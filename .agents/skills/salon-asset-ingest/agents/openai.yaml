@@ -1,0 +1,4 @@
+interface:
+  display_name: "Salon Asset Ingest"
+  short_description: "接入已确认 PNG 并完成 Manifest、预览与截图验证"
+  default_prompt: "Use $salon-asset-ingest to validate and ingest an approved PNG from assets/inbox."

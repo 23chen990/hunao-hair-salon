@@ -1,0 +1,9 @@
+{
+  "name": "hair-salon-studio-pipeline",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:assets": "node --test tests/asset-pipeline.test.mjs",
+    "assets:import": "node tools/asset-pipeline.mjs import"
+  }
+}

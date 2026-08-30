@@ -1,0 +1,9 @@
+<linker>
+  <!-- AssetTestLab creates diagnostic primitives dynamically. Unity cannot infer these
+       collider dependencies from GameObject.CreatePrimitive during WebGL stripping. -->
+  <assembly fullname="UnityEngine.PhysicsModule">
+    <type fullname="UnityEngine.BoxCollider" preserve="all"/>
+    <type fullname="UnityEngine.SphereCollider" preserve="all"/>
+    <type fullname="UnityEngine.CapsuleCollider" preserve="all"/>
+  </assembly>
+</linker>

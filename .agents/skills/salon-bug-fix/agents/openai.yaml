@@ -1,0 +1,4 @@
+interface:
+  display_name: "Salon Bug Fix"
+  short_description: "根据证据复现、最小修复并回归验证理发店 Demo 缺陷"
+  default_prompt: "Use $salon-bug-fix to reproduce and fix this salon bug with regression evidence."

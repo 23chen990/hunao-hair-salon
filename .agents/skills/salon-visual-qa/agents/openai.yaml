@@ -1,0 +1,5 @@
+interface:
+  display_name: "Salon Visual QA"
+  short_description: "使用真实浏览器检查理发店正式场景视觉、资源与安全区域"
+  default_prompt: "Use $salon-visual-qa to run browser-based visual QA on the current salon scene."
+

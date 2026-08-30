@@ -1,0 +1,36 @@
+{
+  "Stations": [
+    {
+      "AssetId": "cut-station-classic-poc",
+      "Type": "CutStation",
+      "Visual": {
+        "Type": 0,
+        "ResourcePath": "builtin://cut-station/classic-poc",
+        "DefaultSize": { "x": 2.4, "y": 2.65, "z": 1.75 },
+        "DefaultScale": 1.0
+      },
+      "Footprint": { "Center": { "x": 0.0, "y": -0.45 }, "Size": { "x": 2.45, "y": 2.65 } },
+      "Collision": { "Center": { "x": 0.0, "y": 0.18 }, "Size": { "x": 1.8, "y": 1.08 } },
+      "Anchors": {
+        "CustomerSeat": { "x": 0.0, "y": 0.52, "z": -0.42 },
+        "CustomerFacing": { "x": 0.0, "y": 0.0, "z": 1.0 },
+        "StylistWork": { "x": 0.0, "y": 0.0, "z": -1.4 },
+        "StylistFacing": { "x": 0.0, "y": 0.0, "z": 1.0 },
+        "Queue": { "x": 2.65, "y": 0.0, "z": -1.15 },
+        "Tool": { "x": 1.08, "y": 1.02, "z": -0.2 },
+        "ServiceVfx": { "x": 0.0, "y": 2.05, "z": -0.42 }
+      },
+      "LegalOrientations": [0, 1],
+      "Sorting": { "SortingLayer": "Default", "SortingOrder": 5, "DepthOffset": 0.0 },
+      "Debug": {
+        "ShowFootprint": true,
+        "ShowCollision": true,
+        "ShowAnchors": true,
+        "MarkerSize": 0.18,
+        "FootprintColor": { "r": 0.1, "g": 0.75, "b": 1.0, "a": 0.3 },
+        "CollisionColor": { "r": 1.0, "g": 0.2, "b": 0.2, "a": 0.35 },
+        "AnchorColor": { "r": 0.25, "g": 1.0, "b": 0.35, "a": 0.9 }
+      }
+    }
+  ]
+}

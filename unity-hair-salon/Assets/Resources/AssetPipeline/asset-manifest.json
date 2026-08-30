@@ -1,0 +1,153 @@
+{
+  "SchemaVersion": 1,
+  "BuildVersion": "0.8.0-pipeline",
+  "Assets": [
+    {
+      "Id": "furniture-cut-station-classic",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/cut-station-classic",
+      "Status": "approved",
+      "Directions": ["back-wall", "right-wall"],
+      "Pivot": { "x": 0.5, "y": 0.0 },
+      "Footprint": { "Center": { "x": 0.0, "y": -0.45 }, "Size": { "x": 2.45, "y": 2.65 } },
+      "Collision": { "Center": { "x": 0.0, "y": 0.18 }, "Size": { "x": 1.8, "y": 1.08 } },
+      "Shadow": { "Enabled": true, "Size": { "x": 2.1, "y": 1.2 }, "Offset": { "x": 0.0, "y": -0.05 }, "Opacity": 0.26, "Softness": 0.75 },
+      "InteractionAnchors": [
+        { "Id": "customer-seat", "Position": { "x": 0.0, "y": 0.52, "z": -0.42 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } },
+        { "Id": "stylist-work", "Position": { "x": 0.0, "y": 0.0, "z": -1.4 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } },
+        { "Id": "queue", "Position": { "x": 2.65, "y": 0.0, "z": -1.15 }, "Facing": { "x": -1.0, "y": 0.0, "z": 0.0 } },
+        { "Id": "tool", "Position": { "x": 1.08, "y": 1.02, "z": -0.2 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } },
+        { "Id": "service-vfx", "Position": { "x": 0.0, "y": 2.05, "z": -0.42 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } }
+      ],
+      "RequiredAnchors": ["customer-seat", "stylist-work", "queue", "tool", "service-vfx"],
+      "Sorting": { "Layer": "Default", "Order": 5, "DepthOffset": 0.0, "SortByWorldZ": true }
+    },
+    {
+      "Id": "furniture-wash-station",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/wash-station",
+      "Status": "approved",
+      "Directions": ["back-wall", "right-wall"],
+      "Pivot": { "x": 0.5, "y": 0.0 },
+      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 2.7, "y": 3.5 } },
+      "Collision": { "Center": { "x": 0.0, "y": 0.2 }, "Size": { "x": 2.2, "y": 3.05 } },
+      "Shadow": { "Enabled": true, "Size": { "x": 2.5, "y": 3.1 }, "Offset": { "x": 0.0, "y": -0.1 }, "Opacity": 0.24, "Softness": 0.8 },
+      "InteractionAnchors": [
+        { "Id": "customer-seat", "Position": { "x": 0.0, "y": 0.6, "z": -0.2 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } },
+        { "Id": "stylist-work", "Position": { "x": -1.55, "y": 0.0, "z": -0.7 }, "Facing": { "x": 1.0, "y": 0.0, "z": 0.0 } },
+        { "Id": "queue", "Position": { "x": -2.25, "y": 0.0, "z": -1.2 }, "Facing": { "x": 1.0, "y": 0.0, "z": 0.0 } }
+      ],
+      "RequiredAnchors": ["customer-seat", "stylist-work", "queue"],
+      "Sorting": { "Layer": "Default", "Order": 4, "DepthOffset": 0.0, "SortByWorldZ": true }
+    },
+    {
+      "Id": "furniture-dryer-chair",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/dryer-chair",
+      "Status": "approved",
+      "Directions": ["back-wall", "right-wall"],
+      "Pivot": { "x": 0.5, "y": 0.0 },
+      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 2.4, "y": 2.4 } },
+      "Collision": { "Center": { "x": 0.0, "y": 0.1 }, "Size": { "x": 1.7, "y": 1.5 } },
+      "Shadow": { "Enabled": true, "Size": { "x": 1.9, "y": 1.5 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.25, "Softness": 0.76 },
+      "InteractionAnchors": [
+        { "Id": "customer-seat", "Position": { "x": 0.0, "y": 0.52, "z": -0.25 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } },
+        { "Id": "stylist-work", "Position": { "x": -1.45, "y": 0.0, "z": -0.55 }, "Facing": { "x": 1.0, "y": 0.0, "z": 0.0 } }
+      ],
+      "RequiredAnchors": ["customer-seat", "stylist-work"],
+      "Sorting": { "Layer": "Default", "Order": 4, "DepthOffset": 0.0, "SortByWorldZ": true }
+    },
+    {
+      "Id": "furniture-perm-station",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/perm-station",
+      "Status": "approved",
+      "Directions": ["back-wall", "right-wall"],
+      "Pivot": { "x": 0.5, "y": 0.0 },
+      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 2.45, "y": 2.7 } },
+      "Collision": { "Center": { "x": 0.0, "y": 0.15 }, "Size": { "x": 2.0, "y": 2.25 } },
+      "Shadow": { "Enabled": true, "Size": { "x": 2.2, "y": 2.4 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.27, "Softness": 0.78 },
+      "InteractionAnchors": [
+        { "Id": "customer-seat", "Position": { "x": 0.0, "y": 0.45, "z": -0.1 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } },
+        { "Id": "stylist-work", "Position": { "x": -1.65, "y": 0.0, "z": -0.7 }, "Facing": { "x": 1.0, "y": 0.0, "z": 0.0 } }
+      ],
+      "RequiredAnchors": ["customer-seat", "stylist-work"],
+      "Sorting": { "Layer": "Default", "Order": 4, "DepthOffset": 0.0, "SortByWorldZ": true }
+    },
+    {
+      "Id": "furniture-waiting-sofa",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/waiting-sofa",
+      "Status": "approved",
+      "Directions": ["back-wall", "right-wall"],
+      "Pivot": { "x": 0.5, "y": 0.0 },
+      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 5.2, "y": 1.8 } },
+      "Collision": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 5.0, "y": 1.5 } },
+      "Shadow": { "Enabled": true, "Size": { "x": 4.9, "y": 1.5 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.25, "Softness": 0.8 },
+      "InteractionAnchors": [
+        { "Id": "wait-left", "Position": { "x": -1.5, "y": 0.65, "z": -0.1 }, "Facing": { "x": 0.0, "y": 0.0, "z": -1.0 } },
+        { "Id": "wait-right", "Position": { "x": 1.5, "y": 0.65, "z": -0.1 }, "Facing": { "x": 0.0, "y": 0.0, "z": -1.0 } }
+      ],
+      "RequiredAnchors": ["wait-left", "wait-right"],
+      "Sorting": { "Layer": "Default", "Order": 3, "DepthOffset": 0.0, "SortByWorldZ": true }
+    },
+    {
+      "Id": "furniture-coffee-table",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/coffee-table",
+      "Status": "approved",
+      "Directions": ["back-wall", "right-wall"],
+      "Pivot": { "x": 0.5, "y": 0.0 },
+      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 3.2, "y": 1.2 } },
+      "Collision": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 3.0, "y": 1.0 } },
+      "Shadow": { "Enabled": true, "Size": { "x": 3.0, "y": 1.0 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.2, "Softness": 0.82 },
+      "InteractionAnchors": [],
+      "RequiredAnchors": [],
+      "Sorting": { "Layer": "Default", "Order": 2, "DepthOffset": 0.0, "SortByWorldZ": true }
+    },
+    {
+      "Id": "furniture-cashier-counter",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/cashier-counter",
+      "Status": "approved",
+      "Directions": ["back-wall", "right-wall"],
+      "Pivot": { "x": 0.5, "y": 0.0 },
+      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 5.6, "y": 2.4 } },
+      "Collision": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 5.3, "y": 2.2 } },
+      "Shadow": { "Enabled": true, "Size": { "x": 5.2, "y": 2.0 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.24, "Softness": 0.82 },
+      "InteractionAnchors": [
+        { "Id": "payment", "Position": { "x": -0.7, "y": 0.0, "z": -1.55 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } }
+      ],
+      "RequiredAnchors": ["payment"],
+      "Sorting": { "Layer": "Default", "Order": 4, "DepthOffset": 0.0, "SortByWorldZ": true }
+    },
+    {
+      "Id": "furniture-product-shelf",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/product-shelf",
+      "Status": "approved",
+      "Directions": ["back-wall", "right-wall"],
+      "Pivot": { "x": 0.5, "y": 0.0 },
+      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 3.0, "y": 0.75 } },
+      "Collision": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 3.0, "y": 0.65 } },
+      "Shadow": { "Enabled": true, "Size": { "x": 2.8, "y": 0.65 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.2, "Softness": 0.85 },
+      "InteractionAnchors": [],
+      "RequiredAnchors": [],
+      "Sorting": { "Layer": "Default", "Order": 2, "DepthOffset": 0.0, "SortByWorldZ": true }
+    },
+    {
+      "Id": "prop-potted-plant",
+      "Type": "prop",
+      "ResourcePath": "builtin://prop/potted-plant",
+      "Status": "approved",
+      "Directions": ["free"],
+      "Pivot": { "x": 0.5, "y": 0.0 },
+      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 1.0, "y": 1.0 } },
+      "Collision": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 0.75, "y": 0.75 } },
+      "Shadow": { "Enabled": true, "Size": { "x": 0.8, "y": 0.6 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.22, "Softness": 0.8 },
+      "InteractionAnchors": [],
+      "RequiredAnchors": [],
+      "Sorting": { "Layer": "Default", "Order": 2, "DepthOffset": 0.0, "SortByWorldZ": true }
+    }
+  ]
+}
