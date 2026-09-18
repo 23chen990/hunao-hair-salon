@@ -57,7 +57,7 @@ public sealed class Phase4A5FreedomAndExitTests
     }
 
     [Test]
-    public void WetHairCompletion_IsAllowedInCurrentPhase()
+    public void WetHairCompletion_ClosesWashCutWithoutAnUnrequestedDryStep()
     {
         SalonGameModel game = NewGame();
         CustomerModel customer = SpawnServing(game, 4504,
@@ -74,8 +74,8 @@ public sealed class Phase4A5FreedomAndExitTests
 
         Assert.IsTrue(customer.IsComplete);
         Assert.IsTrue(customer.OrderRequirementsCompleted);
-        Assert.IsFalse(customer.ExitReady);
-        Assert.AreEqual(ExitBlockReason.WetHair, customer.ExitBlockReason);
+        Assert.IsTrue(customer.ExitReady);
+        Assert.AreEqual(ExitBlockReason.None, customer.ExitBlockReason);
         Assert.AreEqual(CustomerState.Finished, customer.State);
         Assert.AreEqual(1, customer.ExtraServiceCount);
         Assert.Less(customer.Satisfaction, before);
@@ -88,7 +88,7 @@ public sealed class Phase4A5FreedomAndExitTests
         SalonGameModel wetGame = NewGame();
         CustomerModel wet = SpawnServing(wetGame, 4505, SalonTool.Scissors, 0);
         CompleteWashHold(wetGame, wet, WashAction.Shower);
-        Assert.AreEqual(ExitBlockReason.WetHair, wet.ExitBlockReason);
+        Assert.AreEqual(ExitBlockReason.RequirementsIncomplete, wet.ExitBlockReason);
 
         SalonGameModel foamGame = NewGame();
         CustomerModel foam = SpawnServing(foamGame, 4506, SalonTool.Scissors, 0);
@@ -222,8 +222,8 @@ public sealed class Phase4A5FreedomAndExitTests
         view.Initialize(customer, null);
         view.Refresh();
 
-        Assert.IsTrue(view.CleanupVisible);
-        StringAssert.Contains("湿发", view.CleanupText);
+        Assert.IsFalse(view.CleanupVisible,
+            "A completed Wash+Cut order does not require an unrequested Dry cleanup.");
         Object.DestroyImmediate(root);
     }
 

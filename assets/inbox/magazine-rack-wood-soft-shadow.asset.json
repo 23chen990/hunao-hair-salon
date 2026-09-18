@@ -1,0 +1,43 @@
+{
+  "displayName": "木质杂志架（柔和自然阴影）",
+  "category": "magazine-rack",
+  "status": "candidate",
+  "availableOrientations": ["free"],
+  "defaultOrientation": "free",
+  "pivot": { "x": 0.5, "y": 0.0 },
+  "importProfile": "production-2.5d-rendered",
+  "scalePolicy": "footprint-isometric",
+  "footprint": {
+    "center": { "x": 0.0, "y": 0.0 },
+    "size": { "x": 1.7, "y": 0.75 }
+  },
+  "collision": {
+    "center": { "x": 0.0, "y": 0.02 },
+    "size": { "x": 1.5, "y": 0.65 }
+  },
+  "shadow": {
+    "mode": "baked",
+    "size": { "x": 1.8, "y": 0.8 },
+    "offset": { "x": 0.04, "y": -0.03 },
+    "opacity": 0.0,
+    "softness": 0.82
+  },
+  "interactionAnchors": [],
+  "requiredAnchors": [],
+  "sorting": {
+    "layer": "Default",
+    "order": 3,
+    "depthOffset": 0.0,
+    "sortByWorldZ": true
+  },
+  "candidateValidation": {
+    "role": "ordinary",
+    "serviceType": "none",
+    "stationId": -1,
+    "targetObjectName": "",
+    "worldPosition": { "x": 4.0, "y": 0.0, "z": 5.5 },
+    "hideObjectNames": ["Shelf", "Bottle"],
+    "hideRadius": 1.15
+  },
+  "sourceOriginalPath": "/Users/kker/Downloads/本页生成元素_自然阴影_整理/像素风木质杂志架与柔和阴影.png"
+}

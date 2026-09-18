@@ -228,7 +228,7 @@ public sealed class OrderDemandBubbleView : MonoBehaviour
         var cleanupRect = _cleanupRoot.GetComponent<RectTransform>();
         cleanupRect.anchoredPosition = new Vector2(0f, -68f);
         cleanupRect.sizeDelta = new Vector2(230f, 40f);
-        _cleanupText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _cleanupText.font = SalonUiFactory.GetPackagedUiFont();
         _cleanupText.fontSize = 18;
         _cleanupText.alignment = TextAnchor.MiddleCenter;
         _cleanupRoot.SetActive(false);
@@ -240,7 +240,7 @@ public sealed class OrderDemandBubbleView : MonoBehaviour
         RectTransform waitRect = _backgroundWaitRoot.GetComponent<RectTransform>();
         waitRect.anchoredPosition = new Vector2(0f, -70f);
         waitRect.sizeDelta = new Vector2(154f, 34f);
-        _backgroundWaitText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _backgroundWaitText.font = SalonUiFactory.GetPackagedUiFont();
         _backgroundWaitText.fontSize = 16;
         _backgroundWaitText.alignment = TextAnchor.MiddleCenter;
         _backgroundWaitFill = ProceduralProgressBar.Create(_backgroundWaitRoot.transform,

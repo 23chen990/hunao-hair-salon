@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>呼吸桥｜抛弃式灰盒</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="readout" aria-label="本地调试读数">
+        <span id="seed">LEVEL 1</span>
+        <span id="archetype">LONG-REACH</span>
+        <output id="state" aria-live="polite">RUN</output>
+        <span id="clock">0.0s</span>
+      </header>
+      <section class="stage" aria-label="按住任意位置让桥变长，松开让负载跳跃">
+        <canvas id="bridge" tabindex="0" aria-label="呼吸桥：按住与松开的主控制区"></canvas>
+        <div class="pressure" aria-hidden="true"><i id="pressure-fill"></i></div>
+      </section>
+      <footer class="controls">
+        <button id="restart" type="button">↻ 免费重开</button>
+        <button id="next-level" type="button">下一关 →</button>
+        <span id="input-state" aria-live="polite">RELEASE</span>
+      </footer>
+    </main>
+    <script type="module" src="./src/browser.mjs"></script>
+  </body>
+</html>

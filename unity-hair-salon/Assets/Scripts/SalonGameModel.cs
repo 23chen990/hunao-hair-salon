@@ -256,6 +256,15 @@ namespace HairSalon
         public const float FinishedFeedbackSeconds = 1.6f;
         public const float LeavingSeconds = 3.4f;
         private const float WrongServiceInterruptProgress = .3f;
+        private struct AutoBlowTiming
+        {
+            public float Startup;
+            public float GoodStart;
+            public float GoodEnd;
+            public float MinorEnd;
+            public float SafetyStop;
+        }
+
         public float RemainingTime { get; private set; } = 180f;
         public float WorldElapsed { get; private set; }
         public SalonPaymentModel Payments { get; }
@@ -264,6 +273,8 @@ namespace HairSalon
         public SalonServiceConfig ServiceConfig { get; }
         public CustomerExperienceProfile ExperienceProfile { get; }
         public EquipmentProductModel AutoBlowStandProduct { get; } = new EquipmentProductModel();
+        /// <summary>基础自动吹发属于首日可玩的服务；购买支架只升级时间窗口。</summary>
+        public bool AutoBlowAvailable => true;
         public bool HasAutoBlowStand => AutoBlowStandProduct.Purchased;
         public bool FirstDayCompleteForShop { get; private set; }
         public int Balance => Payments.Balance;
@@ -363,7 +374,13 @@ namespace HairSalon
                     AddServiceDelay(customer, step);
                 else if (customer.State == CustomerState.Serving)
                 {
-                    if (IsAwaitingTransfer(customer)) AddServiceDelay(customer, step);
+                    // Once a step has been engaged, a customer who is left waiting for
+                    // the next operation is on the service-delay clock. Active operations
+                    // and the unattended auto-blow timer remain protected until the player
+                    // returns to finish them.
+                    if ((IsAwaitingTransfer(customer) || customer.HasServiceEngaged) &&
+                        !IsUninterruptibleOperation(customer))
+                        AddServiceDelay(customer, step);
                     else customer.ServiceElapsed += step;
                 }
 
@@ -610,9 +627,18 @@ namespace HairSalon
             customer.ServiceExecutionCompletion = completion;
             if (completion.ApplyResult.Status != ApplyStatus.Applied) return;
             customer.AttentionState = CustomerAttentionState.ServiceEngaged;
-            customer.ServicePhase = ServiceStepPhase.Complete;
-            if (execution.Type == ServiceExecutionType.Wash) customer.CompletedWashCount++;
-            CompleteCurrentStep(customer, true);
+            ServiceType completedService = execution.Type == ServiceExecutionType.Wash
+                ? ServiceType.Wash : ServiceType.Dry;
+            if (!customer.IsComplete && customer.CurrentNeed == completedService)
+            {
+                customer.ServicePhase = ServiceStepPhase.Complete;
+                if (execution.Type == ServiceExecutionType.Wash) customer.CompletedWashCount++;
+                CompleteCurrentStep(customer, true);
+                return;
+            }
+
+            customer.ServicePhase = ServiceStepPhase.Ready;
+            ApplyExtraService(customer);
         }
 
         public CustomerModel Spawn(int id, IList<ServiceType> needs)
@@ -1230,6 +1256,19 @@ namespace HairSalon
                 action, _washServiceAdapter.Order(customer), progress, physical);
         }
 
+        private ServiceActionClassification ClassifyBlowDryAction(
+            CustomerModel customer,
+            ActionResult action,
+            ServiceProgressSnapshot progress,
+            CustomerPhysicalStateSnapshot physical)
+        {
+            if (customer != null && customer.OrderRequirementsCompleted && !customer.ExitReady &&
+                customer.ExitBlockReason == ExitBlockReason.WetHair)
+                return new ServiceActionClassification(ServiceRelation.NormalService, false,
+                    ServiceActionClassificationReason.None);
+            return ClassifyServiceAction(customer, action, progress, physical);
+        }
+
         public void CancelActiveServiceAction(CustomerModel customer)
         {
             if (customer == null) return;
@@ -1322,7 +1361,7 @@ namespace HairSalon
             customer.ManualBlowHolding = false;
             float elapsed = customer.ManualBlowElapsed;
             ActionResult preview = _washServiceAdapter.PreviewTimedActionResult(customer, elapsed);
-            ServiceActionClassification classification = ClassifyServiceAction(
+            ServiceActionClassification classification = ClassifyBlowDryAction(
                 customer, preview, GetServiceProgressSnapshot(customer), GetServicePhysicalSnapshot(customer));
             bool releasedTooEarly = elapsed < Math.Max(0f, ServiceConfig.ManualBlowGoodStart);
             ApplyActionResult applied;
@@ -1337,7 +1376,12 @@ namespace HairSalon
             }
             BlowResult result = EndManualBlowState(customer, applied, classification, elapsed);
             if (result != BlowResult.Undone)
-                CompleteCurrentStep(customer, true);
+            {
+                if (!customer.IsComplete && customer.CurrentNeed == ServiceType.Dry)
+                    CompleteCurrentStep(customer, true);
+                else if (customer.IsComplete)
+                    CompleteCurrentStep(customer);
+            }
             return result;
         }
 
@@ -1462,6 +1506,10 @@ namespace HairSalon
         {
             ForceCloseRemainingCustomers(null);
             Payments.ClearDayDrops();
+            _issuedCustomerIds.Clear();
+            _activeHaircutConfigs.Clear();
+            _activeHaircutTools.Clear();
+            _washServiceAdapter.ResetForNextDay();
             RemainingTime = Math.Max(0f, FlowConfig.BusinessDuration);
             WorldElapsed = 0f;
             Served = 0;
@@ -1470,22 +1518,80 @@ namespace HairSalon
             IsRunning = true;
         }
 
+        /// <summary>
+        /// Restores the persistent economy and permanent shop flags at initialization or
+        /// a business-day boundary. Live customers and an in-flight day are rejected so
+        /// loading cannot erase active service state or payment pickup state.
+        /// </summary>
+        public void RestorePersistentState(int balance, bool purchased, bool firstDayComplete)
+        {
+            if (balance < 0) throw new ArgumentOutOfRangeException(nameof(balance));
+            bool atInitialization = WorldElapsed <= 0f && Served == 0 && AngryLeaves == 0 && Mistakes == 0;
+            bool atBusinessBoundary = RemainingTime <= 0f && Customers.Count == 0 && _waitingQueue.Count == 0;
+            if (!atInitialization && !atBusinessBoundary)
+                throw new InvalidOperationException(
+                    "Persistent state can only be restored at initialization or a business-day boundary.");
+            if (Customers.Count > 0 || _waitingQueue.Count > 0 || PlayerBusy)
+                throw new InvalidOperationException(
+                    "Persistent state cannot be restored while a customer or operation is active.");
+
+            Payments.RestoreBalance(balance);
+            AutoBlowStandProduct.Purchased = purchased;
+            FirstDayCompleteForShop = firstDayComplete;
+            AutoBlowStandProduct.CanPurchase = firstDayComplete && !purchased;
+            AutoBlowStandProduct.LockReason = firstDayComplete
+                ? string.Empty : "完成首日营业后开放";
+        }
+
+        private AutoBlowTiming GetAutoBlowTiming()
+        {
+            float startup = Math.Max(.5f, Math.Min(1f, ServiceConfig.AutoBlowStartDuration));
+            float goodStart = Math.Max(0f, ServiceConfig.ManualBlowGoodStart);
+            float goodEnd = Math.Max(goodStart, ServiceConfig.ManualBlowGoodEnd);
+            float minorEnd = Math.Max(goodEnd, ServiceConfig.ManualBlowMinorEnd);
+            float safetyStop = Math.Max(goodEnd + .5f, ServiceConfig.AutoBlowSafetyStopTime);
+
+            if (HasAutoBlowStand)
+            {
+                // The purchased stand improves setup and gives a wider late-recovery
+                // window; its safety stop remains a hard ceiling so unattended customers
+                // still need the player to return and finish.
+                startup = Math.Max(.25f, startup * .65f);
+                goodStart = Math.Max(0f, goodStart - .5f);
+                goodEnd = Math.Max(goodStart, goodEnd + .75f);
+                minorEnd = Math.Max(goodEnd, minorEnd + 1f);
+            }
+
+            safetyStop = Math.Max(goodEnd + .5f, safetyStop);
+            return new AutoBlowTiming
+            {
+                Startup = startup,
+                GoodStart = goodStart,
+                GoodEnd = goodEnd,
+                MinorEnd = minorEnd,
+                SafetyStop = safetyStop
+            };
+        }
+
         public bool StartAutoBlow(CustomerModel customer)
         {
-            if (!HasAutoBlowStand || customer == null || !CanPerformBlowDry(customer) ||
+            if (!AutoBlowAvailable || customer == null || !CanPerformBlowDry(customer) ||
                 customer.TowelWrapped || customer.State != CustomerState.Serving ||
                 !IsCompatibleStation(ServiceType.Dry, customer.Station) ||
                 customer.BlowStage != BlowStage.AwaitingStart) return false;
+            if (!_washServiceAdapter.BeginBackgroundTimedAction(
+                    customer, ServiceActionType.BlowDry, ServiceTool.BlowDryer, WorldElapsed))
+                return false;
             EngageService(customer);
             customer.AutoBlowRunning = true;
             customer.AutoBlowSafetyStopped = false;
             customer.BlowStage = BlowStage.AutoRunning;
             customer.ServicePhase = ServiceStepPhase.BackgroundRunning;
             customer.LastBlowResult = BlowResult.None;
-            float startup = Math.Max(.5f, Math.Min(1f, ServiceConfig.AutoBlowStartDuration));
-            customer.BackgroundTask.Start(startup + ServiceConfig.ManualBlowGoodStart,
-                startup + ServiceConfig.ManualBlowGoodEnd,
-                Math.Max(startup + ServiceConfig.ManualBlowMinorEnd, ServiceConfig.AutoBlowSafetyStopTime), WorldElapsed);
+            AutoBlowTiming timing = GetAutoBlowTiming();
+            customer.BackgroundTask.Start(timing.Startup + timing.GoodStart,
+                timing.Startup + timing.GoodEnd,
+                Math.Max(timing.Startup + timing.MinorEnd, timing.SafetyStop), WorldElapsed);
             SetWorkstationState(customer, WorkstationState.InService);
             CustomerChanged?.Invoke(customer);
             return true;
@@ -1496,19 +1602,29 @@ namespace HairSalon
             if (customer == null || (!customer.AutoBlowRunning && !customer.AutoBlowSafetyStopped))
                 return BlowResult.None;
             float elapsed = customer.BackgroundTask.Elapsed;
-            float startup = Math.Max(.5f, Math.Min(1f, ServiceConfig.AutoBlowStartDuration));
-            if (!customer.AutoBlowSafetyStopped && elapsed < startup + ServiceConfig.ManualBlowGoodStart)
+            AutoBlowTiming timing = GetAutoBlowTiming();
+            if (!customer.AutoBlowSafetyStopped && elapsed < timing.Startup + timing.GoodStart)
                 return BlowResult.Undone;
-            BlowResult result = customer.AutoBlowSafetyStopped || elapsed >= ServiceConfig.AutoBlowSafetyStopTime
-                ? BlowResult.Moderate : elapsed > startup + ServiceConfig.ManualBlowGoodEnd
+            BlowResult result = customer.AutoBlowSafetyStopped || elapsed >= timing.SafetyStop
+                ? BlowResult.Moderate : elapsed > timing.Startup + timing.GoodEnd
                     ? BlowResult.Minor : BlowResult.Good;
+            ActionResult preview = _washServiceAdapter.PreviewTimedActionResult(customer, elapsed);
+            ServiceActionClassification classification = ClassifyBlowDryAction(
+                customer, preview, GetServiceProgressSnapshot(customer), GetServicePhysicalSnapshot(customer));
+            ApplyActionResult applied = _washServiceAdapter.CompleteTimedAction(customer, elapsed, false);
+            if (applied.Status != ApplyStatus.Applied || applied.ActionResult == null)
+                return BlowResult.None;
             customer.AutoBlowRunning = false;
             customer.BackgroundTask.State = BackgroundTaskState.Complete;
             customer.LastBlowResult = result;
             customer.BlowStage = BlowStage.Complete;
             if (result == BlowResult.Minor) ApplyAccidentSeverity(customer, AccidentSeverity.Minor);
             else if (result == BlowResult.Moderate) ApplyAccidentSeverity(customer, AccidentSeverity.Moderate);
-            CompleteCurrentStep(customer);
+            ProjectDomainActionFeedback(customer, applied, classification);
+            if (!customer.IsComplete && customer.CurrentNeed == ServiceType.Dry)
+                CompleteCurrentStep(customer, true);
+            else if (customer.IsComplete)
+                CompleteCurrentStep(customer);
             return result;
         }
 
@@ -1666,8 +1782,16 @@ namespace HairSalon
 
                 customer.HairStage = HairStage.Complete;
                 customer.LastHaircutRating = customer.HaircutService.Rating;
-                CompleteCurrentStep(customer, true,
-                    domainResult.MistakeSeverity == MistakeSeverity.None);
+                if (!customer.IsComplete && customer.CurrentNeed == ServiceType.Cut)
+                {
+                    CompleteCurrentStep(customer, true,
+                        domainResult.MistakeSeverity == MistakeSeverity.None);
+                }
+                else
+                {
+                    customer.ServicePhase = ServiceStepPhase.Ready;
+                    SetWorkstationState(customer, WorkstationState.AwaitingService);
+                }
                 CustomerChanged?.Invoke(customer);
                 return;
             }
@@ -1887,12 +2011,12 @@ namespace HairSalon
                      customer.BackgroundTask.State == BackgroundTaskState.Running)
             {
                 float elapsed = customer.BackgroundTask.Elapsed;
-                float startup = Math.Max(.5f, Math.Min(1f, ServiceConfig.AutoBlowStartDuration));
-                if (elapsed < startup + Math.Max(0f, ServiceConfig.ManualBlowGoodStart))
+                AutoBlowTiming timing = GetAutoBlowTiming();
+                if (elapsed < timing.Startup + timing.GoodStart)
                     customer.BlowStage = BlowStage.Early;
-                else if (elapsed <= startup + Math.Max(ServiceConfig.ManualBlowGoodStart, ServiceConfig.ManualBlowGoodEnd))
+                else if (elapsed <= timing.Startup + timing.GoodEnd)
                     customer.BlowStage = BlowStage.Good;
-                else if (elapsed < Math.Max(startup + ServiceConfig.ManualBlowMinorEnd, ServiceConfig.AutoBlowSafetyStopTime))
+                else if (elapsed < Math.Max(timing.Startup + timing.MinorEnd, timing.SafetyStop))
                     customer.BlowStage = BlowStage.Minor;
                 else
                 {
@@ -1909,8 +2033,6 @@ namespace HairSalon
                 customer.ServicePhase = customer.BlowStage == BlowStage.Minor || customer.BlowStage == BlowStage.SafetyStopped
                     ? ServiceStepPhase.Late
                     : ServiceStepPhase.BackgroundRunning;
-                if (customer.BlowStage == BlowStage.Minor || customer.BlowStage == BlowStage.SafetyStopped)
-                    AddServiceDelay(customer, dt);
             }
         }
 
@@ -2010,7 +2132,7 @@ namespace HairSalon
             // 4A.5.1: current phase allows wetness to remain as quality debt,
             // but must not hard-block closure. Other blockers still block completion.
             if (!physicalExitReady && IsWetnessOnlyBlockingConstraint(readiness) &&
-                !customer.Needs.Contains(ServiceType.Wash))
+                !customer.Needs.Contains(ServiceType.Dry))
                 physicalExitReady = true;
             if (!physicalExitReady) return false;
 
@@ -2078,7 +2200,7 @@ namespace HairSalon
                 CustomerChanged?.Invoke(customer);
             if (customer.State != CustomerState.Serving && customer.Emotion != CustomerEmotion.Calm)
                 customer.WasImpatientBeforeService = true;
-            if (customer.Patience <= 0f && !customer.HasServiceEngaged)
+            if (customer.Patience <= 0f && !IsUninterruptibleOperation(customer))
                 ProcessPatienceLeave(customer);
         }
 
@@ -2087,15 +2209,33 @@ namespace HairSalon
             if (customer == null || customer.State == CustomerState.Entering || customer.State == CustomerState.Waiting)
                 return 1f;
             if (customer.State != CustomerState.Serving) return 0f;
-            if (customer.AttentionState == CustomerAttentionState.ActiveOperation || customer.ManualBlowHolding)
+            if (IsUninterruptibleOperation(customer))
                 return 0f;
             if (customer.Station >= 0 && customer.Station < Workstations.Count &&
                 !IsCompatibleStation(customer.CurrentNeed, Workstations[customer.Station].Type)) return 1f;
-            if (IsAwaitingTransfer(customer)) return Math.Max(0f, ExperienceProfile.ServiceDelayPatienceMultiplier);
-            if (customer.WashStage == WashStage.ReadyToRinse && customer.BackgroundTask.Elapsed >= ServiceConfig.FoamMinorLateThreshold)
+            if (IsAwaitingTransfer(customer) || customer.HasServiceEngaged ||
+                (customer.WashStage == WashStage.ReadyToRinse &&
+                 customer.BackgroundTask.Elapsed >= ServiceConfig.FoamMinorLateThreshold) ||
+                customer.AutoBlowSafetyStopped)
+            {
+                // A short post-service handoff grace keeps the player from being
+                // punished while moving back to the customer. Once that grace is
+                // spent, an ignored engaged customer steadily loses patience.
+                if (customer.ServiceDelaySeconds <= Math.Max(0f, ServiceConfig.ReadyDelayGrace))
+                    return 0f;
                 return Math.Max(0f, ExperienceProfile.ServiceDelayPatienceMultiplier);
-            if (customer.AutoBlowSafetyStopped) return Math.Max(0f, ExperienceProfile.ServiceDelayPatienceMultiplier);
-            return customer.HasServiceEngaged ? 0f : 1f;
+            }
+            return 1f;
+        }
+
+        private static bool IsUninterruptibleOperation(CustomerModel customer)
+        {
+            if (customer == null) return false;
+            return customer.AttentionState == CustomerAttentionState.ActiveOperation ||
+                customer.ActiveServiceAction != ActiveServiceAction.None ||
+                customer.ManualBlowHolding || customer.AutoBlowRunning || customer.IsProcessing ||
+                (customer.ServiceExecution != null &&
+                 customer.ServiceExecution.State == ServiceExecutionState.Executing);
         }
 
         private void ApplySatisfactionLoss(CustomerModel customer, float amount)
@@ -2130,6 +2270,7 @@ namespace HairSalon
         {
             if (customer == null || customer.State == CustomerState.Leaving || customer.State == CustomerState.Exited)
                 return;
+            if (IsUninterruptibleOperation(customer)) return;
             customer.AttentionState = CustomerAttentionState.Neglected;
             _waitingQueue.Remove(customer);
             ReleaseWorkstation(customer);

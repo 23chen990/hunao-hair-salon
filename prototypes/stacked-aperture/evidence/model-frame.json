@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-08-10T14:49:13.558Z",
+  "image": "stacked-aperture-model-frame-390x844.png",
+  "source": "actual generated level + BFS near-solution + real dropBead result",
+  "seed": "1001",
+  "layerCount": 3,
+  "shortestDistance": 6,
+  "appliedMoves": [
+    {
+      "layer": 0,
+      "delta": 1
+    },
+    {
+      "layer": 0,
+      "delta": 1
+    },
+    {
+      "layer": 1,
+      "delta": -1
+    },
+    {
+      "layer": 1,
+      "delta": -1
+    },
+    {
+      "layer": 2,
+      "delta": -1
+    }
+  ],
+  "offsets": [
+    -1,
+    0,
+    2
+  ],
+  "firstBlockerIndex": 2,
+  "browserClaim": false
+}

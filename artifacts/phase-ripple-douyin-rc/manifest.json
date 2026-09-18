@@ -1,0 +1,107 @@
+{
+  "generatedAt": "2026-08-10T13:28:49.679Z",
+  "product": "相位涟漪（暂名）",
+  "artifactKind": "douyin-developer-tools-import-test",
+  "releaseStatus": "blocked_on_real_appid_credentials_and_device_review",
+  "appIdPlaceholder": true,
+  "monetizationIntegrated": false,
+  "packageBytes": 4709078,
+  "packageLimitBytes": 20971520,
+  "files": [
+    {
+      "path": "assets/piece-outbound.png",
+      "size": 1184585,
+      "sha256": "38fe945da92e7d1dcdd2fadc524767d2dd89215e4ca10b620336b973d6c430cf"
+    },
+    {
+      "path": "assets/piece-returned.png",
+      "size": 1045598,
+      "sha256": "2383ff5bf49c12c3b786e369994f2789b9b8d846a85c0acd994431145a0a25c7"
+    },
+    {
+      "path": "assets/tabletop-board.png",
+      "size": 2419512,
+      "sha256": "ba3087bd8aa9a0df248cb89a39948cfd160cce0e83e87a6f700744eed4bdba8f"
+    },
+    {
+      "path": "game.js",
+      "size": 58,
+      "sha256": "dc769d0fc784d4e660e83bf8755d3301e8c1f895444dd8df4b1dfbf5d89c2fe0"
+    },
+    {
+      "path": "game.json",
+      "size": 94,
+      "sha256": "d1180a9a99f80b72cf2d44013d0462a6824f355b12c0ae7bddb3ced53cb584ce"
+    },
+    {
+      "path": "js/douyin-app.js",
+      "size": 8687,
+      "sha256": "a1dc15da93bf5cb1dd7004c62440ef1e382e43e05441fea109efa6d616f165a0"
+    },
+    {
+      "path": "js/events.js",
+      "size": 1190,
+      "sha256": "48bd514634201409d53168f4b752c28cbd8eab8c08ba576c229c026f33dad34d"
+    },
+    {
+      "path": "js/generator.js",
+      "size": 5063,
+      "sha256": "c8d71435b5988e539861b04fc4459427922d964b7ce9e5214d8b671b48e0542e"
+    },
+    {
+      "path": "js/launch.js",
+      "size": 754,
+      "sha256": "55fc32da3ae6e394738236aac3742bb7aa2cdbd813eb280c4ae3f02572987347"
+    },
+    {
+      "path": "js/layout.js",
+      "size": 1136,
+      "sha256": "4bbd4d77ac1a49ba65bf79a769a7cc6c68640d29819cbac9d3ec4e10a036bee5"
+    },
+    {
+      "path": "js/levels.js",
+      "size": 1440,
+      "sha256": "1a24723ce501c88261717a722c87fbeadd46c01dfde94a199c9cea00212a25a2"
+    },
+    {
+      "path": "js/onboarding.js",
+      "size": 2023,
+      "sha256": "290e2c34e0c44ae0204a192d1369a491d094cbf58f71a30c768460355cf9fe8a"
+    },
+    {
+      "path": "js/platform.js",
+      "size": 5507,
+      "sha256": "7388fa93dd5029cf7ebbeb7c94ab365e99bf9608cc77a86001f2a26488b13b4b"
+    },
+    {
+      "path": "js/prng.js",
+      "size": 1079,
+      "sha256": "50756e5cfba6a6f96f140cd6aace5abd0e0115eee47ecb6ce59f985b11ad5e3d"
+    },
+    {
+      "path": "js/render.js",
+      "size": 17511,
+      "sha256": "5e406b2ed68a9c1cfbae41127dc38638c2485d0e5a2091e43e5f5efc3a8764a3"
+    },
+    {
+      "path": "js/rules.js",
+      "size": 8300,
+      "sha256": "e09682ae84a3d28fa6462798b889c79633c7aafb0b5a33e373c4df05ceec7afe"
+    },
+    {
+      "path": "js/session.js",
+      "size": 4776,
+      "sha256": "54add3188164e614da10331f28456c313016df5986fb2c0e018ca113dae2fd15"
+    },
+    {
+      "path": "js/ui-actions.js",
+      "size": 1608,
+      "sha256": "d34335e1b00d951aeb76e397cf2ab308e1c19cb0158787c942040915600782c6"
+    },
+    {
+      "path": "project.config.json",
+      "size": 157,
+      "sha256": "e966c807cff494e0e041a71502ea986fe4085b4dec1ce96dd26f179444800aaa"
+    }
+  ]
+}

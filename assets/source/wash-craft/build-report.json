@@ -1,0 +1,17 @@
+{
+  "blender": "4.5.9 LTS",
+  "assets": [
+    {
+      "asset": "wash-station",
+      "vertices": 1732,
+      "triangles": 3244,
+      "materials": 9
+    },
+    {
+      "asset": "room-finish",
+      "vertices": 16052,
+      "triangles": 25454,
+      "materials": 39
+    }
+  ]
+}

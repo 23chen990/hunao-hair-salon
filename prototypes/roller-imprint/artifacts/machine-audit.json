@@ -1,0 +1,320 @@
+{
+  "schemaVersion": 1,
+  "prototype": "P2 滚筒成章 / ROLL / THROWAWAY",
+  "question": "新玩家能否在30秒内理解拖动距离→转角→凸纹落印，并从错印主动调整下一趟？",
+  "configuration": {
+    "seedCount": 500,
+    "randomTrials": 10000,
+    "faces": 8,
+    "tapeRows": 8,
+    "tapeColumns": 12
+  },
+  "reachability": {
+    "reachable": 500,
+    "zeroActionComplete": 0,
+    "targetWithin8x12": 500,
+    "shortestDepthDistribution": {
+      "2": 125,
+      "3": 125,
+      "4": 125,
+      "5": 125
+    }
+  },
+  "determinism": {
+    "fpsSampleMatches": 500,
+    "undoHashMatches": 500,
+    "replayMatches": 500,
+    "replayEvidence": {
+      "seed": 1,
+      "initialHash": "e30ba20d19c92cb6",
+      "events": [
+        {
+          "type": "roll",
+          "action": {
+            "direction": 1,
+            "distance": 11,
+            "face": 4
+          }
+        },
+        {
+          "type": "roll",
+          "action": {
+            "direction": -1,
+            "distance": 12,
+            "face": 3
+          }
+        }
+      ],
+      "frameHashes": [
+        "0946263a9a063d35",
+        "be530e0e797bcfb1"
+      ],
+      "finalHash": "be530e0e797bcfb1",
+      "exact": true
+    }
+  },
+  "neighborTolerance": {
+    "robustSeeds": 389,
+    "rate": 0.778,
+    "definition": "target admits at least one target-safe adjacent face, reversed direction, and adjacent stop operation"
+  },
+  "randomSequences": {
+    "trials": 10000,
+    "completed": 0,
+    "rate": 0,
+    "sampling": "length uniformly 2–5; each roll uniformly selected from all 192 legal actions; trials distributed uniformly across acceptance seeds"
+  },
+  "alternatives": {
+    "exactSuboptimal": 500,
+    "required": 500
+  },
+  "performanceProxy": {
+    "p50Ms": 0.3631249999999966,
+    "p95Ms": 1.313165999999967,
+    "maxMs": 3.2170829999999953,
+    "measuredSeeds": 500,
+    "measurement": "cold-per-process program generation (including acceptance solve) plus a second strict shortest solve",
+    "disclaimer": "development-machine proxy only; not a low-end-device result"
+  },
+  "iaa": {
+    "seeds": 500,
+    "roundSeconds": {
+      "p10": 40.906,
+      "median": 61.218,
+      "min": 32.164,
+      "max": 95.065,
+      "assumption": "开发机确定性局长代理：观察 12–18 秒；每趟思考 6–14 秒、拖动 1–2 秒、对比 2 秒"
+    },
+    "contactHint": {
+      "eligible": 127,
+      "rate": 0.254,
+      "rule": "真实状态误差连续两趟增大，且固定 seed 新手门控为 25%"
+    },
+    "singlePassUndo": {
+      "eligible": 84,
+      "rate": 0.168,
+      "rule": "真实状态误差由 <=20% 跨到 >20%，且固定 seed 新手门控为 18%"
+    },
+    "maxVoluntaryEntriesPerSession": 2,
+    "sessions": [
+      {
+        "requestedSeconds": 420,
+        "modeledSeconds": 358.078,
+        "rounds": 6,
+        "cooldownSeconds": 199,
+        "interstitialPoints": [
+          {
+            "round": 4,
+            "atSeconds": 263.259,
+            "atSettlement": true
+          }
+        ]
+      },
+      {
+        "requestedSeconds": 480,
+        "modeledSeconds": 458.238,
+        "rounds": 7,
+        "cooldownSeconds": 249,
+        "interstitialPoints": [
+          {
+            "round": 4,
+            "atSeconds": 261.521,
+            "atSettlement": true
+          }
+        ]
+      },
+      {
+        "requestedSeconds": 540,
+        "modeledSeconds": 494.781,
+        "rounds": 8,
+        "cooldownSeconds": 210,
+        "interstitialPoints": [
+          {
+            "round": 4,
+            "atSeconds": 251.089,
+            "atSettlement": true
+          },
+          {
+            "round": 8,
+            "atSeconds": 494.781,
+            "atSettlement": true
+          }
+        ]
+      },
+      {
+        "requestedSeconds": 600,
+        "modeledSeconds": 568.813,
+        "rounds": 9,
+        "cooldownSeconds": 275,
+        "interstitialPoints": [
+          {
+            "round": 5,
+            "atSeconds": 320.839,
+            "atSettlement": true
+          }
+        ]
+      },
+      {
+        "requestedSeconds": 660,
+        "modeledSeconds": 592.349,
+        "rounds": 10,
+        "cooldownSeconds": 222,
+        "interstitialPoints": [
+          {
+            "round": 4,
+            "atSeconds": 241.962,
+            "atSettlement": true
+          },
+          {
+            "round": 8,
+            "atSeconds": 489.936,
+            "atSettlement": true
+          }
+        ]
+      }
+    ],
+    "disclaimer": "all round length, hint, undo, inventory, and cooldown numbers are assumptions/development-machine structure proxies, not viewing, fill, eCPM, ARPDAU, revenue, retention, or device measurements"
+  },
+  "noAd": {
+    "seeds": 500,
+    "completed": 500,
+    "restarted": 500,
+    "blocked": 0,
+    "adPolicy": {
+      "enabled": false,
+      "networkAllowed": false,
+      "networkRequests": 0,
+      "voluntaryRewardLimit": 2
+    }
+  },
+  "adFreeze": {
+    "testedSeeds": 500,
+    "rollIgnored": 500,
+    "clockIgnored": 500,
+    "hashUnchanged": 500
+  },
+  "browser": {
+    "status": "PASS",
+    "actualPointerEventSmoke": {
+      "status": "PASS",
+      "browserPath": "/Users/kker/.cache/puppeteer/chrome-headless-shell/mac_arm-147.0.7727.57/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+      "baseUrl": "loopback ephemeral port",
+      "externalRequests": 0,
+      "results": [
+        {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "pointerType": "mouse",
+          "controls": [
+            {
+              "id": "face-prev",
+              "width": 48,
+              "height": 48
+            },
+            {
+              "id": "face-next",
+              "width": 48,
+              "height": 48
+            },
+            {
+              "id": "undo",
+              "width": 119.328125,
+              "height": 48
+            },
+            {
+              "id": "restart",
+              "width": 119.328125,
+              "height": 48
+            },
+            {
+              "id": "next-seed",
+              "width": 119.34375,
+              "height": 48
+            },
+            {
+              "id": "hint",
+              "width": 182,
+              "height": 48
+            },
+            {
+              "id": "simulate-ad",
+              "width": 182,
+              "height": 48
+            }
+          ],
+          "movesToSolve": 2,
+          "wrongCellsObserved": 2,
+          "finalSeed": 2,
+          "consoleErrors": []
+        },
+        {
+          "viewport": {
+            "width": 430,
+            "height": 932
+          },
+          "pointerType": "touch",
+          "controls": [
+            {
+              "id": "face-prev",
+              "width": 48,
+              "height": 48
+            },
+            {
+              "id": "face-next",
+              "width": 48,
+              "height": 48
+            },
+            {
+              "id": "undo",
+              "width": 132.65625,
+              "height": 48
+            },
+            {
+              "id": "restart",
+              "width": 132.671875,
+              "height": 48
+            },
+            {
+              "id": "next-seed",
+              "width": 132.671875,
+              "height": 48
+            },
+            {
+              "id": "hint",
+              "width": 202,
+              "height": 48
+            },
+            {
+              "id": "simulate-ad",
+              "width": 202,
+              "height": 48
+            }
+          ],
+          "movesToSolve": 2,
+          "wrongCellsObserved": 2,
+          "finalSeed": 2,
+          "consoleErrors": []
+        }
+      ]
+    }
+  },
+  "gates": {
+    "reachability": true,
+    "determinism": true,
+    "neighborTolerance": true,
+    "randomAndAlternatives": true,
+    "performanceProxy": true,
+    "iaaStructure": true,
+    "noAdAndFreeze": true,
+    "browserPointerSmoke": true
+  },
+  "implementationGatesPass": true,
+  "decision": "技术通过，等待陌生真人，产品未决",
+  "humanValidation": {
+    "status": "NOT_RUN",
+    "required": true,
+    "productKeepAllowed": false
+  }
+}

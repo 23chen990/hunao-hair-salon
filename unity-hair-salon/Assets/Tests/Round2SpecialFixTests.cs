@@ -206,7 +206,7 @@ public sealed class Round2SpecialFixTests
     }
 
     [Test]
-    public void WashAndHaircutOrder_RemainsUntilWetHairCleanup()
+    public void WashAndHaircutOrder_FinishesWithoutAnUnrequestedDryStep()
     {
         SalonGameModel game = CreateServingWashCustomer(1210, out CustomerModel customer);
         CompleteActive(game, customer, WashAction.Shower, game.ServiceConfig.RinseDuration);
@@ -224,9 +224,34 @@ public sealed class Round2SpecialFixTests
 
         Assert.IsTrue(customer.IsComplete);
         Assert.IsFalse(customer.TowelWrapped);
-        Assert.AreEqual(CustomerState.Serving, customer.State);
-        Assert.IsFalse(customer.ExitReady);
-        Assert.AreEqual(ExitBlockReason.WetHair, customer.ExitBlockReason);
+        Assert.AreEqual(CustomerState.Finished, customer.State);
+        Assert.IsTrue(customer.ExitReady);
+        Assert.AreEqual(ExitBlockReason.None, customer.ExitBlockReason);
+        Assert.AreEqual(1, game.Payments.Drops.Count);
+    }
+
+    [Test]
+    public void WashAndHaircutOrder_DoesNotOfferAnExtraDryAfterCompletion()
+    {
+        SalonGameModel game = CreateServingWashCustomer(1213, out CustomerModel customer);
+        CompleteActive(game, customer, WashAction.Shower, game.ServiceConfig.RinseDuration);
+        CompleteActive(game, customer, WashAction.Shampoo, game.ServiceConfig.ShampooDuration);
+        CompleteActive(game, customer, WashAction.Shower, game.ServiceConfig.RinseDuration);
+        Assert.AreEqual(ServiceActionResult.QuickActionCompleted,
+            game.PerformQuickAction(customer, ActiveServiceAction.WrapTowel));
+        Assert.IsTrue(game.Assign(customer, 1));
+        Reach(game);
+        Assert.AreEqual(ServiceActionResult.QuickActionCompleted,
+            game.PerformQuickAction(customer, ActiveServiceAction.RemoveTowel));
+        Assert.IsTrue(game.ApplyHaircutResult(customer, SalonTool.Scissors,
+            HaircutResult.Perfect, new HaircutConfig()));
+
+        Assert.AreEqual(CustomerState.Finished, customer.State);
+        Assert.IsTrue(customer.ExitReady);
+        Assert.IsTrue(customer.HairWet);
+        Assert.AreEqual(1, game.Payments.Drops.Count);
+        Assert.IsFalse(game.StartManualBlow(customer),
+            "A completed Wash+Cut order must not expose a hidden dry cleanup step.");
     }
 
     [Test]

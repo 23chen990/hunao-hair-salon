@@ -1,0 +1,144 @@
+{
+  "verifiedAt": "2026-08-10T11:10:19.400961+00:00",
+  "passed": true,
+  "requirements": {
+    "clipCount": 7,
+    "width": 390,
+    "height": 844,
+    "durationRangeSeconds": [
+      6,
+      10
+    ],
+    "videoCodec": "H.264",
+    "audioTracks": 0,
+    "realOutcomeMatchesManifest": true
+  },
+  "toolAvailability": {
+    "ffprobe": null,
+    "playwrightFfmpeg": "/Users/kker/Library/Caches/ms-playwright/ffmpeg-1011/ffmpeg-mac",
+    "playwrightFfmpegSupportsMp4Demux": false,
+    "note": "The Playwright FFmpeg build has only Matroska/WebM and image2 demuxers. It successfully probed the raw WebM but cannot parse final MP4 files; final MP4 checks use OpenCV's FFmpeg backend, file, and afinfo."
+  },
+  "rawWebm": {
+    "path": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/raw/phase-ripple-continuous.webm",
+    "ffmpegReturnCode": 1,
+    "hasVideoVp8": true,
+    "hasAudioStream": false
+  },
+  "finalMp4FfmpegAttempt": {
+    "returnCode": 183,
+    "stderrTail": [
+      "[in#0 @ 0x795010000] Error opening input: Invalid data found when processing input",
+      "Error opening input file /Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/01-sync-4.mp4.",
+      "Error opening input files: Invalid data found when processing input"
+    ]
+  },
+  "clips": [
+    {
+      "id": "01-sync-4",
+      "outcome": "success",
+      "containerProbe": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/01-sync-4.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/01-sync-4.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "fc8300158c2a0a6654f09e546873ddcffe627473afe20aec0b1680de8dc19d0f"
+    },
+    {
+      "id": "02-near-miss-4",
+      "outcome": "timeout",
+      "containerProbe": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/02-near-miss-4.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/02-near-miss-4.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "eef2356fa4fda1952e125c23ec41611eab4b7f8394f310a8e19f80e74adab5eb"
+    },
+    {
+      "id": "03-early-click-4",
+      "outcome": "timeout",
+      "containerProbe": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/03-early-click-4.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/03-early-click-4.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "df14782cd2e1812432d59d613597817e8750ff2159a6eb716b013772f7df87f3"
+    },
+    {
+      "id": "04-later-success-4",
+      "outcome": "success",
+      "containerProbe": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/04-later-success-4.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/04-later-success-4.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "b19539b3bb99038040aeb7a17198311ce2aa8ebffd764f30b1362aaf12fb6843"
+    },
+    {
+      "id": "05-sync-6",
+      "outcome": "success",
+      "containerProbe": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/05-sync-6.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/05-sync-6.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "651a65aaa5288449bfa5be370d300080dbf2c98d9975aaf0703637f475b4aa0f"
+    },
+    {
+      "id": "06-sync-3",
+      "outcome": "success",
+      "containerProbe": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/06-sync-3.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/06-sync-3.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "a455100845b4b2cf21ad11bf0f944fba6420c3f388a49d1d16997fbf1d5d909c"
+    },
+    {
+      "id": "07-sync-5",
+      "outcome": "success",
+      "containerProbe": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/07-sync-5.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/videos/07-sync-5.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "d4a54b7242ff9a804b6db8b0c94d09e1cbe39755a07c8d24cc37eac0bb233c7e"
+    }
+  ],
+  "cover": {
+    "path": "/Users/kker/Documents/ChatGPT/game2/prototypes/phase-ripple/validation/cover/phase-ripple-contact-cover.png",
+    "width": 390,
+    "height": 844,
+    "sourceClip": "05-sync-6.mp4",
+    "sourceTimeSeconds": 1.8,
+    "sha256": "28e3b0550cced34bc8f0d97cbd46869ee317a4be55998bde78e2eed43114f01a"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "verifiedAt": "2026-08-10T14:49:47.694Z",
+  "entry": "index.html",
+  "evidence": "evidence/stacked-aperture-390x844.png",
+  "results": [
+    {
+      "viewport": "390x844",
+      "input": "mouse drag",
+      "solvedSeed": "1001",
+      "shortestMoves": 6,
+      "nextSeed": "1002",
+      "resetVerified": true,
+      "safeLayout": {
+        "viewport": "390x844",
+        "boardWithinHorizontalSafeArea": true,
+        "controlsWithinBottomSafeArea": true,
+        "minimumLayerHitHeight": 72
+      },
+      "consoleErrors": []
+    },
+    {
+      "viewport": "430x932",
+      "input": "touch pointer drag + tap",
+      "seed": "1001",
+      "firstBlockerIndex": 0,
+      "retryPreservedLayout": true,
+      "safeLayout": {
+        "viewport": "430x932",
+        "boardWithinHorizontalSafeArea": true,
+        "controlsWithinBottomSafeArea": true,
+        "minimumLayerHitHeight": 72
+      },
+      "consoleErrors": []
+    }
+  ]
+}

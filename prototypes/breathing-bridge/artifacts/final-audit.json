@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "prototype": "breathing-bridge-growing-bridge",
+  "status": "TECHNICAL_PASS_PRODUCT_UNDECIDED",
+  "mechanic": "auto-run growing membrane bridge with release-to-jump landings",
+  "machineAudit": {
+    "status": "PASS",
+    "source": "artifacts/machine-audit.json",
+    "solver": { "numerator": 300, "denominator": 300 },
+    "crossFpsSeeds": { "numerator": 300, "denominator": 300, "replays": 900, "mismatches": 0 },
+    "robustSeeds": { "numerator": 300, "denominator": 300, "trialSuccesses": 7456, "trialDenominator": 7500, "trialsPerSeed": 25, "minimumSeedRate": 0.8 },
+    "randomSuccess": { "numerator": 2677, "denominator": 10000, "rate": 0.2677, "requiredRange": [0.1, 0.3] },
+    "stableSimulation": { "numerator": 10000, "denominator": 10000, "anomalies": 0 },
+    "checkpoint": { "numerator": 300, "denominator": 300 },
+    "freeRestart": { "numerator": 300, "denominator": 300 },
+    "noAdsPlayable": { "numerator": 300, "denominator": 300, "networkRequests": 0 },
+    "performanceMs": { "denominator": 10000, "p50": 2.027958, "p95": 2.498208, "max": 19.905292 }
+  },
+  "browserSmoke": {
+    "status": "ENVIRONMENT_UNVERIFIED",
+    "source": "artifacts/smoke-audit.json",
+    "attempts": 2,
+    "reason": "宿主禁止临时 127.0.0.1 回环监听（listen EPERM）；按规则未绕过权限，未把环境故障写成玩法 KILL。",
+    "requiredProfiles": ["390x844-mouse", "430x932-touch"],
+    "staleScreenshots": [
+      "artifacts/smoke-390x844-mouse.png",
+      "artifacts/smoke-430x932-touch.png"
+    ],
+    "staleScreenshotWarning": "两张 PNG 来自本次连续关卡重构前的浏览器复验，不能作为新版视觉证据；环境允许后需重新 npm run smoke。"
+  },
+  "build": {
+    "status": "PASS",
+    "source": "dist/build-manifest.json",
+    "dependencyCount": 0,
+    "adsEnabled": false,
+    "networkAllowed": false
+  },
+  "productDecision": "UNDECIDED_REQUIRES_UNCOACHED_HUMAN",
+  "prohibitedConclusions": ["KEEP", "fun proven", "retention proven", "revenue proven"],
+  "nextVerification": "在允许回环端口的环境重新运行 npm run smoke，再让陌生真人无文字试玩；机器成功不能建立理解、好玩、重试、留存或收益结论。"
+}

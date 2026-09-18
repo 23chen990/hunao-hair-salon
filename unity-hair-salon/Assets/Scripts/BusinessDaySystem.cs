@@ -66,6 +66,13 @@ namespace HairSalon
     [Serializable]
     public sealed class DayConfig
     {
+        // Mobile profiles opt into these fields explicitly. Legacy configs keep their
+        // existing traffic and timing behavior when IsMobileProfile is false.
+        public bool IsMobileProfile;
+        public int MobileDayNumber = 1;
+        public int TargetOrders;
+        public int WaitingCapacity;
+        public bool AllowSpawnWhileWaitingOverload;
         public float StartingDuration = 2f;
         public float BusinessDuration = 180f;
         public float ClosingGraceDuration = 30f;
@@ -112,6 +119,32 @@ namespace HairSalon
                 if (cursor < 0f) return entry.OrderId;
             }
             return "O005";
+        }
+
+        /// <summary>
+        /// Selects an order from the profile's deterministic progression. Legacy
+        /// configs retain their weighted picker through PickOrder(float).
+        /// </summary>
+        public string PickOrderForSpawn(int spawnIndex, float normalizedProgress)
+        {
+            if (!IsMobileProfile)
+            {
+                float roll = DeterministicRoll(spawnIndex, normalizedProgress);
+                return PickOrder(roll);
+            }
+
+            return SalonMobileDayConfig.PickOrderForSpawn(this, spawnIndex, normalizedProgress);
+        }
+
+        private static float DeterministicRoll(int spawnIndex, float normalizedProgress)
+        {
+            unchecked
+            {
+                int seed = spawnIndex * 1103515245 + 12345 +
+                    (int)(Math.Max(0f, Math.Min(1f, normalizedProgress)) * 1000f);
+                seed &= 0x7fffffff;
+                return (seed % 10000) / 10000f;
+            }
         }
 
         private static bool IsImplementedOrder(string orderId)
@@ -192,6 +225,8 @@ namespace HairSalon
                         progress < _config.Rush.StartProgress + durationProgress;
             bool stationSaturated = snapshot.OccupiedStations >= snapshot.ServiceStationCount;
             bool waitingOverload = snapshot.WaitingCustomers >= Math.Max(1, _config.OverloadWaitingThreshold);
+            bool waitingAtCapacity = _config.WaitingCapacity > 0 &&
+                                     snapshot.WaitingCustomers >= _config.WaitingCapacity;
             bool angryOverload = snapshot.AngryCustomers >= 2;
             bool overloaded = waitingOverload || (stationSaturated && snapshot.WaitingCustomers >= 2) || angryOverload;
             bool underHardCap = snapshot.ActiveCustomers < Math.Max(1, _config.MaxConcurrentCustomers);
@@ -207,7 +242,8 @@ namespace HairSalon
             float baseInterval = min + (max - min) * Clamp01(intervalRoll);
             float interval = baseInterval / intensity;
             if (overloaded) interval *= Math.Max(1f, _config.OverloadSlowdownMultiplier);
-            return new TrafficDecision(underHardCap && !waitingOverload, interval, phase, rush, overloaded,
+            bool waitingGate = waitingAtCapacity || (waitingOverload && !_config.AllowSpawnWhileWaitingOverload);
+            return new TrafficDecision(underHardCap && !waitingGate, interval, phase, rush, overloaded,
                 reputationMultiplier);
         }
 
@@ -332,6 +368,11 @@ namespace HairSalon
             CurrentStars = Clamp(_config.InitialStars, _config.MinimumStars, _config.MaximumStars);
         }
 
+        public void Restore(float stars)
+        {
+            CurrentStars = Clamp(stars, _config.MinimumStars, _config.MaximumStars);
+        }
+
         public void ApplyDayResult(DayStats stats)
         {
             if (stats == null || stats.ReputationApplied) return;
@@ -375,6 +416,9 @@ namespace HairSalon
         public bool CanSpawnCustomers => State == DayState.Business && BusinessRemainingTime > 0f && !IsPaused;
         public DayStats Stats { get; private set; }
         public ShopReputationModel Reputation { get; }
+        public DayEvaluation CurrentDayEvaluation => EvaluateDay();
+        public bool CanRetryDay => (State == DayState.Result || State == DayState.ClosedManagement) &&
+                                    EvaluateDay().CanRetry;
         public event Action<DayState> StateChanged;
 
         public BusinessDayController(DayConfig config, ShopReputationConfig reputationConfig = null)
@@ -388,6 +432,8 @@ namespace HairSalon
         public void PrepareDay(int dayNumber)
         {
             DayNumber = Math.Max(1, dayNumber);
+            if (Config.IsMobileProfile)
+                SalonMobileDayConfig.ApplyForDay(Config, DayNumber);
             Stats = new DayStats(DayNumber);
             BusinessRemainingTime = Math.Max(0f, Config.BusinessDuration);
             ClosingGraceRemainingTime = Math.Max(0f, Config.ClosingGraceDuration);
@@ -424,6 +470,39 @@ namespace HairSalon
         public void SetPaused(bool paused) => IsPaused = paused;
         public void ForceResult() => SetState(DayState.Result);
         public void FinalizeDayReputation() => Reputation.ApplyDayResult(Stats);
+        public DayEvaluation EvaluateDay()
+        {
+            bool ended = State == DayState.Result || State == DayState.ClosedManagement;
+            return SalonMobileDayConfig.Evaluate(Config, Stats == null ? 0 : Stats.CompletedOrders, ended);
+        }
+
+        public void RestoreReputation(float stars) => Reputation.Restore(stars);
+
+        /// <summary>
+        /// Restores a persisted post-day management state without applying the
+        /// day's result again. A caller that already prepared the same day keeps
+        /// that daily state; other states are safely re-prepared first.
+        /// </summary>
+        public bool RestoreClosedManagement(int dayNumber, float reputationStars)
+        {
+            int normalizedDay = Math.Max(1, dayNumber);
+            if (State != DayState.PreOpen || DayNumber != normalizedDay)
+                PrepareDay(normalizedDay);
+            else if (Config.IsMobileProfile)
+                SalonMobileDayConfig.ApplyForDay(Config, normalizedDay);
+
+            RestoreReputation(reputationStars);
+            SetState(DayState.ClosedManagement);
+            return true;
+        }
+
+        public bool PrepareRetryDay()
+        {
+            if (!CanRetryDay) return false;
+            PrepareDay(DayNumber);
+            return true;
+        }
+
         public void OpenClosedManagement()
         {
             if (State == DayState.Result) SetState(DayState.ClosedManagement);

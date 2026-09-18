@@ -24,14 +24,20 @@ namespace HairSalon.AssetPipeline
     public sealed class BrowserCoreFlowSmoke : MonoBehaviour
     {
         private SalonDemo _owner;
+        private bool _captureServiceUi;
 
         public static bool IsRequested(string url)
             => !string.IsNullOrEmpty(url) &&
                url.IndexOf("browserSmoke=1", StringComparison.OrdinalIgnoreCase) >= 0;
 
+        public static bool IsServiceUiEvidenceRequested(string url)
+            => !string.IsNullOrEmpty(url) &&
+               url.IndexOf("uiEvidence=service", StringComparison.OrdinalIgnoreCase) >= 0;
+
         public void Initialize(SalonDemo owner)
         {
             _owner = owner;
+            _captureServiceUi = IsServiceUiEvidenceRequested(Application.absoluteURL);
             StartCoroutine(Run());
         }
 
@@ -67,6 +73,14 @@ namespace HairSalon.AssetPipeline
                 yield break;
             }
             yield return new WaitForSecondsRealtime(SalonGameModel.MovingToStationSeconds + .15f);
+
+            if (_captureServiceUi)
+            {
+                _owner.RuntimeFocusCustomer(customer);
+                Debug.Log("[UI_SERVICE_READY] customer=" + customer.Id + " station=" + customer.Station +
+                          " uiEvidence=service");
+                yield return new WaitForSecondsRealtime(2f);
+            }
 
             _owner.RuntimeGame.SelectCustomer(customer);
             _owner.RuntimeGame.ApplyHaircutResult(customer, SalonTool.Scissors,

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>相位涟漪 · 解区热图</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body class="debug-body">
+    <main class="debug-shell">
+      <header class="debug-header">
+        <div>
+          <p>PHASE / RIPPLE</p>
+          <h1>解区热图</h1>
+        </div>
+        <a href="./index.html">PLAY</a>
+      </header>
+      <label class="seed-control">验收关卡 <select id="seed-select"></select></label>
+      <canvas id="heatmap" width="360" height="600" aria-label="点击位置解区热图"></canvas>
+      <pre id="metrics"></pre>
+      <p class="legend"><span></span>亮度表示该位置在多少个 50ms 时刻采样中成功；红圈是反向生成的参考点击。</p>
+    </main>
+    <script type="module" src="./dist/debug.js"></script>
+  </body>
+</html>

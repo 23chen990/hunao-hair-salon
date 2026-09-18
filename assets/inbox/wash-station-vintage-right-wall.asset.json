@@ -1,0 +1,69 @@
+{
+  "displayName": "复古洗发椅工作站（右墙向）",
+  "category": "wash-station",
+  "status": "candidate",
+  "availableOrientations": ["right-wall"],
+  "defaultOrientation": "right-wall",
+  "pivot": { "x": 0.5, "y": 0.0 },
+  "importProfile": "production-2.5d-rendered",
+  "scalePolicy": "footprint-isometric",
+  "footprint": {
+    "center": { "x": 0.0, "y": 0.0 },
+    "size": { "x": 2.7, "y": 3.5 }
+  },
+  "collision": {
+    "center": { "x": 0.0, "y": 0.2 },
+    "size": { "x": 2.2, "y": 3.05 }
+  },
+  "shadow": {
+    "mode": "baked",
+    "size": { "x": 2.7, "y": 3.5 },
+    "offset": { "x": 0.0, "y": -0.1 },
+    "opacity": 0.0,
+    "softness": 0.8
+  },
+  "interactionAnchors": [
+    {
+      "id": "customer-seat",
+      "position": { "x": 0.0, "y": 0.6, "z": -0.2 },
+      "facing": { "x": 1.0, "y": 0.0, "z": 0.0 }
+    },
+    {
+      "id": "stylist-work",
+      "position": { "x": -1.55, "y": 0.0, "z": -0.7 },
+      "facing": { "x": 1.0, "y": 0.0, "z": 0.0 }
+    },
+    {
+      "id": "queue",
+      "position": { "x": -2.25, "y": 0.0, "z": -1.2 },
+      "facing": { "x": 1.0, "y": 0.0, "z": 0.0 }
+    },
+    {
+      "id": "tool",
+      "position": { "x": 1.08, "y": 1.02, "z": -0.2 },
+      "facing": { "x": 1.0, "y": 0.0, "z": 0.0 }
+    },
+    {
+      "id": "service-vfx",
+      "position": { "x": 0.0, "y": 2.05, "z": -0.42 },
+      "facing": { "x": 1.0, "y": 0.0, "z": 0.0 }
+    }
+  ],
+  "requiredAnchors": ["customer-seat", "stylist-work", "queue", "tool", "service-vfx"],
+  "sorting": {
+    "layer": "Default",
+    "order": 4,
+    "depthOffset": 0.0,
+    "sortByWorldZ": true
+  },
+  "candidateValidation": {
+    "role": "service-station",
+    "serviceType": "wash",
+    "stationId": 0,
+    "targetObjectName": "Wash Workstation 1",
+    "worldPosition": { "x": 9.0, "y": 0.0, "z": -0.3 },
+    "hideObjectNames": ["Plant Pot", "Faceted Leaf"],
+    "hideRadius": 2.2
+  },
+  "sourceOriginalPath": "/Users/kker/Downloads/本页生成元素_自然阴影_整理/等距视角复古洗发椅工作站.png"
+}

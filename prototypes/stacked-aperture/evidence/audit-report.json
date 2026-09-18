@@ -1,0 +1,136 @@
+{
+  "auditedAt": "2026-08-11T02:29:59.845Z",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin-arm64",
+    "solverTimingScope": "development-machine proxy only; not a low-end-device result"
+  },
+  "fixedSeedSet": {
+    "first": 1,
+    "last": 500,
+    "count": 500
+  },
+  "generationAndSolve": {
+    "solvableSeeds": 500,
+    "initiallyBlockedSeeds": 500,
+    "shortestDistanceMin": 4,
+    "shortestDistanceMax": 8,
+    "shortestDistanceHistogram": {
+      "4": 137,
+      "5": 138,
+      "6": 131,
+      "7": 50,
+      "8": 44
+    }
+  },
+  "determinism": {
+    "replayHashMatches": 500,
+    "serializationHashMatches": 500,
+    "replayFramesVerified": 3226
+  },
+  "interactionAndDecoys": {
+    "slotSpacingPx": 54,
+    "releaseBandWidthPx": 54,
+    "releaseHalfTolerancePx": 27,
+    "distinctLayerColorPasses": 500,
+    "decoyGeometryPasses": 500,
+    "minimumDecoyClearanceGapPx": 14,
+    "sampledIntermediateStates": 2000,
+    "sampledIntermediateSolvable": 2000
+  },
+  "randomSuccess": {
+    "samples": 10000,
+    "successes": 14,
+    "rate": 0.0014
+  },
+  "solverTimingMs": {
+    "samples": 500,
+    "median": 0.10112499999996771,
+    "p95": 0.8155409999999961,
+    "max": 1.3195000000000014
+  },
+  "durationProxy": {
+    "samples": 500,
+    "p10Ms": 40567,
+    "medianMs": 54570,
+    "p95Ms": 81265
+  },
+  "eligibilityProxy": {
+    "samples": 10000,
+    "hintEligibleClosures": 1512,
+    "diagnosticEligibleClosures": 1676,
+    "hintRate": 0.1512,
+    "diagnosticRate": 0.1676,
+    "proxyAssumptions": {
+      "perLayerReadAccuracy": 0.79,
+      "detailChoiceRate": 0.55,
+      "retryBehavior": "correct the explicitly blocked layer, preserve all other placements"
+    }
+  },
+  "rewardedEntryCap": {
+    "attemptedEligibilityEvents": 3,
+    "emittedEligibilityEvents": 2,
+    "capPerSession": 2
+  },
+  "interstitialSessions": {
+    "opportunityCountsByMinutes": {
+      "8": 2,
+      "9": 2,
+      "10": 2,
+      "11": 2,
+      "12": 2
+    },
+    "opportunityRoundsByMinutes": {
+      "8": [
+        4,
+        7
+      ],
+      "9": [
+        4,
+        7
+      ],
+      "10": [
+        4,
+        7
+      ],
+      "11": [
+        4,
+        7
+      ],
+      "12": [
+        4,
+        7
+      ]
+    },
+    "firstThreeRoundsEligible": 0,
+    "capPerSession": 2,
+    "cooldownMs": 180000
+  },
+  "noAdAndPause": {
+    "noAdFlowPasses": 500,
+    "noAdFlowSeeds": 500,
+    "pausedWallClockMs": 50000,
+    "pausedGameClockMs": 5000,
+    "gameplayHashUnchanged": true
+  },
+  "gates": {
+    "seedsSolvable": true,
+    "noInitialStraightThrough": true,
+    "shortestDistanceInRange": true,
+    "serializationAndReplayDeterministic": true,
+    "touchTolerance": true,
+    "visibleSafeDecoys": true,
+    "randomSuccessAtMost15Percent": true,
+    "solverP95AtMost20Ms": true,
+    "interstitialStructure": true,
+    "hintEligibilityInBand": true,
+    "diagnosticEligibilityInBand": true,
+    "rewardEntrySessionCap": true,
+    "noAdRegression": true,
+    "adSimulationPausesLogicClock": true
+  },
+  "allMachineGatesPassed": true,
+  "browserSmoke": {
+    "status": "not included in this audit; run npm run browser:smoke separately"
+  }
+}

@@ -1,0 +1,141 @@
+:root {
+  color: #eaf8f5;
+  background: #03090b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  background: #03090b;
+}
+
+body { overflow: hidden; }
+
+.prototype-shell {
+  position: relative;
+  width: min(100vw, 430px);
+  height: 100dvh;
+  min-height: 640px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #071013;
+  box-shadow: 0 0 0 1px #193036, 0 28px 90px #000;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.debug-link {
+  position: absolute;
+  z-index: 2;
+  top: max(20px, env(safe-area-inset-top));
+  right: max(20px, env(safe-area-inset-right));
+  padding: 8px 10px;
+  border: 1px solid #29454c;
+  color: #769096;
+  background: #071013cc;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-decoration: none;
+}
+
+.debug-body {
+  overflow: auto;
+  background: #071013;
+}
+
+.debug-shell {
+  width: min(100% - 28px, 760px);
+  margin: 0 auto;
+  padding: 24px 0 48px;
+}
+
+.debug-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #29454c;
+}
+
+.debug-header p {
+  margin: 0 0 6px;
+  color: #6cf5dd;
+  font-size: 10px;
+  letter-spacing: .16em;
+}
+
+.debug-header h1 { margin: 0; font-size: 28px; }
+
+.debug-header a {
+  padding: 8px 14px;
+  border: 1px solid #6cf5dd;
+  color: #6cf5dd;
+  text-decoration: none;
+  font-size: 11px;
+}
+
+.seed-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 0 12px;
+  color: #769096;
+  font-size: 12px;
+}
+
+select {
+  min-width: 150px;
+  padding: 9px 12px;
+  border: 1px solid #29454c;
+  border-radius: 0;
+  color: #eaf8f5;
+  background: #0d191d;
+  font: inherit;
+}
+
+#heatmap {
+  display: block;
+  width: min(100%, 360px);
+  height: auto;
+  border: 1px solid #29454c;
+  background: #071013;
+  image-rendering: pixelated;
+}
+
+#metrics {
+  margin: 16px 0;
+  padding: 14px;
+  overflow: auto;
+  border-left: 3px solid #6cf5dd;
+  color: #b9ceca;
+  background: #0d191d;
+  font: 11px/1.75 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.legend {
+  max-width: 56ch;
+  color: #769096;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.legend span {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 7px;
+  background: #6cf5dd;
+}

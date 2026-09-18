@@ -45,7 +45,7 @@ public sealed class StationCapabilityFlowTests
     }
 
     [Test]
-    public void FinalWashRequirementStillWaitsForWetHairAfterTowelRemoval()
+    public void FinalWashRequirementFinishesAfterTowelRemovalWithoutDry()
     {
         var game = NewGame();
         CustomerModel customer = SpawnServing(game, 203, new[] { ServiceType.Wash }, 0);
@@ -63,10 +63,10 @@ public sealed class StationCapabilityFlowTests
         Assert.IsTrue(game.TickActiveServiceAction(customer, game.ServiceConfig.RemoveTowelDuration));
 
         Assert.IsFalse(customer.TowelWrapped);
-        Assert.AreEqual(CustomerState.Serving, customer.State);
-        Assert.IsFalse(customer.ExitReady);
-        Assert.AreEqual(ExitBlockReason.WetHair, customer.ExitBlockReason);
-        Assert.AreEqual(0, game.Payments.Drops.Count);
+        Assert.AreEqual(CustomerState.Finished, customer.State);
+        Assert.IsTrue(customer.ExitReady);
+        Assert.AreEqual(ExitBlockReason.None, customer.ExitBlockReason);
+        Assert.AreEqual(1, game.Payments.Drops.Count);
     }
 
     [TestCase(SalonTool.Scissors)]
@@ -174,6 +174,23 @@ public sealed class StationCapabilityFlowTests
         Assert.AreEqual(HairStage.Complete, customer.HairStage);
         Assert.AreEqual(CustomerState.Serving, customer.State);
         Assert.Less(customer.Satisfaction, satisfactionAfterWrongPlacement);
+    }
+
+    [Test]
+    public void EarlyHaircut_DoesNotCompleteTheCurrentWashRequirement()
+    {
+        var game = NewGame();
+        CustomerModel customer = SpawnServing(game, 209,
+            new[] { ServiceType.Wash, ServiceType.Cut }, 1);
+
+        Assert.IsTrue(game.ApplyHaircutResult(customer, SalonTool.Scissors,
+            HaircutResult.Perfect, new HaircutConfig()));
+
+        Assert.AreEqual(0, customer.Step,
+            "Completing a future haircut must not mark the current wash as complete.");
+        Assert.AreEqual(ServiceType.Wash, customer.CurrentNeed);
+        Assert.AreEqual(CustomerState.Serving, customer.State);
+        Assert.AreEqual(0, game.Payments.Drops.Count);
     }
 
     [Test]

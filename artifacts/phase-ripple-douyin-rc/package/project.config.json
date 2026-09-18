@@ -1,0 +1,9 @@
+{
+  "appid": "REPLACE_WITH_DOUYIN_APPID",
+  "projectname": "phase-ripple",
+  "setting": {
+    "es6": true,
+    "minified": false,
+    "urlCheck": true
+  }
+}
