@@ -357,6 +357,11 @@ namespace HairSalon
             {
                 var customer = Customers[i];
                 UpdateProcessingService(customer, step);
+                // Active timed service actions (shampoo / rinse / towel / dye / perm) are
+                // advanced by the model, not by a specific input path. Previously only the
+                // desktop loop ticked them, so a timed action started from the mobile path
+                // could never finish. Both paths now share this single advancement point.
+                TickActiveServiceAction(customer, step);
                 bool wasMovingToStation = customer.State == CustomerState.MovingToStation;
                 customer.BackgroundTask.Tick(step);
                 CustomerState stateBeforeServiceUpdate = customer.State;
@@ -814,6 +819,15 @@ namespace HairSalon
             Workstations[station].State = WorkstationState.Reserved;
             customer.Station = station;
             _washServiceAdapter.MovementStarted(customer, station);
+            // 泡沫等待是绑定洗头工位的后台任务。顾客一旦被转移，计时必须取消，
+            // 否则一个已经失效的计时器会在别的工位继续判定迟到事故。
+            // 吹发后台任务的 CurrentNeed 是 Dry，因此不受这里影响。
+            if (customer.BackgroundTask.State == BackgroundTaskState.Running &&
+                customer.CurrentNeed == ServiceType.Wash)
+            {
+                customer.BackgroundTask.State = BackgroundTaskState.Inactive;
+                customer.BackgroundTask.RiskState = BackgroundRiskState.None;
+            }
             RefreshFocusedStation(customer);
             if (!IsCompatibleStation(customer.CurrentNeed, targetType))
             {
@@ -1042,6 +1056,87 @@ namespace HairSalon
             return true;
         }
 
+        /// <summary>
+        /// 正式洗头第 1 段：短主动洗发。
+        /// 一次调用内先复用领域「打湿」动作（立即结算），再开启一个短时「打泡沫」动作。
+        /// 泡沫动作完成后由 <see cref="TickActiveServiceAction"/> 自动进入后台泡沫等待，
+        /// 玩家可以离开，稍后必须回来冲洗。不新增任何移动版专用状态。
+        /// </summary>
+        public bool BeginWashFoamHold(CustomerModel customer)
+        {
+            if (!CanUseWashStation(customer) || customer.CurrentNeed != ServiceType.Wash) return false;
+            if (customer.ServiceExecution != null &&
+                customer.ServiceExecution.State == ServiceExecutionState.Executing) return false;
+            if (PlayerBusy) return false;
+
+            // Wet hair first through the same domain action the detailed desktop flow uses.
+            if (!_washServiceAdapter.BeginTimedAction(
+                    customer, ServiceActionType.Shower, ServiceTool.Shower, WorldElapsed)) return false;
+            ApplyActionResult wetted = _washServiceAdapter.CompleteTimedAction(
+                customer, Math.Max(0f, ServiceConfig.RinseDuration), false);
+            if (wetted.Status != ApplyStatus.Applied) return false;
+
+            if (!_washServiceAdapter.BeginTimedAction(
+                    customer, ServiceActionType.Shampoo, ServiceTool.Shampoo, WorldElapsed)) return false;
+            if (!BeginTimedAction(customer, ActiveServiceAction.Shampoo, ServiceConfig.ShampooDuration))
+            {
+                _washServiceAdapter.DiscardTimedAction(customer, ClearReason.ToolBecameInvalid);
+                return false;
+            }
+            CustomerChanged?.Invoke(customer);
+            return true;
+        }
+
+        /// <summary>
+        /// 正式洗头第 2 段：回来冲洗收尾。
+        /// 复用领域「冲洗」动作把泡沫清零并满足 RinseClean 里程碑，随后推进订单步数。
+        /// 冲洗耗时在事故达到 Moderate 时延长，复用既有的 OverdueRinseDuration 规则。
+        /// </summary>
+        public bool FinishWashRinse(CustomerModel customer)
+        {
+            if (!CanUseWashStation(customer) || customer.CurrentNeed != ServiceType.Wash) return false;
+            if (customer.ServiceExecution != null &&
+                customer.ServiceExecution.State == ServiceExecutionState.Executing) return false;
+            if (PlayerBusy) return false;
+
+            if (!_washServiceAdapter.BeginTimedAction(
+                    customer, ServiceActionType.Shower, ServiceTool.Shower, WorldElapsed)) return false;
+            float duration = customer.AccidentSeverity >= AccidentSeverity.Moderate
+                ? ServiceConfig.OverdueRinseDuration : ServiceConfig.RinseDuration;
+            ApplyActionResult rinsed = _washServiceAdapter.CompleteTimedAction(
+                customer, Math.Max(0f, duration), false);
+            if (rinsed.Status != ApplyStatus.Applied) return false;
+
+            customer.BackgroundTask.State = BackgroundTaskState.Complete;
+            customer.ServicePhase = ServiceStepPhase.Complete;
+            if (_washServiceAdapter.IsWashReadyForTransition(customer) && !customer.IsComplete)
+            {
+                customer.CompletedWashCount++;
+                CompleteCurrentStep(customer, true);
+            }
+            else
+            {
+                SetWorkstationState(customer, WorkstationState.AwaitingService);
+                CustomerChanged?.Invoke(customer);
+            }
+            return true;
+        }
+
+        /// <summary>泡沫后台等待是否正在进行；View 只能读取，不得自行推导。</summary>
+        public bool IsWashFoamWaitRunning(CustomerModel customer)
+        {
+            return customer != null && customer.CurrentNeed == ServiceType.Wash &&
+                   customer.ShampooApplied &&
+                   customer.BackgroundTask.State == BackgroundTaskState.Running;
+        }
+
+        /// <summary>泡沫是否已经进入可冲洗窗口（玩家回来的时机）。</summary>
+        public bool IsWashFoamReadyToRinse(CustomerModel customer)
+        {
+            return IsWashFoamWaitRunning(customer) &&
+                   customer.BackgroundTask.Elapsed >= Math.Max(0f, ServiceConfig.FoamOptimalStart);
+        }
+
         public ServiceActionResult ResolveWashToolSelection(CustomerModel customer, WashAction action)
         {
             if (!CanUseWashStation(customer)) return ServiceActionResult.Invalid;
@@ -1198,8 +1293,24 @@ namespace HairSalon
                 customer.ServicePhase = ServiceStepPhase.Ready;
                 if (completed == ActiveServiceAction.Shampoo)
                 {
-                    customer.BackgroundTask.State = BackgroundTaskState.Inactive;
-                    customer.BackgroundTask.RiskState = BackgroundRiskState.None;
+                    // Shampooing leaves foam on the head. When the order still needs a wash,
+                    // this starts the existing foam-wait background task so the player can
+                    // walk away and must come back to rinse. The late thresholds already
+                    // escalate to Minor/Moderate accidents inside UpdateServiceStage.
+                    if (customer.CurrentNeed == ServiceType.Wash && customer.ShampooApplied)
+                    {
+                        customer.BackgroundTask.Start(
+                            Math.Max(0f, ServiceConfig.FoamOptimalStart),
+                            Math.Max(ServiceConfig.FoamOptimalStart, ServiceConfig.FoamMinorLateThreshold),
+                            Math.Max(ServiceConfig.FoamMinorLateThreshold, ServiceConfig.FoamModerateLateThreshold),
+                            WorldElapsed);
+                        customer.ServicePhase = ServiceStepPhase.BackgroundRunning;
+                    }
+                    else
+                    {
+                        customer.BackgroundTask.State = BackgroundTaskState.Inactive;
+                        customer.BackgroundTask.RiskState = BackgroundRiskState.None;
+                    }
                 }
                 SetWorkstationState(customer, WorkstationState.AwaitingService);
                 CustomerChanged?.Invoke(customer);
@@ -1649,6 +1760,15 @@ namespace HairSalon
             HaircutResult resolved = CompleteHaircutAction(customer, elapsed, false);
             if (!operationWasActive) EndActiveOperation(customer);
             return resolved != HaircutResult.None;
+        }
+
+        /// <summary>
+        /// 一次性剪发（点按式）按住时长由模型/配置决定，View 只读取结果。
+        /// 沿用既有口径：落在完美区间下沿，因此点按式剪发仍是稳定完成而非过剪。
+        /// </summary>
+        public float HaircutHoldDurationFor(SalonTool tool, HaircutConfig config)
+        {
+            return config == null ? 0f : Math.Max(0f, config.GetPerfectMin(tool)) + .05f;
         }
 
         public bool BeginHaircutAction(CustomerModel customer, SalonTool selectedTool, HaircutConfig config)

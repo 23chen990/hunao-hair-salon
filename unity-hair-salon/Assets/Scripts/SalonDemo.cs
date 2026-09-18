@@ -2008,8 +2008,9 @@ public sealed partial class SalonDemo : MonoBehaviour
         }
         else
         {
+            // SalonGameModel.Tick now advances every timed service action for both input
+            // paths. This method only reads the result for presentation.
             duration = Mathf.Max(.01f, customer.ActiveServiceDuration);
-            _game.TickActiveServiceAction(customer, Time.deltaTime);
         }
         if (action != ActiveServiceAction.WrapTowel && action != ActiveServiceAction.RemoveTowel)
         {

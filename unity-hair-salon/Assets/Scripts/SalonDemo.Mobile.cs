@@ -32,7 +32,7 @@ public sealed partial class SalonDemo
     private float _mobileEvidenceAt;
     private bool _mobileRestoring;
 
-    private enum MobileAction { None, Greet, Assign, Guide, Wash, Cut, StartDry, FinishDry }
+    private enum MobileAction { None, Greet, Assign, Guide, Wash, RinseWash, Cut, StartDry, FinishDry }
     private struct MobileTarget
     {
         public MobileAction Action;
@@ -358,9 +358,28 @@ public sealed partial class SalonDemo
             }
             else if (customer.CurrentNeed == ServiceType.Wash)
             {
-                target.Action = MobileAction.Wash;
-                target.Label = "洗发";
-                target.Hint += " · 点一下，专心服务 3 秒";
+                if (customer.ActiveServiceAction == ActiveServiceAction.Shampoo)
+                {
+                    target.Action = MobileAction.Wash;
+                    target.Available = false;
+                    target.Label = "洗发中";
+                    target.Hint += " · 正在打泡沫";
+                }
+                else if (_game.IsWashFoamWaitRunning(customer))
+                {
+                    // 后台泡沫等待：这是玩家可以离开、之后必须回来处理的节奏点。
+                    target.Action = MobileAction.RinseWash;
+                    bool ready = _game.IsWashFoamReadyToRinse(customer);
+                    target.Available = ready;
+                    target.Label = ready ? "冲洗" : "泡沫中";
+                    target.Hint += ready ? " · 回来冲洗收尾" : " · 可以先照顾其他顾客";
+                }
+                else
+                {
+                    target.Action = MobileAction.Wash;
+                    target.Label = "洗发";
+                    target.Hint += " · 点一下，然后可以先走开";
+                }
             }
             else if (customer.CurrentNeed == ServiceType.Cut)
             {
@@ -413,24 +432,32 @@ public sealed partial class SalonDemo
             BlowResult result = _game.FinishAutoBlow(customer);
             ShowToast(result == BlowResult.Good ? "吹发完成！" : "收尾完成 · 下次早一点回来");
         }
+        else if (target.Action == MobileAction.RinseWash)
+        {
+            if (_game.FinishWashRinse(customer))
+                ShowToast(customer.IsComplete ? "冲洗完成！" : "冲洗完成 · 继续下一项");
+            else ShowToast("还没到冲洗时间");
+        }
         else if (target.Action == MobileAction.Cut || target.Action == MobileAction.Wash)
         {
             SalonCustomerView view = FindCustomerView(customer);
             if (view == null || !view.IsAtMovementDestination) return;
+            bool wash = target.Action == MobileAction.Wash;
             _mobileWorkingTool = customer.HaircutService == null ? SalonTool.Scissors : customer.HaircutService.CurrentRequiredTool;
-            bool began = target.Action == MobileAction.Wash
-                ? _game.BeginServiceExecution(customer, ServiceExecutionType.Wash)
+            bool began = wash
+                ? _game.BeginWashFoamHold(customer)
                 : _game.BeginHaircutAction(customer, _mobileWorkingTool, HaircutSettings);
             if (!began) { ShowToast("顾客尚未准备好"); return; }
             _mobileWorkingView = view;
-            _mobileWorkingService = target.Action == MobileAction.Wash ? ServiceType.Wash : ServiceType.Cut;
+            _mobileWorkingService = wash ? ServiceType.Wash : ServiceType.Cut;
             _mobileWorkElapsed = 0f;
-            _mobileWorkDuration = target.Action == MobileAction.Wash ? ServiceSettings.WashServiceDuration
-                : HaircutSettings.GetPerfectMin(_mobileWorkingTool) + .05f;
+            _mobileWorkDuration = wash
+                ? ServiceSettings.ShampooDuration
+                : _game.HaircutHoldDurationFor(_mobileWorkingTool, HaircutSettings);
             _playerCharacter?.FaceTowards(view.transform.position - _player.position);
-            _playerCharacter?.BeginService(target.Action == MobileAction.Wash
+            _playerCharacter?.BeginService(wash
                 ? HairdresserAnimationState.WashHair : HairdresserAnimationState.CutHair);
-            if (target.Action == MobileAction.Cut) view.HaircutFeedback?.BeginHold(_mobileWorkingTool);
+            if (!wash) view.HaircutFeedback?.BeginHold(_mobileWorkingTool);
         }
         RefreshMobileDayPresentation();
     }
@@ -458,7 +485,9 @@ public sealed partial class SalonDemo
             view.ApplyHairStage(view.Customer.HairStage);
         }
         view.OrderDemand?.Refresh();
-        ShowToast(MobileServiceName(_mobileWorkingService) + "完成" + (view.Customer.IsComplete ? "！" : " · 继续下一项"));
+        ShowToast(_mobileWorkingService == ServiceType.Wash
+            ? "泡沫已打好 · 可以先去照顾别人，回来冲洗"
+            : MobileServiceName(_mobileWorkingService) + "完成" + (view.Customer.IsComplete ? "！" : " · 继续下一项"));
         EndMobileWork();
     }
 
