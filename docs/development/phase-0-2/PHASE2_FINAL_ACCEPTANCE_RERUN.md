@@ -1,7 +1,7 @@
 # Phase 2 Gameplay Gate 最终复跑验收
 
-> 复跑日期：2026-09-19（Asia/Shanghai）  
-> 范围：Phase 2 最后一轮验收收尾；不进入 Phase 3。  
+> 复跑日期：2026-09-19（Asia/Shanghai）
+> 范围：Phase 2 最后一轮验收收尾；不进入 Phase 3。
 > 原则：只保护正式 Mobile Wash 的 readiness，修正文档事实，不调玩法参数，不扩展系统。
 
 ## A. Git 状态与可追溯性
