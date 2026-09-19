@@ -28,7 +28,7 @@
 
 ## B. 本轮实际改动（逐文件）
 
-改动保持在 5 个文件，且没有新增玩法系统：
+除本验收报告本身外，改动保持在 5 个文件，且没有新增玩法系统：
 
 | 文件 | 改动 | 影响边界 |
 | --- | --- | --- |
@@ -123,7 +123,7 @@ TDD 证据也保留在本机 XML：guard 加入前的 focused run 为 1 failed�
 
 ## H. 仓库 baseline 卫生审计（只读）
 
-相对 `main` 的 PR 当前为 663 个文件，顶层分布为：`unity-hair-salon` 265、`prototypes` 236、`artifacts` 59、`docs` 37、`platforms` 30、`assets` 11、`.agents` 5、`tools` 8、`output` 2，其余为项目说明/配置文件。
+相对 `main` 的 PR 当前为 664 个文件，顶层分布为：`unity-hair-salon` 265、`prototypes` 236、`artifacts` 59、`docs` 38、`platforms` 30、`assets` 11、`.agents` 5、`tools` 8、`output` 2，其余为项目说明/配置文件。
 
 - tracked tree 共 1,227 个文件、约 161,575,276 bytes；
 - `git ls-files` 中没有 `Library/`、`Temp/`、`Builds/`、`Logs/`、`UserSettings/`、`Artifacts/`；`.gitignore` 已保护这些未来生成目录；
