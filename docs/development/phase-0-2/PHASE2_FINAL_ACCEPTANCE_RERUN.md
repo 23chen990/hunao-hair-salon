@@ -125,7 +125,7 @@ TDD 证据也保留在本机 XML：guard 加入前的 focused run 为 1 failed�
 
 相对 `main` 的 PR 当前为 664 个文件，顶层分布为：`unity-hair-salon` 265、`prototypes` 236、`artifacts` 59、`docs` 38、`platforms` 30、`assets` 11、`.agents` 5、`tools` 8、`output` 2，其余为项目说明/配置文件。
 
-- tracked tree 共 1,227 个文件、约 161,575,276 bytes；
+- tracked tree 共 1,228 个文件、约 161.6 MB（按最终工作区文件大小只读统计）；
 - `git ls-files` 中没有 `Library/`、`Temp/`、`Builds/`、`Logs/`、`UserSettings/`、`Artifacts/`；`.gitignore` 已保护这些未来生成目录；
 - 没有发现超过 GitHub 100 MB 限制的 tracked 单文件；较大的三个文件为：
   - `assets/source/wash-craft/room-finish.blend1`（10,005,491 bytes）；
