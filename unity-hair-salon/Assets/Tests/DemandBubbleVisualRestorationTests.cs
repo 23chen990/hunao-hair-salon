@@ -26,7 +26,8 @@ public class DemandBubbleVisualRestorationTests
             "A seated customer must keep overhead demand/progress visible even while the player serves elsewhere.");
         customer.State = CustomerState.Waiting;
         customer.Station = -1;
-        Assert.IsFalse((bool)policy.Invoke(null, new object[] { customer, false, true }));
+        Assert.IsTrue((bool)policy.Invoke(null, new object[] { customer, false, true }),
+            "Mobile players must see waiting orders before choosing whom to serve.");
         Assert.IsTrue((bool)policy.Invoke(null, new object[] { customer, true, true }),
             "Explicit selection must still reveal a waiting customer's demand.");
     }

@@ -13,6 +13,8 @@ public sealed class CustomerUIRootView : MonoBehaviour
     private Transform _mobileAnchor;
     private Transform _requirementContainer;
     private Transform _emotionContainer;
+    private Transform _urgencyContainer;
+    private CustomerUrgencyView _urgencyView;
     private bool _isSelected;
 
     public CustomerModel Customer => _customer;
@@ -20,9 +22,16 @@ public sealed class CustomerUIRootView : MonoBehaviour
     public Transform CurrentAnchor => _currentAnchor;
     public Transform RequirementContainer => _requirementContainer;
     public Transform EmotionContainer => _emotionContainer;
+    public Transform UrgencyContainer => _urgencyContainer;
+    public CustomerUrgencyView UrgencyView => _urgencyView;
     public bool IsVisible => _visualRoot != null && _visualRoot.gameObject.activeSelf;
 
     public void Initialize(CustomerModel customer)
+    {
+        Initialize(customer, null);
+    }
+
+    public void Initialize(CustomerModel customer, Camera sceneCamera)
     {
         if (_customer != null || customer == null) return;
         _customer = customer;
@@ -33,6 +42,10 @@ public sealed class CustomerUIRootView : MonoBehaviour
         _requirementContainer.SetParent(_visualRoot, false);
         _emotionContainer = new GameObject("EmotionSlot").transform;
         _emotionContainer.SetParent(_visualRoot, false);
+        _urgencyContainer = new GameObject("Customer Urgency Status").transform;
+        _urgencyContainer.SetParent(_visualRoot, false);
+        _urgencyView = _urgencyContainer.gameObject.AddComponent<CustomerUrgencyView>();
+        _urgencyView.Initialize(customer, sceneCamera);
         _visualRoot.gameObject.SetActive(false);
     }
 

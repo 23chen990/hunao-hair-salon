@@ -1,0 +1,1517 @@
+{
+  "generatedAt": "2026-08-10T11:54:03.970Z",
+  "sourceUrl": "../playable/index.html",
+  "sourcePrototype": "../playable",
+  "viewport": {
+    "width": 390,
+    "height": 844,
+    "deviceScaleFactor": 1
+  },
+  "rawVideo": "prototypes/phase-ripple-skinned/validation/raw/phase-ripple-continuous.webm",
+  "recordWallDurationSeconds": 94.677822541,
+  "pageErrors": [],
+  "captures": [
+    {
+      "id": "02-near-miss-4",
+      "seed": 17,
+      "pieceCount": 4,
+      "category": "near_miss",
+      "hook": "最后一颗，会赶上吗？",
+      "requestedInput": {
+        "x": -7,
+        "y": -35,
+        "time": 0.6
+      },
+      "canvasPoint": {
+        "x": 187.188,
+        "y": 378.71999999999997
+      },
+      "expectedOutcome": "timeout",
+      "actualOutcome": "timeout",
+      "rawStartSeconds": 0.44644016599999997,
+      "rawEndSeconds": 7.948681541,
+      "requestedDurationSeconds": 7.5,
+      "firstClick": {
+        "type": "first_click",
+        "at": 1786362750310,
+        "data": {
+          "seed": 17,
+          "x": -7.042064116551326,
+          "y": -35.21033543806807,
+          "time": 0.6000000000000003
+        }
+      },
+      "levelResult": {
+        "type": "level_result",
+        "at": 1786362754331,
+        "data": {
+          "seed": 17,
+          "outcome": "timeout",
+          "click": {
+            "x": -7.042064116551326,
+            "y": -35.21033543806807,
+            "time": 0.6000000000000003
+          },
+          "triggerOrder": [
+            0,
+            1,
+            3,
+            2
+          ],
+          "spread": 0.8083333333333647,
+          "resultTime": 4.641666666666687
+        }
+      },
+      "triggerOrder": [
+        0,
+        1,
+        3,
+        2
+      ]
+    },
+    {
+      "id": "03-early-click-4",
+      "seed": 17,
+      "pieceCount": 4,
+      "category": "early_click",
+      "hook": "点早了，会更准吗？",
+      "requestedInput": {
+        "x": 10,
+        "y": 0,
+        "time": 0.05
+      },
+      "canvasPoint": {
+        "x": 206.16,
+        "y": 417.78
+      },
+      "expectedOutcome": "timeout",
+      "actualOutcome": "timeout",
+      "rawStartSeconds": 7.9609513750000005,
+      "rawEndSeconds": 15.461965915999999,
+      "requestedDurationSeconds": 7.5,
+      "firstClick": {
+        "type": "first_click",
+        "at": 1786362757266,
+        "data": {
+          "seed": 17,
+          "x": 10.06009945502648,
+          "y": -0.0000011003934174115016,
+          "time": 0.05833333333333333
+        }
+      },
+      "levelResult": {
+        "type": "level_result",
+        "at": 1786362760489,
+        "data": {
+          "seed": 17,
+          "outcome": "timeout",
+          "click": {
+            "x": 10.06009945502648,
+            "y": -0.0000011003934174115016,
+            "time": 0.05833333333333333
+          },
+          "triggerOrder": [
+            2,
+            1,
+            3,
+            0
+          ],
+          "spread": null,
+          "resultTime": 3.2833333333333243
+        }
+      },
+      "triggerOrder": [
+        2,
+        1,
+        3,
+        0
+      ]
+    },
+    {
+      "id": "04-later-success-4",
+      "seed": 17,
+      "pieceCount": 4,
+      "category": "success",
+      "hook": "点早了，会更准吗？",
+      "requestedInput": {
+        "x": 10,
+        "y": 0,
+        "time": 0.55
+      },
+      "canvasPoint": {
+        "x": 206.16,
+        "y": 417.78
+      },
+      "expectedOutcome": "success",
+      "actualOutcome": "success",
+      "rawStartSeconds": 15.469938,
+      "rawEndSeconds": 22.970843166,
+      "requestedDurationSeconds": 7.5,
+      "firstClick": {
+        "type": "first_click",
+        "at": 1786362765266,
+        "data": {
+          "seed": 17,
+          "x": 10.06009945502648,
+          "y": -0.0000011003934174115016,
+          "time": 0.5500000000000005
+        }
+      },
+      "levelResult": {
+        "type": "level_result",
+        "at": 1786362769155,
+        "data": {
+          "seed": 17,
+          "outcome": "success",
+          "click": {
+            "x": 10.06009945502648,
+            "y": -0.0000011003934174115016,
+            "time": 0.5500000000000005
+          },
+          "triggerOrder": [
+            1,
+            2,
+            3,
+            0
+          ],
+          "spread": 0.8000000000000207,
+          "resultTime": 4.441666666666677
+        }
+      },
+      "triggerOrder": [
+        1,
+        2,
+        3,
+        0
+      ]
+    },
+    {
+      "id": "01-sync-4",
+      "seed": 17,
+      "pieceCount": 4,
+      "category": "success",
+      "hook": "最后一颗，会赶上吗？",
+      "requestedInput": {
+        "x": 37.68005381583613,
+        "y": -64.5807301973603,
+        "time": 0.6117736915312707
+      },
+      "canvasPoint": {
+        "x": 237.05094005847312,
+        "y": 345.70790509974586
+      },
+      "expectedOutcome": "success",
+      "actualOutcome": "success",
+      "rawStartSeconds": 22.978283625,
+      "rawEndSeconds": 30.479364458,
+      "requestedDurationSeconds": 7.5,
+      "firstClick": {
+        "type": "first_click",
+        "at": 1786362772841,
+        "data": {
+          "seed": 17,
+          "x": 37.9064908394447,
+          "y": -64.9688254869901,
+          "time": 0.6166666666666669
+        }
+      },
+      "levelResult": {
+        "type": "level_result",
+        "at": 1786362776572,
+        "data": {
+          "seed": 17,
+          "outcome": "success",
+          "click": {
+            "x": 37.9064908394447,
+            "y": -64.9688254869901,
+            "time": 0.6166666666666669
+          },
+          "triggerOrder": [
+            1,
+            0,
+            2,
+            3
+          ],
+          "spread": 0.008333333333333748,
+          "resultTime": 4.350000000000006
+        }
+      },
+      "triggerOrder": [
+        1,
+        0,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "05-sync-6",
+      "seed": 167,
+      "pieceCount": 6,
+      "category": "success",
+      "hook": "只能点一次，能同步吗？",
+      "requestedInput": {
+        "x": -6.759028255835402,
+        "y": -66.0559204545484,
+        "time": 0.8022376236598938
+      },
+      "canvasPoint": {
+        "x": 187.4569244664877,
+        "y": 344.06159277272394
+      },
+      "expectedOutcome": "success",
+      "actualOutcome": "success",
+      "rawStartSeconds": 63.737700583,
+      "rawEndSeconds": 71.239348625,
+      "requestedDurationSeconds": 7.5,
+      "firstClick": {
+        "type": "first_click",
+        "at": 1786362813791,
+        "data": {
+          "seed": 167,
+          "x": -6.799647441277138,
+          "y": -66.45289861238918,
+          "time": 0.8083333333333329
+        }
+      },
+      "levelResult": {
+        "type": "level_result",
+        "at": 1786362817085,
+        "data": {
+          "seed": 167,
+          "outcome": "success",
+          "click": {
+            "x": -6.799647441277138,
+            "y": -66.45289861238918,
+            "time": 0.8083333333333329
+          },
+          "triggerOrder": [
+            4,
+            3,
+            5,
+            0,
+            2,
+            1
+          ],
+          "spread": 0,
+          "resultTime": 4.099999999999993
+        }
+      },
+      "triggerOrder": [
+        4,
+        3,
+        5,
+        0,
+        2,
+        1
+      ]
+    },
+    {
+      "id": "06-sync-3",
+      "seed": 223,
+      "pieceCount": 3,
+      "category": "success",
+      "hook": "只能点一次，能同步吗？",
+      "requestedInput": {
+        "x": -10.522462599520908,
+        "y": -53.04126004901532,
+        "time": 0.6159853755217045
+      },
+      "canvasPoint": {
+        "x": 183.25693173893467,
+        "y": 358.5859537852989
+      },
+      "expectedOutcome": "success",
+      "actualOutcome": "success",
+      "rawStartSeconds": 75.28555287500001,
+      "rawEndSeconds": 82.788022541,
+      "requestedDurationSeconds": 7.5,
+      "firstClick": {
+        "type": "first_click",
+        "at": 1786362825153,
+        "data": {
+          "seed": 223,
+          "x": -10.585702382601225,
+          "y": -53.36000479184662,
+          "time": 0.6166666666666669
+        }
+      },
+      "levelResult": {
+        "type": "level_result",
+        "at": 1786362828718,
+        "data": {
+          "seed": 223,
+          "outcome": "success",
+          "click": {
+            "x": -10.585702382601225,
+            "y": -53.36000479184662,
+            "time": 0.6166666666666669
+          },
+          "triggerOrder": [
+            0,
+            1,
+            2
+          ],
+          "spread": 0.016666666666667496,
+          "resultTime": 4.191666666666665
+        }
+      },
+      "triggerOrder": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "07-sync-5",
+      "seed": 293,
+      "pieceCount": 5,
+      "category": "success",
+      "hook": "只能点一次，能同步吗？",
+      "requestedInput": {
+        "x": -48.179640450171,
+        "y": -5.857187571119584,
+        "time": 0.8518211000738666
+      },
+      "canvasPoint": {
+        "x": 141.23152125760916,
+        "y": 411.24337867063053
+      },
+      "expectedOutcome": "success",
+      "actualOutcome": "success",
+      "rawStartSeconds": 86.92585904100001,
+      "rawEndSeconds": 94.425930958,
+      "requestedDurationSeconds": 7.5,
+      "firstClick": {
+        "type": "first_click",
+        "at": 1786362837037,
+        "data": {
+          "seed": 293,
+          "x": -48.469181244189926,
+          "y": -5.892387903653634,
+          "time": 0.866666666666666
+        }
+      },
+      "levelResult": {
+        "type": "level_result",
+        "at": 1786362840260,
+        "data": {
+          "seed": 293,
+          "outcome": "success",
+          "click": {
+            "x": -48.469181244189926,
+            "y": -5.892387903653634,
+            "time": 0.866666666666666
+          },
+          "triggerOrder": [
+            0,
+            4,
+            1,
+            2,
+            3
+          ],
+          "spread": 0.008333333333333748,
+          "resultTime": 4.083333333333326
+        }
+      },
+      "triggerOrder": [
+        0,
+        4,
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "allEvents": [
+    {
+      "type": "level_start",
+      "at": 1786362749589,
+      "data": {
+        "seed": 17,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362749692,
+      "data": {
+        "seed": 17,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0.10833333333333332
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362749692,
+      "data": {
+        "seed": 17,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362750310,
+      "data": {
+        "seed": 17,
+        "x": -7.042064116551326,
+        "y": -35.21033543806807,
+        "time": 0.6000000000000003
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362754331,
+      "data": {
+        "seed": 17,
+        "outcome": "timeout",
+        "click": {
+          "x": -7.042064116551326,
+          "y": -35.21033543806807,
+          "time": 0.6000000000000003
+        },
+        "triggerOrder": [
+          0,
+          1,
+          3,
+          2
+        ],
+        "spread": 0.8083333333333647,
+        "resultTime": 4.641666666666687
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362757202,
+      "data": {
+        "seed": 17,
+        "reason": "manual",
+        "priorOutcome": "timeout",
+        "priorTime": 4.641666666666687
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362757202,
+      "data": {
+        "seed": 17,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362757266,
+      "data": {
+        "seed": 17,
+        "x": 10.06009945502648,
+        "y": -0.0000011003934174115016,
+        "time": 0.05833333333333333
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362760489,
+      "data": {
+        "seed": 17,
+        "outcome": "timeout",
+        "click": {
+          "x": 10.06009945502648,
+          "y": -0.0000011003934174115016,
+          "time": 0.05833333333333333
+        },
+        "triggerOrder": [
+          2,
+          1,
+          3,
+          0
+        ],
+        "spread": null,
+        "resultTime": 3.2833333333333243
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362764715,
+      "data": {
+        "seed": 17,
+        "reason": "manual",
+        "priorOutcome": "timeout",
+        "priorTime": 3.2833333333333243
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362764715,
+      "data": {
+        "seed": 17,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362765266,
+      "data": {
+        "seed": 17,
+        "x": 10.06009945502648,
+        "y": -0.0000011003934174115016,
+        "time": 0.5500000000000005
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362769155,
+      "data": {
+        "seed": 17,
+        "outcome": "success",
+        "click": {
+          "x": 10.06009945502648,
+          "y": -0.0000011003934174115016,
+          "time": 0.5500000000000005
+        },
+        "triggerOrder": [
+          1,
+          2,
+          3,
+          0
+        ],
+        "spread": 0.8000000000000207,
+        "resultTime": 4.441666666666677
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362772223,
+      "data": {
+        "seed": 17,
+        "reason": "manual",
+        "priorOutcome": "success",
+        "priorTime": 4.441666666666677
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362772223,
+      "data": {
+        "seed": 17,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362772841,
+      "data": {
+        "seed": 17,
+        "x": 37.9064908394447,
+        "y": -64.9688254869901,
+        "time": 0.6166666666666669
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362776572,
+      "data": {
+        "seed": 17,
+        "outcome": "success",
+        "click": {
+          "x": 37.9064908394447,
+          "y": -64.9688254869901,
+          "time": 0.6166666666666669
+        },
+        "triggerOrder": [
+          1,
+          0,
+          2,
+          3
+        ],
+        "spread": 0.008333333333333748,
+        "resultTime": 4.350000000000006
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362779734,
+      "data": {
+        "fromSeed": 17,
+        "toSeed": 29
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362779734,
+      "data": {
+        "seed": 29,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362779741,
+      "data": {
+        "seed": 29,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362779741,
+      "data": {
+        "seed": 29,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362780273,
+      "data": {
+        "seed": 29,
+        "x": -2.4224061232346754,
+        "y": -51.83304383204531,
+        "time": 0.5250000000000006
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362783781,
+      "data": {
+        "seed": 29,
+        "outcome": "success",
+        "click": {
+          "x": -2.4224061232346754,
+          "y": -51.83304383204531,
+          "time": 0.5250000000000006
+        },
+        "triggerOrder": [
+          1,
+          2,
+          0,
+          3
+        ],
+        "spread": 0.016666666666667496,
+        "resultTime": 4.041666666666657
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362783787,
+      "data": {
+        "fromSeed": 29,
+        "toSeed": 43
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362783787,
+      "data": {
+        "seed": 43,
+        "pieceCount": 6,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362783794,
+      "data": {
+        "seed": 43,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362783794,
+      "data": {
+        "seed": 43,
+        "pieceCount": 6,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362784666,
+      "data": {
+        "seed": 43,
+        "x": -7.896767212794377,
+        "y": 81.8196432407086,
+        "time": 0.8749999999999993
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362788222,
+      "data": {
+        "seed": 43,
+        "outcome": "success",
+        "click": {
+          "x": -7.896767212794377,
+          "y": 81.8196432407086,
+          "time": 0.8749999999999993
+        },
+        "triggerOrder": [
+          5,
+          0,
+          4,
+          1,
+          2,
+          3
+        ],
+        "spread": 0.016666666666667496,
+        "resultTime": 4.433333333333343
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362788227,
+      "data": {
+        "fromSeed": 43,
+        "toSeed": 61
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362788227,
+      "data": {
+        "seed": 61,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362788241,
+      "data": {
+        "seed": 61,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0.008333333333333333
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362788241,
+      "data": {
+        "seed": 61,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362788882,
+      "data": {
+        "seed": 61,
+        "x": 52.59780241892888,
+        "y": 49.71368386195259,
+        "time": 0.6416666666666668
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362792397,
+      "data": {
+        "seed": 61,
+        "outcome": "success",
+        "click": {
+          "x": 52.59780241892888,
+          "y": 49.71368386195259,
+          "time": 0.6416666666666668
+        },
+        "triggerOrder": [
+          3,
+          0,
+          1,
+          2
+        ],
+        "spread": 0.016666666666667496,
+        "resultTime": 4.15833333333333
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362792402,
+      "data": {
+        "fromSeed": 61,
+        "toSeed": 79
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362792402,
+      "data": {
+        "seed": 79,
+        "pieceCount": 6,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362792408,
+      "data": {
+        "seed": 79,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362792408,
+      "data": {
+        "seed": 79,
+        "pieceCount": 6,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362792933,
+      "data": {
+        "seed": 79,
+        "x": -14.934759873610277,
+        "y": 73.54308898632341,
+        "time": 0.5250000000000006
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362796389,
+      "data": {
+        "seed": 79,
+        "outcome": "success",
+        "click": {
+          "x": -14.934759873610277,
+          "y": 73.54308898632341,
+          "time": 0.5250000000000006
+        },
+        "triggerOrder": [
+          1,
+          2,
+          0,
+          5,
+          3,
+          4
+        ],
+        "spread": 0.016666666666666607,
+        "resultTime": 3.9749999999999885
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362796393,
+      "data": {
+        "fromSeed": 79,
+        "toSeed": 97
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362796393,
+      "data": {
+        "seed": 97,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362796397,
+      "data": {
+        "seed": 97,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362796397,
+      "data": {
+        "seed": 97,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362797124,
+      "data": {
+        "seed": 97,
+        "x": -56.4798666880681,
+        "y": 57.09941460536079,
+        "time": 0.7333333333333332
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362800664,
+      "data": {
+        "seed": 97,
+        "outcome": "success",
+        "click": {
+          "x": -56.4798666880681,
+          "y": 57.09941460536079,
+          "time": 0.7333333333333332
+        },
+        "triggerOrder": [
+          2,
+          1,
+          3,
+          0
+        ],
+        "spread": 0.016666666666667496,
+        "resultTime": 4.266666666666668
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362800671,
+      "data": {
+        "fromSeed": 97,
+        "toSeed": 113
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362800671,
+      "data": {
+        "seed": 113,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362800687,
+      "data": {
+        "seed": 113,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0.016666666666666666
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362800687,
+      "data": {
+        "seed": 113,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362801258,
+      "data": {
+        "seed": 113,
+        "x": -14.59417434839102,
+        "y": -59.464217332693224,
+        "time": 0.5750000000000004
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362804931,
+      "data": {
+        "seed": 113,
+        "outcome": "success",
+        "click": {
+          "x": -14.59417434839102,
+          "y": -59.464217332693224,
+          "time": 0.5750000000000004
+        },
+        "triggerOrder": [
+          3,
+          2,
+          0,
+          1
+        ],
+        "spread": 0.008333333333333748,
+        "resultTime": 4.250000000000001
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362804935,
+      "data": {
+        "fromSeed": 113,
+        "toSeed": 131
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362804935,
+      "data": {
+        "seed": 131,
+        "pieceCount": 6,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362804940,
+      "data": {
+        "seed": 131,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362804941,
+      "data": {
+        "seed": 131,
+        "pieceCount": 6,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362805590,
+      "data": {
+        "seed": 131,
+        "x": -50.770461559295654,
+        "y": 4.7735606707059155,
+        "time": 0.6500000000000001
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362808839,
+      "data": {
+        "seed": 131,
+        "outcome": "success",
+        "click": {
+          "x": -50.770461559295654,
+          "y": 4.7735606707059155,
+          "time": 0.6500000000000001
+        },
+        "triggerOrder": [
+          2,
+          1,
+          3,
+          0,
+          4,
+          5
+        ],
+        "spread": 0.016666666666666607,
+        "resultTime": 3.899999999999989
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362808843,
+      "data": {
+        "fromSeed": 131,
+        "toSeed": 149
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362808843,
+      "data": {
+        "seed": 149,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362808847,
+      "data": {
+        "seed": 149,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362808847,
+      "data": {
+        "seed": 149,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362809532,
+      "data": {
+        "seed": 149,
+        "x": 69.00699322040265,
+        "y": 35.237375406118566,
+        "time": 0.6833333333333333
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362812972,
+      "data": {
+        "seed": 149,
+        "outcome": "success",
+        "click": {
+          "x": 69.00699322040265,
+          "y": 35.237375406118566,
+          "time": 0.6833333333333333
+        },
+        "triggerOrder": [
+          0,
+          1,
+          3,
+          2
+        ],
+        "spread": 0.016666666666667496,
+        "resultTime": 4.124999999999995
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362812977,
+      "data": {
+        "fromSeed": 149,
+        "toSeed": 167
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362812977,
+      "data": {
+        "seed": 167,
+        "pieceCount": 6,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362812984,
+      "data": {
+        "seed": 167,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0.008333333333333333
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362812984,
+      "data": {
+        "seed": 167,
+        "pieceCount": 6,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362813791,
+      "data": {
+        "seed": 167,
+        "x": -6.799647441277138,
+        "y": -66.45289861238918,
+        "time": 0.8083333333333329
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362817085,
+      "data": {
+        "seed": 167,
+        "outcome": "success",
+        "click": {
+          "x": -6.799647441277138,
+          "y": -66.45289861238918,
+          "time": 0.8083333333333329
+        },
+        "triggerOrder": [
+          4,
+          3,
+          5,
+          0,
+          2,
+          1
+        ],
+        "spread": 0,
+        "resultTime": 4.099999999999993
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362820493,
+      "data": {
+        "fromSeed": 167,
+        "toSeed": 191
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362820493,
+      "data": {
+        "seed": 191,
+        "pieceCount": 6,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362820500,
+      "data": {
+        "seed": 191,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362820500,
+      "data": {
+        "seed": 191,
+        "pieceCount": 6,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362821245,
+      "data": {
+        "seed": 191,
+        "x": -55.673443354093116,
+        "y": 23.523164529066793,
+        "time": 0.7499999999999998
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362824518,
+      "data": {
+        "seed": 191,
+        "outcome": "success",
+        "click": {
+          "x": -55.673443354093116,
+          "y": 23.523164529066793,
+          "time": 0.7499999999999998
+        },
+        "triggerOrder": [
+          5,
+          4,
+          0,
+          1,
+          2,
+          3
+        ],
+        "spread": 0.016666666666667496,
+        "resultTime": 4.02499999999999
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362824524,
+      "data": {
+        "fromSeed": 191,
+        "toSeed": 223
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362824524,
+      "data": {
+        "seed": 223,
+        "pieceCount": 3,
+        "generationAttempt": 1
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362824532,
+      "data": {
+        "seed": 223,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362824532,
+      "data": {
+        "seed": 223,
+        "pieceCount": 3,
+        "generationAttempt": 1
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362825153,
+      "data": {
+        "seed": 223,
+        "x": -10.585702382601225,
+        "y": -53.36000479184662,
+        "time": 0.6166666666666669
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362828718,
+      "data": {
+        "seed": 223,
+        "outcome": "success",
+        "click": {
+          "x": -10.585702382601225,
+          "y": -53.36000479184662,
+          "time": 0.6166666666666669
+        },
+        "triggerOrder": [
+          0,
+          1,
+          2
+        ],
+        "spread": 0.016666666666667496,
+        "resultTime": 4.191666666666665
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362832042,
+      "data": {
+        "fromSeed": 223,
+        "toSeed": 257
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362832042,
+      "data": {
+        "seed": 257,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362832053,
+      "data": {
+        "seed": 257,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0.008333333333333333
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362832054,
+      "data": {
+        "seed": 257,
+        "pieceCount": 4,
+        "generationAttempt": 0
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362832704,
+      "data": {
+        "seed": 257,
+        "x": -6.372653521024264,
+        "y": 76.22202433072607,
+        "time": 0.6500000000000001
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362836160,
+      "data": {
+        "seed": 257,
+        "outcome": "success",
+        "click": {
+          "x": -6.372653521024264,
+          "y": 76.22202433072607,
+          "time": 0.6500000000000001
+        },
+        "triggerOrder": [
+          3,
+          0,
+          2,
+          1
+        ],
+        "spread": 0.008333333333333748,
+        "resultTime": 4.108333333333327
+      }
+    },
+    {
+      "type": "next_level",
+      "at": 1786362836165,
+      "data": {
+        "fromSeed": 257,
+        "toSeed": 293
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362836166,
+      "data": {
+        "seed": 293,
+        "pieceCount": 5,
+        "generationAttempt": 1
+      }
+    },
+    {
+      "type": "retry",
+      "at": 1786362836172,
+      "data": {
+        "seed": 293,
+        "reason": "manual",
+        "priorOutcome": "playing",
+        "priorTime": 0
+      }
+    },
+    {
+      "type": "level_start",
+      "at": 1786362836172,
+      "data": {
+        "seed": 293,
+        "pieceCount": 5,
+        "generationAttempt": 1
+      }
+    },
+    {
+      "type": "first_click",
+      "at": 1786362837037,
+      "data": {
+        "seed": 293,
+        "x": -48.469181244189926,
+        "y": -5.892387903653634,
+        "time": 0.866666666666666
+      }
+    },
+    {
+      "type": "level_result",
+      "at": 1786362840260,
+      "data": {
+        "seed": 293,
+        "outcome": "success",
+        "click": {
+          "x": -48.469181244189926,
+          "y": -5.892387903653634,
+          "time": 0.866666666666666
+        },
+        "triggerOrder": [
+          0,
+          4,
+          1,
+          2,
+          3
+        ],
+        "spread": 0.008333333333333748,
+        "resultTime": 4.083333333333326
+      }
+    }
+  ]
+}

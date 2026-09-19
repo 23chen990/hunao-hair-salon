@@ -1,0 +1,10 @@
+{
+  "name": "phase-ripple-douyin-minigame",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-reporter=spec tests/*.test.mjs",
+    "build": "node tools/build.mjs",
+    "package:rc": "node tools/package-rc.mjs"
+  }
+}

@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 2,
+  "prototype": "breathing-bridge-growing-bridge",
+  "question": "Can a player grow a bridge while auto-running, then release pressure to make readable jump-like landings across distinct action grammars?",
+  "parameters": {
+    "seedCount": 300,
+    "robustnessTrials": 25,
+    "randomRuns": 10000,
+    "stabilityRuns": 10000,
+    "sessionCount": 180,
+    "fixedDt": 0.016666666666666666,
+    "nodeCount": 10
+  },
+  "solver": {
+    "numerator": 300,
+    "denominator": 300,
+    "failures": []
+  },
+  "frameRateReplay": {
+    "numerator": 300,
+    "denominator": 300,
+    "renderFps": [
+      30,
+      60,
+      120
+    ],
+    "replayCount": 900
+  },
+  "robustness": {
+    "numerator": 300,
+    "denominator": 300,
+    "trialSuccesses": 7456,
+    "trialDenominator": 7500,
+    "trialsPerSeed": 25,
+    "minSeedRate": 0.8,
+    "medianSeedRate": 1
+  },
+  "random": {
+    "numerator": 2677,
+    "denominator": 10000,
+    "rate": 0.2677,
+    "requiredRange": [
+      0.1,
+      0.3
+    ]
+  },
+  "stability": {
+    "numerator": 10000,
+    "denominator": 10000,
+    "anomalyCount": 0,
+    "anomalySamples": [],
+    "checks": [
+      "finite",
+      "energyCap",
+      "bounds",
+      "sweptObstacleCCD",
+      "nodeOffsetCap"
+    ]
+  },
+  "performance": {
+    "unit": "milliseconds per simulated round on development host",
+    "denominator": 10000,
+    "p50Ms": 2.027958,
+    "p95Ms": 2.498208,
+    "maxMs": 19.905292
+  },
+  "checkpoint": {
+    "numerator": 300,
+    "denominator": 300,
+    "requiredProgressRange": [
+      0.45,
+      0.7
+    ],
+    "requiredPrefixSeconds": 20
+  },
+  "freeRestart": {
+    "numerator": 300,
+    "denominator": 300
+  },
+  "archetypes": {
+    "names": [
+      "long-reach",
+      "short-pulse",
+      "high-lift",
+      "late-drop",
+      "zigzag-rhythm"
+    ],
+    "sample": [
+      {
+        "seed": 1,
+        "archetype": "long-reach",
+        "signature": "long-reach|bridge-and-roll:72:25:585|bridge-and-roll:118:25:590|bridge-and-roll:98:16:580|bridge-and-roll:121:16:588|bridge-and-roll:123:16:591|bridge-and-roll:84:18:602|bridge-and-roll:121:16:584|bridge-and-roll:119:16:579|bridge-and-roll:128:25:588"
+      },
+      {
+        "seed": 2,
+        "archetype": "short-pulse",
+        "signature": "short-pulse|bridge-and-roll:44:33:593|bridge-and-roll:45:23:583|bridge-and-roll:59:29:587|bridge-and-roll:35:22:583|hop:62:35:584|hop:45:40:579|hop:58:43:601|bridge-and-roll:40:21:600|bridge-and-roll:47:27:602"
+      },
+      {
+        "seed": 3,
+        "archetype": "high-lift",
+        "signature": "high-lift|charge-and-hop:44:38:590|charge-and-hop:49:48:580|charge-and-hop:61:56:595|charge-and-hop:68:56:578|charge-and-hop:54:56:595|bridge-and-roll:57:30:589|charge-and-hop:66:56:592|charge-and-hop:57:56:589|charge-and-hop:64:56:587"
+      },
+      {
+        "seed": 4,
+        "archetype": "late-drop",
+        "signature": "late-drop|bridge-and-roll:71:16:590|bridge-and-roll:102:16:587|bridge-and-roll:98:16:590|bridge-and-roll:100:24:597|bridge-and-roll:92:21:578|bridge-and-roll:81:17:588|bridge-and-roll:81:26:591|bridge-and-roll:101:32:582|bridge-and-roll:79:29:578"
+      },
+      {
+        "seed": 5,
+        "archetype": "zigzag-rhythm",
+        "signature": "zigzag-rhythm|bridge-and-roll:86:32:558|bridge-and-roll:126:24:624|bridge-and-roll:51:25:551|bridge-and-roll:148:19:611|hop:56:40:546|hop:115:40:615|hop:90:38:563|bridge-and-roll:101:31:625|bridge-and-roll:51:26:565"
+      },
+      {
+        "seed": 6,
+        "archetype": "long-reach",
+        "signature": "long-reach|bridge-and-roll:72:16:580|bridge-and-roll:131:16:587|bridge-and-roll:75:22:590|bridge-and-roll:85:25:601|bridge-and-roll:135:25:601|bridge-and-roll:107:16:598|bridge-and-roll:109:24:599|bridge-and-roll:109:23:583|bridge-and-roll:95:16:585"
+      },
+      {
+        "seed": 7,
+        "archetype": "short-pulse",
+        "signature": "short-pulse|hop:36:36:588|hop:41:37:582|hop:50:36:591|hop:64:40:581|hop:43:38:600|hop:53:53:600|bridge-and-roll:35:28:578|bridge-and-roll:57:30:601|hop:55:36:581"
+      },
+      {
+        "seed": 8,
+        "archetype": "high-lift",
+        "signature": "high-lift|charge-and-hop:66:56:589|bridge-and-roll:52:32:580|charge-and-hop:51:56:580|charge-and-hop:44:45:597|charge-and-hop:60:55:590|charge-and-hop:75:54:590|charge-and-hop:71:47:580|charge-and-hop:81:43:589|charge-and-hop:81:56:591"
+      },
+      {
+        "seed": 9,
+        "archetype": "late-drop",
+        "signature": "late-drop|bridge-and-roll:96:16:595|bridge-and-roll:100:16:592|bridge-and-roll:101:16:587|bridge-and-roll:99:23:583|bridge-and-roll:71:31:591|bridge-and-roll:58:28:580|bridge-and-roll:70:21:601|bridge-and-roll:63:21:597|bridge-and-roll:85:27:582"
+      },
+      {
+        "seed": 10,
+        "archetype": "zigzag-rhythm",
+        "signature": "zigzag-rhythm|hop:92:36:555|hop:96:40:609|hop:68:39:563|bridge-and-roll:102:34:618|bridge-and-roll:66:30:556|bridge-and-roll:96:22:609|bridge-and-roll:73:32:548|hop:163:36:609|bridge-and-roll:90:19:561"
+      }
+    ]
+  },
+  "iaa": {
+    "sessions": 180,
+    "rounds": 1498,
+    "durationSeconds": {
+      "numeratorWithin40To70": 1029,
+      "denominator": 1498,
+      "median": 65.823344,
+      "p10": 52.054351,
+      "min": 42.000821,
+      "max": 87.712314
+    },
+    "firstThreeInterstitialEligible": 0,
+    "interstitialRules": {
+      "rounds": [
+        4,
+        8
+      ],
+      "settlementOnly": true,
+      "cooldownSeconds": 300,
+      "requiredMinimumSeconds": 180
+    },
+    "interstitialPerSession": {
+      "denominator": 180,
+      "one": 180,
+      "two": 0,
+      "mode": 1,
+      "median": 1,
+      "max": 1
+    },
+    "pressureGhost": {
+      "numerator": 479,
+      "denominator": 1498,
+      "rate": 0.3197596795727637,
+      "rule": "same segment failed twice"
+    },
+    "checkpointContinue": {
+      "numerator": 262,
+      "denominator": 1498,
+      "rate": 0.17489986648865152,
+      "rule": "fell after checkpoint"
+    },
+    "rewardEntriesPerSession": {
+      "denominator": 180,
+      "max": 2,
+      "median": 2,
+      "cap": 2
+    }
+  },
+  "pauseResume": {
+    "denominator": 1,
+    "frozenTickNumerator": 1,
+    "hashContractNumerator": 1,
+    "inputReleasedNumerator": 1,
+    "countdownLossSeconds": 0,
+    "networkRequests": 0
+  },
+  "noAdsRegression": {
+    "fullPlayableNumerator": 300,
+    "fullPlayableDenominator": 300,
+    "restartNumerator": 300,
+    "restartDenominator": 300,
+    "networkRequests": 0
+  },
+  "policy": {
+    "adsEnabled": false,
+    "networkAllowed": false,
+    "requestBudget": 0,
+    "actualRequests": 0
+  },
+  "hardGates": [
+    {
+      "id": "solver-and-cross-fps",
+      "pass": true
+    },
+    {
+      "id": "timing-noise-robustness",
+      "pass": true
+    },
+    {
+      "id": "random-control-band",
+      "pass": true
+    },
+    {
+      "id": "stability-10000",
+      "pass": true
+    },
+    {
+      "id": "checkpoint-and-free-restart",
+      "pass": true
+    },
+    {
+      "id": "iaa-local-structure",
+      "pass": true
+    },
+    {
+      "id": "ads-off-pause-resume",
+      "pass": true
+    }
+  ],
+  "overallPass": true,
+  "productDecision": "UNDECIDED_REQUIRES_UNCOACHED_HUMAN",
+  "allowedConclusion": "核心机器验证通过不等于产品 KEEP；需陌生真人判断。",
+  "assumptions": [
+    "A level is a deterministic sequence of nine bridge-growth/jump segments, not one jittered obstacle.",
+    "Holding grows the membrane front; releasing pressure creates the jump pulse.",
+    "The random baseline alternates unplanned hold/release windows and is not a claim about human behavior.",
+    "Performance values are development-host proxies."
+  ],
+  "execution": {
+    "startedAt": "2026-08-11T09:44:42.238Z",
+    "finishedAt": "2026-08-11T09:45:30.664Z",
+    "host": "darwin-arm64",
+    "node": "v24.14.0",
+    "command": "npm run audit"
+  }
+}

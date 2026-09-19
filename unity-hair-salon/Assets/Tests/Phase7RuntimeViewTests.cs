@@ -69,6 +69,40 @@ public sealed class Phase7RuntimeViewTests
         DestroyRuntimeObjects();
     }
 
+    [Test]
+    public void PausingDuringManualBlowCancelsTheHeldService()
+    {
+        var root = new GameObject("Phase7 Manual Blow Pause Runtime");
+        var demo = root.AddComponent<SalonDemo>();
+        demo.FlowSettings.InitialCustomerCount = 0;
+        Invoke(demo, "Start");
+        Invoke(demo, "StartBusinessDay");
+        var game = (SalonGameModel)Field(demo, "_game");
+        CustomerModel customer = game.Spawn(901, new[] { ServiceType.Dry });
+        game.Tick(SalonGameModel.EnteringSeconds + .01f);
+        Assert.IsTrue(game.Assign(customer, 1));
+        game.Tick(SalonGameModel.MovingToStationSeconds + .01f);
+        Assert.IsTrue(game.StartManualBlow(customer));
+
+        var viewObject = new GameObject("Paused Manual Blow Customer");
+        var view = viewObject.AddComponent<SalonCustomerView>();
+        view.Customer = customer;
+        SetField(demo, "_activeServiceView", view);
+        SetField(demo, "_activeServicePointer", 55);
+
+        Invoke(demo, "TogglePause");
+
+        Assert.IsTrue(Controller(demo).IsPaused);
+        Assert.IsFalse(customer.ManualBlowHolding,
+            "A paused game must not resume a manual dryer after the pointer has been released by the pause UI.");
+        Assert.AreEqual(ActiveServiceAction.None, customer.ActiveServiceAction);
+        Assert.IsNull(Field(demo, "_activeServiceView"));
+
+        UnityEngine.Object.DestroyImmediate(viewObject);
+        UnityEngine.Object.DestroyImmediate(root);
+        DestroyRuntimeObjects();
+    }
+
     private static BusinessDayController Controller(SalonDemo demo)
     {
         return (BusinessDayController)Field(demo, "_dayController");
@@ -79,6 +113,13 @@ public sealed class Phase7RuntimeViewTests
         return target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(target);
     }
 
+    private static void SetField(object target, string name, object value)
+    {
+        FieldInfo field = target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.IsNotNull(field, name);
+        field.SetValue(target, value);
+    }
+
     private static void Invoke(object target, string name)
     {
         target.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic)?.Invoke(target, null);
@@ -87,7 +128,9 @@ public sealed class Phase7RuntimeViewTests
     private static void DestroyRuntimeObjects()
     {
         foreach (GameObject item in UnityEngine.Object.FindObjectsByType<GameObject>())
-            if (item != null && item.name != "Phase7 Runtime" && item.name != "Phase7 Flow Runtime")
+            if (item != null && item.name != "Phase7 Runtime" && item.name != "Phase7 Flow Runtime" &&
+                item.name != "Phase7 Manual Blow Pause Runtime" &&
+                item.name != "Paused Manual Blow Customer")
                 UnityEngine.Object.DestroyImmediate(item);
     }
 }

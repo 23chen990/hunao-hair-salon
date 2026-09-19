@@ -3,6 +3,7 @@ using HairSalon;
 using NUnit.Framework;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.UI;
 
 public sealed class Phase6RuntimeViewTests
 {
@@ -167,5 +168,53 @@ public sealed class Phase6RuntimeViewTests
         Assert.AreEqual(.5f, view.GetServiceProgress(0), .001f);
         Assert.AreEqual(string.Empty, (string)getCountdown.Invoke(view, new object[] { 0 }));
         Object.DestroyImmediate(root);
+    }
+
+    [Test]
+    public void PurchasedAutoBlowStand_IsStartedByTheRealDryerToolbarButton()
+    {
+        var game = new SalonGameModel();
+        CustomerModel customer = game.Spawn(301, new List<ServiceType> { ServiceType.Dry });
+        game.Tick(SalonGameModel.EnteringSeconds + .01f);
+        Assert.IsTrue(game.Assign(customer, 1));
+        game.Tick(SalonGameModel.MovingToStationSeconds + .01f);
+        game.SetFirstDayCompleteForDebug(true);
+        Assert.IsTrue(game.PurchaseAutoBlowStand());
+        game.SelectCustomer(customer);
+
+        var root = new GameObject("Auto blow toolbar test");
+        var demo = root.AddComponent<SalonDemo>();
+        SetPrivate(demo, "_game", game);
+        SetPrivate(demo, "_haircutInteraction", new HaircutInteraction(new HaircutConfig()));
+        var toolbar = new GameObject("Workstation Tools", typeof(RectTransform));
+        toolbar.transform.SetParent(root.transform, false);
+        var labelObject = new GameObject("Focus Label", typeof(RectTransform), typeof(Text));
+        labelObject.transform.SetParent(toolbar.transform, false);
+        SetPrivate(demo, "_toolBar", toolbar);
+        SetPrivate(demo, "_focusLabel", labelObject.GetComponent<Text>());
+
+        InvokePrivate(demo, "BuildToolBar", customer);
+        Button dryerButton = toolbar.transform.Find("Tool 4").GetComponent<Button>();
+        dryerButton.onClick.Invoke();
+
+        Assert.IsTrue(customer.AutoBlowRunning,
+            "The purchased stand must replace the manual dryer click with the automatic action.");
+        Object.DestroyImmediate(root);
+    }
+
+    private static void SetPrivate(object target, string fieldName, object value)
+    {
+        FieldInfo field = target.GetType().GetField(fieldName,
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.IsNotNull(field, fieldName);
+        field.SetValue(target, value);
+    }
+
+    private static object InvokePrivate(object target, string methodName, params object[] args)
+    {
+        MethodInfo method = target.GetType().GetMethod(methodName,
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.IsNotNull(method, methodName);
+        return method.Invoke(target, args);
     }
 }

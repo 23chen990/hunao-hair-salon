@@ -86,7 +86,7 @@ public sealed class Phase6FinalAcceptanceTests
     }
 
     [Test]
-    public void CompletedRubbingIsImmediatelyReadyForAStandardRinse()
+    public void UnattendedFoamEscalatesIntoAnAccidentAndSlowsTheRinse()
     {
         var game = NewGame();
         CustomerModel customer = SpawnServing(game, 4, ServiceType.Wash, 0);
@@ -94,12 +94,22 @@ public sealed class Phase6FinalAcceptanceTests
         game.TickActiveServiceAction(customer, game.ServiceConfig.RinseDuration);
         Assert.IsTrue(game.BeginWashAction(customer, WashAction.Shampoo));
         game.TickActiveServiceAction(customer, game.ServiceConfig.ShampooDuration);
-        game.Tick(13f);
 
+        // 在理想窗口内回来：不该有任何事故。
+        game.Tick(game.ServiceConfig.FoamOptimalStart + .01f);
         Assert.AreEqual("None", Field(customer, "AccidentSeverity").ToString());
         Assert.AreEqual(WashStage.Foamy, customer.WashStage);
+        Assert.IsTrue(game.IsWashFoamReadyToRinse(customer));
+
+        // 放着不管：泡沫迟到先升到 Minor，再升到 Moderate。
+        game.Tick(game.ServiceConfig.FoamMinorLateThreshold + .01f);
+        Assert.AreEqual("Minor", Field(customer, "AccidentSeverity").ToString());
+        game.Tick(game.ServiceConfig.FoamModerateLateThreshold + .01f);
+        Assert.AreEqual("Moderate", Field(customer, "AccidentSeverity").ToString());
+
+        // 事故不是单纯扣分：冲洗被延长，玩家需要额外处理时间。
         Assert.IsTrue(game.BeginWashAction(customer, WashAction.Shower));
-        Assert.AreEqual(game.ServiceConfig.RinseDuration, customer.ActiveServiceDuration);
+        Assert.AreEqual(game.ServiceConfig.OverdueRinseDuration, customer.ActiveServiceDuration);
     }
 
     [Test]

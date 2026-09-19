@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>滚筒成章｜抛弃式灰盒</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="title-row">
+      <div>
+        <h1>滚筒成章</h1>
+        <p>拖动任一圆柄；每跨一格，接触面转一面并落印。</p>
+      </div>
+      <output id="seed-label" aria-label="当前种子">#1</output>
+    </header>
+
+    <canvas id="game" aria-label="8 乘 12 滚筒落印灰盒"></canvas>
+
+    <section class="controls" aria-label="灰盒控制">
+      <div class="control-row face-row">
+        <button id="face-prev" type="button" aria-label="上一个起始接触面">−</button>
+        <output id="face-label">起始面 1 / 8</output>
+        <button id="face-next" type="button" aria-label="下一个起始接触面">＋</button>
+      </div>
+      <div class="control-row three">
+        <button id="undo" type="button">撤销整趟</button>
+        <button id="restart" type="button">免费重开</button>
+        <button id="next-seed" type="button">下一 seed</button>
+      </div>
+      <div class="control-row two">
+        <button id="hint" type="button">接触弧（本地）</button>
+        <button id="simulate-ad" type="button">模拟冻结</button>
+      </div>
+    </section>
+
+    <details class="debug-log">
+      <summary>真实事件日志 / 回放状态</summary>
+      <pre id="event-log"></pre>
+    </details>
+  </main>
+  <script type="module" src="./src/app.mjs"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "prototype": "breathing-bridge",
+  "dependencyCount": 0,
+  "adsEnabled": false,
+  "networkAllowed": false,
+  "files": [
+    {
+      "path": "index.html",
+      "bytes": 1273,
+      "sha256": "cb940be0e64f7187fd8240631630abebcc945d83d8e62c6da201b4fb2800e260"
+    },
+    {
+      "path": "styles.css",
+      "bytes": 2657,
+      "sha256": "6eda90290c1181c77a222c129c1960bd400ad53f6328e73b61fd38adf2e72c49"
+    },
+    {
+      "path": "src/browser.mjs",
+      "bytes": 8302,
+      "sha256": "2616fba56dbba9759941983e64484180234f5c4dbffce3b24d0aec6e737040dc"
+    },
+    {
+      "path": "src/sim.mjs",
+      "bytes": 35978,
+      "sha256": "e680ce28eb8058ff99a4b43e2e73eb9b85b9b11fe789eca7ee86f46b76d4343d"
+    },
+    {
+      "path": "src/growing-bridge.mjs",
+      "bytes": 39034,
+      "sha256": "22cfd171a825fbfa77ffd3196b127ef14250d25d2a4a974ec9881f26e0b1b0a1"
+    }
+  ]
+}

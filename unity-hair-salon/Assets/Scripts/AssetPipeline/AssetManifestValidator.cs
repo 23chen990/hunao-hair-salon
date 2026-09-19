@@ -22,7 +22,9 @@ namespace HairSalon.AssetPipeline
         DuplicateAnchor,
         MissingRequiredAnchor,
         InvalidAnchor,
-        MissingSorting
+        MissingSorting,
+        InvalidCandidateValidation,
+        InvalidWorldScale
     }
 
     public readonly struct AssetValidationIssue
@@ -61,7 +63,7 @@ namespace HairSalon.AssetPipeline
         private static readonly HashSet<string> Types = new HashSet<string>(StringComparer.Ordinal)
             { "furniture", "character", "ui-sprite", "effect", "prop" };
         private static readonly HashSet<string> Statuses = new HashSet<string>(StringComparer.Ordinal)
-            { "draft", "review", "approved", "deprecated" };
+            { "draft", "candidate", "NEEDS-REVIEW", "review", "approved", "deprecated" };
         private static readonly HashSet<string> Directions = new HashSet<string>(StringComparer.Ordinal)
             { "back-wall", "right-wall", "free" };
 
@@ -95,6 +97,9 @@ namespace HairSalon.AssetPipeline
                 else if (!resolver.Exists(asset.ResourcePath)) Add(issues, AssetValidationCode.ResourceNotFound, asset, $"Resource not found: {asset.ResourcePath}");
                 if (!Statuses.Contains(asset.Status ?? string.Empty)) Add(issues, AssetValidationCode.InvalidStatus, asset, $"Unsupported status: {asset.Status}");
                 ValidateDirections(asset, issues);
+                if (!string.IsNullOrWhiteSpace(asset.DefaultOrientation) &&
+                    (asset.Directions == null || !asset.Directions.Contains(asset.DefaultOrientation)))
+                    Add(issues, AssetValidationCode.IllegalDirection, asset, "Default orientation must be one of the available directions.");
                 if (!Finite(asset.Pivot) || asset.Pivot.x < 0f || asset.Pivot.x > 1f || asset.Pivot.y < 0f || asset.Pivot.y > 1f)
                     Add(issues, AssetValidationCode.InvalidPivot, asset, "Pivot must be normalized between 0 and 1.");
                 ValidateArea(asset, asset.Footprint, AssetValidationCode.InvalidFootprint, "Footprint", issues);
@@ -103,6 +108,8 @@ namespace HairSalon.AssetPipeline
                 ValidateAnchors(asset, issues);
                 if (asset.Sorting == null || string.IsNullOrWhiteSpace(asset.Sorting.Layer) || !Finite(asset.Sorting.DepthOffset))
                     Add(issues, AssetValidationCode.MissingSorting, asset, "Sorting layer/order/depth information is required.");
+                ValidateCandidatePlacement(asset, issues);
+                ValidateWorldScale(asset, issues);
             }
             return issues;
         }
@@ -127,7 +134,14 @@ namespace HairSalon.AssetPipeline
 
         private static void ValidateShadow(AssetDefinition asset, List<AssetValidationIssue> issues)
         {
-            if (asset.Shadow == null || !asset.Shadow.Enabled) return;
+            if (asset.Shadow == null) return;
+            if (!string.IsNullOrWhiteSpace(asset.Shadow.Mode) &&
+                asset.Shadow.Mode != "baked" && asset.Shadow.Mode != "procedural" && asset.Shadow.Mode != "none")
+            {
+                Add(issues, AssetValidationCode.InvalidShadow, asset, "Shadow mode must be baked, procedural or none.");
+                return;
+            }
+            if (!asset.Shadow.UsesProceduralShadow) return;
             if (!Finite(asset.Shadow.Size) || !Finite(asset.Shadow.Offset) ||
                 asset.Shadow.Size.x <= 0f || asset.Shadow.Size.y <= 0f ||
                 !Finite(asset.Shadow.Opacity) || asset.Shadow.Opacity < 0f || asset.Shadow.Opacity > 1f ||
@@ -156,6 +170,43 @@ namespace HairSalon.AssetPipeline
                 if (string.IsNullOrWhiteSpace(required) || !configured.Contains(required))
                     Add(issues, AssetValidationCode.MissingRequiredAnchor, asset, $"Missing required anchor: {required}");
         }
+
+        private static void ValidateCandidatePlacement(AssetDefinition asset, List<AssetValidationIssue> issues)
+        {
+            if (!RequiresCandidateValidation(asset)) return;
+            AssetCandidateValidation candidate = asset.CandidateValidation;
+            bool validRole = candidate != null && (candidate.Role == "ordinary" || candidate.Role == "service-station");
+            bool validCommon = validRole && Finite(candidate.WorldPosition) && Finite(candidate.HideRadius) &&
+                               candidate.HideRadius >= 0f && candidate.HideObjectNames != null;
+            bool validService = candidate?.Role != "service-station" ||
+                                (!string.IsNullOrWhiteSpace(candidate.ServiceType) && candidate.StationId >= 0 &&
+                                 !string.IsNullOrWhiteSpace(candidate.TargetObjectName));
+            if (!validCommon || !validService)
+                Add(issues, AssetValidationCode.InvalidCandidateValidation, asset,
+                    "Candidate needs a valid role, scene position and optional service-station binding.");
+        }
+
+        private static void ValidateWorldScale(AssetDefinition asset, List<AssetValidationIssue> issues)
+        {
+            if (asset.ImportProfile == "authored-3d")
+            {
+                if (!Finite(asset.DesiredWorldSize) || asset.DesiredWorldSize.x <= 0f ||
+                    asset.DesiredWorldSize.y <= 0f || asset.ScalePolicy != "explicit")
+                    Add(issues, AssetValidationCode.InvalidWorldScale, asset,
+                        "Authored models require explicit positive world dimensions.");
+                return;
+            }
+            if (!RequiresCandidateValidation(asset)) return;
+            bool validSize = Finite(asset.DesiredWorldSize) && asset.DesiredWorldSize.x > 0f && asset.DesiredWorldSize.y > 0f;
+            bool validPolicy = asset.ScalePolicy == "footprint-isometric" || asset.ScalePolicy == "explicit";
+            bool validProfile = asset.ImportProfile == "production-2.5d-rendered";
+            if (!validSize || !validPolicy || !validProfile)
+                Add(issues, AssetValidationCode.InvalidWorldScale, asset,
+                    "Candidate needs one positive DesiredWorldSize, a supported ScalePolicy and the production 2.5D import profile.");
+        }
+
+        private static bool RequiresCandidateValidation(AssetDefinition asset)
+            => asset.Status == "candidate" || asset.Status == "NEEDS-REVIEW";
 
         private static bool Finite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
         private static bool Finite(Vector2 value) => Finite(value.x) && Finite(value.y);

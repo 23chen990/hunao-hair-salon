@@ -1,0 +1,12 @@
+{
+  "name": "roller-imprint-throwaway",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:core": "node --test test/model.test.mjs",
+    "audit": "node tools/audit.mjs",
+    "build": "node tools/build.mjs",
+    "smoke": "node tools/browser-smoke.mjs"
+  }
+}

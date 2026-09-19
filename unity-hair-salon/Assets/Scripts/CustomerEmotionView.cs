@@ -57,7 +57,7 @@ public sealed class CustomerEmotionView : MonoBehaviour
         symbolObject.transform.SetParent(_badge.transform, false);
         _reactionSymbol = symbolObject.GetComponent<Text>();
         _reactionSymbol.rectTransform.sizeDelta = new Vector2(58f, 58f);
-        _reactionSymbol.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _reactionSymbol.font = SalonUiFactory.GetPackagedUiFont();
         _reactionSymbol.fontSize = 34;
         _reactionSymbol.fontStyle = FontStyle.Bold;
         _reactionSymbol.alignment = TextAnchor.MiddleCenter;
@@ -70,6 +70,8 @@ public sealed class CustomerEmotionView : MonoBehaviour
     public void Refresh()
     {
         if (_customer == null || _badge == null) return;
+        if (!isActiveAndEnabled)
+            StopWrongServicePulse();
         bool hasFoamBurst = _customer.HasUnresolvedFoamBurstEvent;
         bool hasReaction = _customer.ReactionKind != CustomerReactionKind.None
             && _customer.ReactionRemaining > 0f;
@@ -181,8 +183,11 @@ public sealed class CustomerEmotionView : MonoBehaviour
 
     private void StartWrongServicePulse()
     {
-        if (_badge == null) return;
-        if (_wrongServicePulse != null) StopCoroutine(_wrongServicePulse);
+        // Refresh can arrive while the owning customer UI is hidden by a seat/selection
+        // transition. Unity rejects StartCoroutine on an inactive hierarchy; leave the
+        // reaction visible and let the next active refresh start the pulse instead.
+        if (_badge == null || !isActiveAndEnabled || !_badge.activeInHierarchy) return;
+        if (_wrongServicePulse != null) return;
         _wrongServicePulse = StartCoroutine(WrongServicePulse());
     }
 

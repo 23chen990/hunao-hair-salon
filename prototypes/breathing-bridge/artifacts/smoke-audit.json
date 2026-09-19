@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "prototype": "breathing-bridge",
+  "status": "ENVIRONMENT_UNVERIFIED",
+  "attempts": 2,
+  "error": "Error: local server failed: listen EPERM: operation not permitted 127.0.0.1\n    at Server.<anonymous> (file:///Users/kker/Documents/ChatGPT/game2/prototypes/breathing-bridge/scripts/smoke.mjs:66:44)\n    at Object.onceWrapper (node:events:623:26)\n    at Server.emit (node:events:508:28)\n    at emitErrorNT (node:net:1984:8)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)"
+}

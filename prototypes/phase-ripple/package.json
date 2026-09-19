@@ -1,0 +1,10 @@
+{
+  "name": "phase-ripple-greybox",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-reporter=spec tests/*.test.ts",
+    "build": "node tools/build.mjs",
+    "validate": "node tools/validate.ts"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "packageName": "phase-ripple-local-test",
+  "createdDate": "2026-08-10",
+  "purpose": "Local-only playable, accepted media, and evidence bundle before the independent studio brand account user gate",
+  "releaseAuthorized": false,
+  "futureReleaseOrder": [
+    "01-sync-4",
+    "02-near-miss-4",
+    "03-early-click-4",
+    "04-later-success-4",
+    "06-sync-3",
+    "07-sync-5",
+    "05-sync-6"
+  ],
+  "integrity": {
+    "algorithm": "SHA-256",
+    "checksumFile": "SHA256SUMS",
+    "policy": "SHA256SUMS covers every package file except itself, including manifest.json. manifest.json enumerates every payload file and names both metadata files, avoiding a circular self-hash."
+  },
+  "metadataFiles": [
+    "manifest.json",
+    "SHA256SUMS"
+  ],
+  "omittedRawEvidence": {
+    "path": "prototypes/phase-ripple-skinned/validation/raw/phase-ripple-continuous.webm",
+    "sha256": "6a0eb8a5d2beb84e8fb00fd29db8c12468d515fdae19b7be2f84d6725f82e9ba",
+    "reason": "Continuous raw WebM is retained in the source repository and intentionally not duplicated in this local package."
+  },
+  "files": [
+    {"path":"BOUNDARIES.md","bytes":1606,"sha256":"4ac3894c0142861e26da014c8a0f2c830ae6bb117c744065291a5c73f4413484","source":"generated for this local test package"},
+    {"path":"FUTURE_RELEASE_ORDER.md","bytes":1764,"sha256":"10dce72f10f0188582a35dce85e5144ed0f7bf0f1e3ff3ebf0033d5854a1a517","source":"derived from prototypes/phase-ripple-skinned/validation/README.md"},
+    {"path":"LOCAL_TEST_CHECKLIST.md","bytes":2347,"sha256":"f42af6b44992ad8831c347f985eb50e9201dea1f3c6c750868dfd267b66d2ec1","source":"generated for this local test package"},
+    {"path":"START_HERE.md","bytes":2591,"sha256":"75994a4eea8f24c25391621774a5497a1c542fa0238e76c47c051d1c621c74b5","source":"generated for this local test package"},
+
+    {"path":"evidence/ASSET_PROVENANCE.md","bytes":2857,"sha256":"32848a0f9b2d18f539bc86a69b765b451e37f6aad3bf52e85b0df674f2fbc059","source":"prototypes/phase-ripple-skinned/ASSET_PROVENANCE.md"},
+    {"path":"evidence/LOCAL_VERIFICATION.md","bytes":2502,"sha256":"590c1fb6e930ac7fcc91c545794ed3814958f1e9baa3933a4ab9a4aaba57542b","source":"generated from independent local reruns on 2026-08-10"},
+    {"path":"evidence/PACKAGE_PROVENANCE.md","bytes":1768,"sha256":"809c48dca60ac74518fa8375e7bfd3d4d2dc457821799e576d63b1ebee14e6c0","source":"generated for this local test package"},
+    {"path":"evidence/capture-run.json","bytes":32000,"sha256":"d6baf7bbb6bbf5c068efe2eee9d1eb260f619574227f4d5667c88e3b8f0df7dc","source":"prototypes/phase-ripple-skinned/validation/evidence/capture-run.json","transformation":"absolute local paths normalized only"},
+    {"path":"evidence/media-report.json","bytes":6010,"sha256":"a1aa05cbae216f3c8225ea5a17d684ca9a1dc8b07a5d41d303a859ea41559516","source":"prototypes/phase-ripple-skinned/validation/evidence/media-report.json","transformation":"absolute local paths normalized only"},
+    {"path":"evidence/verification-report.json","bytes":5103,"sha256":"562a260486e5e279cd0bd86eb5d3855d8cb37cbea6e15613dce95399b89b6693","source":"prototypes/phase-ripple-skinned/validation/evidence/verification-report.json","transformation":"absolute local paths and local tool path normalized only"},
+
+    {"path":"media/01-sync-4.mp4","bytes":150555,"sha256":"146aa670bf822c381aef51b5bfbfc5ac1062a5fff21c2c4b87c90c28ced78b4b","source":"prototypes/phase-ripple-skinned/validation/videos/01-sync-4.mp4"},
+    {"path":"media/02-near-miss-4.mp4","bytes":275379,"sha256":"c893366c858e421a44b361f602bf9f27952bc8a8695919c20bf285a2126103e5","source":"prototypes/phase-ripple-skinned/validation/videos/02-near-miss-4.mp4"},
+    {"path":"media/03-early-click-4.mp4","bytes":151100,"sha256":"fcd21b4e79590604b6cbec59a8c0b6acd0155d5548afffa5349c102222cda532","source":"prototypes/phase-ripple-skinned/validation/videos/03-early-click-4.mp4"},
+    {"path":"media/04-later-success-4.mp4","bytes":177285,"sha256":"63946d7f91ea746c82f4349540a1dbb68d1c85e02bb45279e60b10f130eeeff1","source":"prototypes/phase-ripple-skinned/validation/videos/04-later-success-4.mp4"},
+    {"path":"media/05-sync-6.mp4","bytes":175231,"sha256":"45e102a6b1a1cdec3c6c7178a6fe8ac2e20700e441def6ead1b01d7c325877c9","source":"prototypes/phase-ripple-skinned/validation/videos/05-sync-6.mp4"},
+    {"path":"media/06-sync-3.mp4","bytes":147697,"sha256":"912e48b301470ac0e3190b0ec5a9e4fd717c414d9a8aea674af429bd57478c45","source":"prototypes/phase-ripple-skinned/validation/videos/06-sync-3.mp4"},
+    {"path":"media/07-sync-5.mp4","bytes":198017,"sha256":"ee245eafd0f1ee723b42e46f6a296d09f7bdfb1ed4155f0e122911cf52d5897a","source":"prototypes/phase-ripple-skinned/validation/videos/07-sync-5.mp4"},
+    {"path":"media/phase-ripple-contact-cover.png","bytes":369479,"sha256":"93d579a712393664fff5cc5db07941f8639cf4c5c7a69200cfdc05f9c8840232","source":"prototypes/phase-ripple-skinned/validation/cover/phase-ripple-contact-cover.png"},
+
+    {"path":"playable/assets/piece-outbound.png","bytes":1184585,"sha256":"38fe945da92e7d1dcdd2fadc524767d2dd89215e4ca10b620336b973d6c430cf","source":"prototypes/phase-ripple-skinned/assets/piece-outbound.png"},
+    {"path":"playable/assets/piece-returned.png","bytes":1045598,"sha256":"2383ff5bf49c12c3b786e369994f2789b9b8d846a85c0acd994431145a0a25c7","source":"prototypes/phase-ripple-skinned/assets/piece-returned.png"},
+    {"path":"playable/assets/tabletop-board.png","bytes":2419512,"sha256":"ba3087bd8aa9a0df248cb89a39948cfd160cce0e83e87a6f700744eed4bdba8f","source":"prototypes/phase-ripple-skinned/assets/tabletop-board.png"},
+    {"path":"playable/dist/app.js","bytes":4380,"sha256":"fe31169638be22ed4c9fc5ce49ff4b83037e3d0f4544d246a6fce6b1ff267912","source":"isolated rebuild of prototypes/phase-ripple-skinned/src/app.ts"},
+    {"path":"playable/dist/events.js","bytes":1391,"sha256":"914c40db95a7c3e85143cf150efebce1b8bc232e8d04b62cffc8108e44f47808","source":"isolated rebuild of prototypes/phase-ripple-skinned/src/events.ts"},
+    {"path":"playable/dist/generator.js","bytes":4958,"sha256":"ee458bd3de279ffa96c1444a16be04e654f436af54b24190b2cc11654c2cf792","source":"isolated rebuild of prototypes/phase-ripple-skinned/src/generator.ts"},
+    {"path":"playable/dist/layout.js","bytes":1307,"sha256":"9852b6657a62c881b8ad336a8bf9790e526a379506df80030b1e5107414bad67","source":"isolated rebuild of prototypes/phase-ripple-skinned/src/layout.ts"},
+    {"path":"playable/dist/levels.js","bytes":150,"sha256":"91ea968cbd1f2e0c740244e3b4da8aff42a197eb75f0f47a2dc30a56577a286f","source":"isolated rebuild of prototypes/phase-ripple-skinned/src/levels.ts"},
+    {"path":"playable/dist/prng.js","bytes":1200,"sha256":"434d3ce14d8ec963793c4e8599c247b71957dcd34e76bc637ad216d9c2202042","source":"isolated rebuild of prototypes/phase-ripple-skinned/src/prng.ts"},
+    {"path":"playable/dist/render.js","bytes":7371,"sha256":"a533c06c2a20f55227bd4a21f816ee4c744d48a1c562f9c7e0f7bbaad2120a3f","source":"isolated rebuild of prototypes/phase-ripple-skinned/src/render.ts"},
+    {"path":"playable/dist/rules.js","bytes":8122,"sha256":"ba58b19f84c5b75dda90b3ef3004579c9f3f27369176819c254354c24a41bf21","source":"isolated rebuild of prototypes/phase-ripple-skinned/src/rules.ts"},
+    {"path":"playable/dist/session.js","bytes":3359,"sha256":"258a57a8f4256527ecec8e4472eb6dd40fbc215dbd81d86b99a306042c113319","source":"isolated rebuild of prototypes/phase-ripple-skinned/src/session.ts"},
+    {"path":"playable/dist/solver.js","bytes":5865,"sha256":"106bfbf436b3fdab81207b96a428ebfef8f3a35f257fa4438a4c557c722de1ae","source":"isolated rebuild of prototypes/phase-ripple-skinned/src/solver.ts"},
+    {"path":"playable/dist/types.js","bytes":1,"sha256":"01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b","source":"isolated rebuild of prototypes/phase-ripple-skinned/src/types.ts"},
+    {"path":"playable/index.html","bytes":880,"sha256":"c611fdafbaf7f826304eba5735fb10d3501d2d08a009da8ba1278df499714537","source":"prototypes/phase-ripple-skinned/index.html"},
+    {"path":"playable/start_local_server.sh","bytes":482,"sha256":"2d3cddcbb62e489f666942fbb4615a810fba77632c42358b3c4ece42045c025c","source":"generated for this local test package"},
+    {"path":"playable/styles.css","bytes":1537,"sha256":"e5a05c20ba6e49868651d77ef663899aece07663c89c8c6252d522752c3a6a7a","source":"prototypes/phase-ripple-skinned/styles.css"}
+  ]
+}

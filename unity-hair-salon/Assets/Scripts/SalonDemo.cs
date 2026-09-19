@@ -11,7 +11,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public sealed class SalonDemo : MonoBehaviour
+public sealed partial class SalonDemo : MonoBehaviour
 {
     [Header("Haircut Long Press MVP")]
     public HaircutConfig HaircutSettings = new HaircutConfig();
@@ -71,6 +71,7 @@ public sealed class SalonDemo : MonoBehaviour
     private Camera _camera;
     private Canvas _hudCanvas;
     private GameObject _toolBar;
+    private RectTransform _toolButtonRoot;
     private Text _focusLabel;
     private Text _hintLabel;
     private Image _toolBarBacking;
@@ -120,6 +121,11 @@ public sealed class SalonDemo : MonoBehaviour
     private int _activeHaircutPointer = int.MinValue;
     private int _nextCustomerId;
     private float _spawnCooldown;
+    private Vector3[] _playerRoute = new Vector3[0];
+    private int _playerRouteIndex;
+    private Vector3 _playerRouteDestination;
+    private bool _hasPlayerRoute;
+
     private ActiveServiceAction _selectedServiceAction = ActiveServiceAction.None;
     private SalonCustomerView _activeServiceView;
     private int _activeServicePointer = int.MinValue;
@@ -140,6 +146,12 @@ public sealed class SalonDemo : MonoBehaviour
     {
         if (customer == null || FindCustomerView(customer) != null) return;
         CreateCustomerView(customer, EntrancePosition, Hex("C7569B"), false);
+    }
+    internal void RuntimeFocusCustomer(CustomerModel customer)
+    {
+        if (customer == null) return;
+        _game.SelectCustomer(customer);
+        ApplyFocus(customer);
     }
 
     private static readonly Vector3 EntrancePosition = new Vector3(-10.4f, 1.05f, -2.7f);
@@ -166,8 +178,7 @@ public sealed class SalonDemo : MonoBehaviour
         CustomerModel customer, bool isSelected, bool reachedDestination)
     {
         if (customer == null) return false;
-        return isSelected || reachedDestination && customer.Station >= 0 &&
-            (customer.State == CustomerState.Serving || customer.State == CustomerState.Finished);
+        return customer.State != CustomerState.Leaving && customer.State != CustomerState.Exited;
     }
 
     public static bool HasArmedToolSelection(int selectedToolIndex,
@@ -204,7 +215,8 @@ public sealed class SalonDemo : MonoBehaviour
             Stage4AHaircutRuntimeAcceptance.ConfigureFromCommandLine(DaySettings);
         _phase4A5AcceptanceOptions =
             Stage4A5FreedomRuntimeAcceptance.ConfigureFromCommandLine(DaySettings);
-        if (IsGameplayValidationMode)
+        ConfigureMobileGame();
+        if (IsNormalGameplayMode)
         {
             FlowSettings.MaxCustomers = Mathf.Max(5, FlowSettings.MaxCustomers);
             FlowSettings.WaitingCapacity = Mathf.Max(4, FlowSettings.WaitingCapacity);
@@ -228,6 +240,7 @@ public sealed class SalonDemo : MonoBehaviour
         _game.CustomerChanged += HandleCustomerChanged;
         _game.ViewChanged += HandleViewChanged;
         BuildWorld();
+        WashCraftIntegration.Apply(GameObject.Find("Fixed Salon Map").transform);
         BuildHud();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (DevelopmentDebugOverlay.IsRequested(Application.absoluteURL, System.Environment.GetCommandLineArgs()))
@@ -235,7 +248,8 @@ public sealed class SalonDemo : MonoBehaviour
         if (BrowserCoreFlowSmoke.IsRequested(Application.absoluteURL))
             gameObject.AddComponent<BrowserCoreFlowSmoke>().Initialize(this);
 #endif
-        _dayController.PrepareDay(1);
+        if (_mobileMode) RestoreMobileGame();
+        else _dayController.PrepareDay(1);
         ResetSpawnCooldown();
         ApplyOverview(true);
         if (_phase7AcceptanceOptions != null)
@@ -248,6 +262,11 @@ public sealed class SalonDemo : MonoBehaviour
         if (_phase4A5AcceptanceOptions != null)
             gameObject.AddComponent<Stage4A5FreedomRuntimeAcceptance>()
                 .Initialize(this, _phase4A5AcceptanceOptions);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        if (WashCraftIntegration.IsEnabled &&
+            (Application.absoluteURL.Contains("washCraft=detail") || Application.absoluteURL.Contains("washCraft=service")))
+            gameObject.AddComponent<WashCraftEvidence>().Initialize(this);
+#endif
         StartCoroutine(CaptureFromCommandLine());
     }
 
@@ -256,19 +275,26 @@ public sealed class SalonDemo : MonoBehaviour
         if (_game == null || _dayController == null) return;
         _dayController.Tick(Time.deltaTime, CountActiveCustomers());
         UpdateDayHud();
+        RefreshMobileDayPresentation();
+        EmitMobileEvidence();
         if (_dayController.IsPaused || _dayController.State == DayState.PreOpen ||
             _dayController.State == DayState.Result || _dayController.State == DayState.ClosedManagement) return;
         _game.Tick(Time.deltaTime);
         MaintainCustomerFlow(Time.deltaTime);
-        UpdateHaircutInteraction();
-        UpdateActiveServiceInteraction();
+        if (_mobileMode) UpdateMobilePlay(Time.deltaTime);
+        else
+        {
+            UpdateHaircutInteraction();
+            UpdateActiveServiceInteraction();
+        }
         UpdateCustomerViews();
         UpdateCamera();
-        UpdatePlayer();
+        if (!_mobileMode) UpdatePlayer();
     }
 
     public void HandleCustomerClick(CustomerModel customer)
     {
+        if (_mobileMode) return;
         if (!CanInteractWithSalon() || customer == null || customer.State == CustomerState.Leaving || customer.State == CustomerState.Exited) return;
         CancelHaircutInteraction(true);
         _game.SelectCustomer(customer);
@@ -276,6 +302,7 @@ public sealed class SalonDemo : MonoBehaviour
 
     public void HandleStationClick(int stationId)
     {
+        if (_mobileMode) return;
         if (!CanInteractWithSalon() || _game == null || _game.SelectedCustomer == null) return;
         CustomerModel customer = _game.SelectedCustomer;
         bool targetMatchesCurrentNeed = stationId >= 0 && stationId < _game.Workstations.Count &&
@@ -301,6 +328,7 @@ public sealed class SalonDemo : MonoBehaviour
 
     public void HandleCustomerDrop(CustomerModel customer, int stationId)
     {
+        if (_mobileMode) return;
         if (customer == null) return;
         _game.SelectCustomer(customer);
         HandleStationClick(stationId);
@@ -308,6 +336,7 @@ public sealed class SalonDemo : MonoBehaviour
 
     public void HandleBlankClick()
     {
+        if (_mobileMode) return;
         if (!CanInteractWithSalon() || _game == null || _game.ViewState == SalonViewState.Overview) return;
         CancelHaircutInteraction(true);
         _game.ClearFocus();
@@ -329,6 +358,7 @@ public sealed class SalonDemo : MonoBehaviour
         _camera.farClipPlane = 100f;
         _camera.transform.position = new Vector3(0f, 18f, -19f);
         _camera.transform.LookAt(new Vector3(0f, 0f, 1.4f));
+        WashCraftIntegration.ConfigureCamera(_camera);
         _overviewCameraPosition = _camera.transform.position;
         _overviewCameraRotation = _camera.transform.rotation;
         _cameraPositionTarget = _overviewCameraPosition;
@@ -373,6 +403,7 @@ public sealed class SalonDemo : MonoBehaviour
         _player = playerInstance.transform;
         _playerCharacter = playerInstance.GetComponent<HairdresserCharacter>();
         _playerTarget = _player.position;
+        ConfigureSimple2DPresentation();
     }
 
     private void BuildWalls(Transform root)
@@ -567,12 +598,26 @@ public sealed class SalonDemo : MonoBehaviour
         _hintLabel = UiLabel("", safe.transform, 23, Cream, TextAnchor.MiddleCenter, new Vector2(0f, -125f), new Vector2(620f, 46f), new Color(.11f, .12f, .14f, .82f), new Vector2(.5f, 1f));
         _hintLabel.transform.parent.gameObject.SetActive(false);
 
-        _toolBar = UiPanel("Workstation Tools", safe.transform, new Color(.19f, .13f, .10f, .96f), new Vector2(.5f, 0f), new Vector2(.5f, 0f), new Vector2(0f, 90f), new Vector2(690f, 170f));
+        _toolBar = UiPanel("Workstation Tools", safe.transform, DarkWood, new Vector2(.5f, 0f),
+            new Vector2(.5f, 0f), new Vector2(0f, 100f), new Vector2(720f, 190f));
+        SalonUiFactory.StyleRoundedPanel(_toolBar, Hex("3A2118"), new Vector2(0f, -8f));
         _toolBarBacking = _toolBar.GetComponent<Image>();
-        _focusLabel = UiLabel("", _toolBar.transform, 22, Cream, TextAnchor.MiddleCenter, new Vector2(0f, 62f), new Vector2(610f, 34f));
+        var traySurface = UiPanel("Tool Tray Surface", _toolBar.transform, Hex("F8E6C8"),
+            new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0f, -5f), new Vector2(684f, 154f));
+        SalonUiFactory.StyleRoundedPanel(traySurface);
+        SalonUiFactory.MakeClickThrough(traySurface);
+        var statusRibbon = UiPanel("Tool Status Ribbon", _toolBar.transform, Hex("68402A"),
+            new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0f, 65f), new Vector2(620f, 42f));
+        SalonUiFactory.StyleRoundedPanel(statusRibbon);
+        _focusLabel = UiLabel("", statusRibbon.transform, 22, Cream, TextAnchor.MiddleCenter,
+            Vector2.zero, new Vector2(590f, 34f));
+        _toolButtonRoot = UiRect("Tool Buttons", _toolBar.transform, Vector2.zero, Vector2.one,
+            new Vector2(.5f, .5f), Vector2.zero, Vector2.zero);
         _toolBar.SetActive(false);
+        BuildMobileHud(safe.transform);
         BuildDayStartPanel(safe.transform);
         BuildResultPanel(safe.transform);
+        BuildMobileResultControls();
         BuildShopPanel(safe.transform);
         BuildPausePanel(safe.transform);
     }
@@ -610,7 +655,7 @@ public sealed class SalonDemo : MonoBehaviour
         _topHudCoinLabel = HudText(_game.Balance.ToString("N0"), coins, 38f, Color.white,
             new Vector2(4f, 0f), new Vector2(150f, 66f));
         _coinBalanceLabel = _topHudCoinLabel;
-        HudImageButton("Add Coins", coins, "TopHUD/add-button", new Vector2(112f, 0f),
+        if (!_mobileMode) HudImageButton("Add Coins", coins, "TopHUD/add-button", new Vector2(112f, 0f),
             new Vector2(64f, 64f), ToggleShop);
         _coinHudTarget = coins;
 
@@ -646,28 +691,30 @@ public sealed class SalonDemo : MonoBehaviour
 
     private void BuildDayStartPanel(Transform parent)
     {
-        _dayStartPanel = UiPanel("Day Start Overlay", parent, new Color(.10f, .08f, .07f, .9f),
+        _dayStartPanel = UiPanel("Day Start Overlay", parent, new Color(.10f, .08f, .07f, .72f),
             Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-        _dayStartLabel = UiLabel("DAY 1\n开店准备", _dayStartPanel.transform, 58, Cream,
-            TextAnchor.MiddleCenter, new Vector2(0f, 125f), new Vector2(620f, 190f));
-        _preOpenInfoLabel = UiLabel("今日准备\n基础设备已就绪", _dayStartPanel.transform, 28, Color.white,
-            TextAnchor.MiddleCenter, new Vector2(0f, -20f), new Vector2(620f, 120f));
-        _startBusinessButton = UiButton("开始营业", _dayStartPanel.transform, new Vector2(.5f, .5f),
-            new Vector2(0f, -155f), new Vector2(330f, 82f), Teal, StartBusinessDay);
+        Transform surface = BuildModalSurface(_dayStartPanel.transform, "Opening Card", "Opening Surface",
+            new Vector2(720f, 500f), Hex("FFF0D7"));
+        _dayStartLabel = UiLabel("DAY 1\n开店准备", surface, 58, DarkWood,
+            TextAnchor.MiddleCenter, new Vector2(0f, 120f), new Vector2(620f, 170f));
+        _preOpenInfoLabel = UiLabel("今日准备\n基础设备已就绪", surface, 28, Ink,
+            TextAnchor.MiddleCenter, new Vector2(0f, -15f), new Vector2(620f, 110f));
+        _startBusinessButton = UiButton("开始营业", surface, new Vector2(.5f, .5f),
+            new Vector2(0f, -170f), new Vector2(330f, 82f), Teal, StartBusinessDay);
         _dayStartPanel.SetActive(false);
     }
 
     private void BuildResultPanel(Transform parent)
     {
-        _resultPanel = UiPanel("Day Result", parent, new Color(.10f, .08f, .07f, .97f),
+        _resultPanel = UiPanel("Day Result", parent, new Color(.10f, .08f, .07f, .78f),
             Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-        var card = UiPanel("Result Card", _resultPanel.transform, Hex("F4E7D4"),
-            new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(720f, 790f));
-        _resultTitleLabel = UiLabel("DAY 1 营业结束", card.transform, 42, Color.white,
+        Transform surface = BuildModalSurface(_resultPanel.transform, "Result Card", "Result Surface",
+            new Vector2(760f, 820f), Hex("FFF0D7"));
+        _resultTitleLabel = UiLabel("DAY 1 营业结束", surface, 42, Color.white,
             TextAnchor.MiddleCenter, new Vector2(0f, 325f), new Vector2(620f, 72f), Coral);
-        _resultSummaryLabel = UiLabel("", card.transform, 24, Ink, TextAnchor.MiddleLeft,
+        _resultSummaryLabel = UiLabel("", surface, 24, Ink, TextAnchor.MiddleLeft,
             new Vector2(0f, 5f), new Vector2(570f, 540f));
-        _resultContinueButton = UiButton("继续前往商店", card.transform, new Vector2(.5f, .5f),
+        _resultContinueButton = UiButton("继续前往商店", surface, new Vector2(.5f, .5f),
             new Vector2(0f, -335f), new Vector2(350f, 76f), Teal, ContinueToShop);
         _resultContinueButton.GetComponentInChildren<Text>().text = "进入闭店经营";
         _resultPanel.SetActive(false);
@@ -675,44 +722,58 @@ public sealed class SalonDemo : MonoBehaviour
 
     private void BuildShopPanel(Transform parent)
     {
-        _shopPanel = UiPanel("Equipment Shop", parent, new Color(.10f, .08f, .07f, .97f),
+        _shopPanel = UiPanel("Equipment Shop", parent, new Color(.10f, .08f, .07f, .78f),
             Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-        var card = UiPanel("Shop Card", _shopPanel.transform, Hex("2D292B"),
-            new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.zero, new Vector2(820f, 780f));
-        UiLabel("闭店经营", card.transform, 40, Cream, TextAnchor.MiddleCenter,
+        Transform surface = BuildModalSurface(_shopPanel.transform, "Shop Card", "Shop Surface",
+            new Vector2(860f, 820f), Hex("352A28"));
+        UiLabel("闭店经营", surface, 40, Cream, TextAnchor.MiddleCenter,
             new Vector2(0f, 330f), new Vector2(430f, 64f));
-        _managementFundsLabel = UiLabel("当前资金  0", card.transform, 25, Gold, TextAnchor.MiddleCenter,
+        _managementFundsLabel = UiLabel("当前资金  0", surface, 25, Gold, TextAnchor.MiddleCenter,
             new Vector2(0f, 282f), new Vector2(430f, 48f));
         EquipmentProductModel product = _game.AutoBlowStandProduct;
-        UiLabel("A", card.transform, 72, Gold, TextAnchor.MiddleCenter,
+        UiLabel("A", surface, 72, Gold, TextAnchor.MiddleCenter,
             new Vector2(-300f, 205f), new Vector2(120f, 120f), DarkWood);
-        UiLabel(product.DisplayName + "\n启动后自动吹发，你可以腾出手处理其他顾客。\n超时后会自动安全停机。",
-            card.transform, 25, Color.white, TextAnchor.MiddleLeft,
+        UiLabel(product.DisplayName + (_mobileMode ? "升级\n启动更快，收尾时间更宽裕。\n基础自动吹发已免费提供。" : "\n启动后自动吹发，你可以腾出手处理其他顾客。\n超时后会自动安全停机。"),
+            surface, 25, Color.white, TextAnchor.MiddleLeft,
             new Vector2(40f, 205f), new Vector2(500f, 125f));
-        _shopStatusLabel = UiLabel("", card.transform, 22, Cream, TextAnchor.MiddleCenter,
+        _shopStatusLabel = UiLabel("", surface, 22, Cream, TextAnchor.MiddleCenter,
             new Vector2(-110f, 125f), new Vector2(550f, 52f));
-        _autoBlowPurchaseButton = UiButton("购买  " + product.Price.ToString("N0") + " 金币", card.transform,
+        _autoBlowPurchaseButton = UiButton("购买  " + product.Price.ToString("N0") + " 金币", surface,
             new Vector2(.5f, .5f), new Vector2(225f, 125f), new Vector2(250f, 58f), Gold, PurchaseAutoBlowStand);
-        UiLabel("染发设备    LOCKED\n尚未达到购买条件", card.transform, 25, Color.white,
+        UiLabel(_mobileMode ? "基础吹发：已开放\n运行时可去接待其他顾客" : "染发设备    LOCKED\n尚未达到购买条件", surface, 25, Color.white,
             TextAnchor.MiddleLeft, new Vector2(0f, 10f), new Vector2(650f, 105f), Purple);
-        UiLabel("烫发设备    LOCKED\n尚未达到购买条件", card.transform, 25, Color.white,
+        UiLabel(_mobileMode ? "升级收益\n缩短启动时间，延长合适的收尾窗口" : "烫发设备    LOCKED\n尚未达到购买条件", surface, 25, Color.white,
             TextAnchor.MiddleLeft, new Vector2(0f, -115f), new Vector2(650f, 105f), DarkWood);
-        UiLabel("所有商品始终可见 · 是否购买由你决定", card.transform, 20, Cream,
+        UiLabel("所有商品始终可见 · 是否购买由你决定", surface, 20, Cream,
             TextAnchor.MiddleCenter, new Vector2(0f, -225f), new Vector2(650f, 44f));
-        UiButton("准备下一天", card.transform, new Vector2(.5f, .5f), new Vector2(0f, -305f),
+        UiButton("准备下一天", surface, new Vector2(.5f, .5f), new Vector2(0f, -305f),
             new Vector2(330f, 72f), Teal, BeginNextDay);
         _shopPanel.SetActive(false);
     }
 
     private void BuildPausePanel(Transform parent)
     {
-        _pausePanel = UiPanel("Pause Overlay", parent, new Color(.10f, .08f, .07f, .92f),
+        _pausePanel = UiPanel("Pause Overlay", parent, new Color(.10f, .08f, .07f, .72f),
             Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-        UiLabel("营业已暂停", _pausePanel.transform, 52, Cream, TextAnchor.MiddleCenter,
+        Transform surface = BuildModalSurface(_pausePanel.transform, "Pause Card", "Pause Surface",
+            new Vector2(620f, 390f), Hex("FFF0D7"));
+        UiLabel("营业已暂停", surface, 52, DarkWood, TextAnchor.MiddleCenter,
             new Vector2(0f, 90f), new Vector2(520f, 90f));
-        _resumeButton = UiButton("继续营业", _pausePanel.transform, new Vector2(.5f, .5f),
+        _resumeButton = UiButton("继续营业", surface, new Vector2(.5f, .5f),
             new Vector2(0f, -30f), new Vector2(300f, 76f), Teal, TogglePause);
         _pausePanel.SetActive(false);
+    }
+
+    private static Transform BuildModalSurface(Transform parent, string cardName, string surfaceName,
+        Vector2 cardSize, Color surfaceColor)
+    {
+        var card = UiPanel(cardName, parent, DarkWood, new Vector2(.5f, .5f), new Vector2(.5f, .5f),
+            Vector2.zero, cardSize);
+        SalonUiFactory.StyleRoundedPanel(card, Hex("321E16"), new Vector2(0f, -10f));
+        var surface = UiPanel(surfaceName, card.transform, surfaceColor, new Vector2(.5f, .5f),
+            new Vector2(.5f, .5f), Vector2.zero, cardSize - new Vector2(36f, 36f));
+        SalonUiFactory.StyleRoundedPanel(surface);
+        return surface.transform;
     }
 
     private void ToggleShop()
@@ -730,6 +791,7 @@ public sealed class SalonDemo : MonoBehaviour
     private void PurchaseAutoBlowStand()
     {
         bool purchased = _game.PurchaseAutoBlowStand();
+        if (purchased) SaveMobileCheckpoint(true);
         ShowToast(purchased ? "自动吹风支架已购买" : _game.AutoBlowStandProduct.LockReason);
         _coinBalanceLabel.text = _game.Balance.ToString("N0");
         RefreshShopPanel();
@@ -792,6 +854,7 @@ public sealed class SalonDemo : MonoBehaviour
             _dayController.FinalizeDayReputation();
             _game.SetFirstDayCompleteForDebug(true);
             ClearCustomerViews();
+            if (_mobileMode) CollectMobilePaymentsAtClose();
             ClearDayPaymentPickups();
             ShowResultPanel();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
@@ -806,6 +869,7 @@ public sealed class SalonDemo : MonoBehaviour
             if (_autoBlowPurchaseButton != null && EventSystem.current != null)
                 EventSystem.current.SetSelectedGameObject(_autoBlowPurchaseButton.gameObject);
         }
+        HandleMobileDayState(state);
         UpdateDayHud();
     }
 
@@ -870,10 +934,11 @@ public sealed class SalonDemo : MonoBehaviour
     private void StartBusinessDay()
     {
         if (_dayController == null || _dayController.State != DayState.PreOpen) return;
+        if (_mobileMode) SaveMobileCheckpoint(false);
         _dayController.StartBusiness();
     }
 
-    private bool IsGameplayValidationMode => _phase7AcceptanceOptions == null &&
+    private bool IsNormalGameplayMode => _phase7AcceptanceOptions == null &&
         _phase3WashAcceptanceOptions == null && _phase4AHaircutAcceptanceOptions == null &&
         _phase4A5AcceptanceOptions == null;
 
@@ -883,7 +948,8 @@ public sealed class SalonDemo : MonoBehaviour
                                        _dayController.State != DayState.ClosingGrace)) return;
         bool paused = !_dayController.IsPaused;
         _dayController.SetPaused(paused);
-        if (paused) CancelHaircutInteraction(false);
+        if (_mobileMode) _mobileControls?.ResetInput();
+        else if (paused) CancelHaircutInteraction(false);
         if (_pausePanel != null) _pausePanel.SetActive(paused);
         if (paused && _resumeButton != null && EventSystem.current != null)
             EventSystem.current.SetSelectedGameObject(_resumeButton.gameObject);
@@ -915,7 +981,7 @@ public sealed class SalonDemo : MonoBehaviour
     {
         int normalizedDay = Mathf.Max(1, dayNumber);
         string[] weekdays = { "周一", "周二", "周三", "周四", "周五", "周六", "周日" };
-        int calendarDay = ((normalizedDay + 10) % 31) + 1;
+        int calendarDay = _mobileMode ? normalizedDay : ((normalizedDay + 10) % 31) + 1;
         string weekday = weekdays[(normalizedDay + 1) % weekdays.Length];
         if (_weekdayLabel != null) _weekdayLabel.text = weekday;
         if (_weatherWeekdayLabel != null) _weatherWeekdayLabel.text = weekday;
@@ -993,7 +1059,7 @@ public sealed class SalonDemo : MonoBehaviour
         view.BaseScale = root.localScale;
         view.InitializeHair(hair);
         var customerUi = root.gameObject.AddComponent<CustomerUIRootView>();
-        customerUi.Initialize(customer);
+        customerUi.Initialize(customer, _camera);
         view.CustomerUI = customerUi;
         var orderDemand = customerUi.RequirementContainer.gameObject.AddComponent<OrderDemandBubbleView>();
         orderDemand.Initialize(customer, _camera);
@@ -1014,23 +1080,16 @@ public sealed class SalonDemo : MonoBehaviour
     private bool SpawnRuntimeCustomer(float entranceOffset = 0f)
     {
         int id = _nextCustomerId;
-        List<ServiceType> needs;
-        if (IsGameplayValidationMode && id < 4)
-        {
-            ServiceType validationService = id == 0 ? ServiceType.Dye :
-                id == 1 ? ServiceType.Cut : ServiceType.Perm;
-            needs = new List<ServiceType> { validationService };
-        }
-        else
-        {
-            string orderId = DaySettings.PickOrder(Random.value);
-            needs = new List<ServiceType>(SalonOrderCatalog.Get(orderId));
-        }
+        string orderId = _mobileMode
+            ? SalonMobileDayConfig.PickOrderForSpawn(DaySettings, id, _dayController.BusinessProgress)
+            : DaySettings.PickOrder(Random.value);
+        var needs = new List<ServiceType>(SalonOrderCatalog.Get(orderId));
         CustomerModel customer = _game.Spawn(id, needs);
         if (customer == null) return false;
         _nextCustomerId++;
         _dayController.Stats.RecordSpawn(customer);
-        if (customer.CurrentNeed == ServiceType.Cut && (id & 1) == 0)
+        if (_mobileMode) _game.ConfigureHaircutOrder(customer, SalonTool.Scissors);
+        else if (customer.CurrentNeed == ServiceType.Cut && (id & 1) == 0)
             _game.ConfigureHaircutOrder(customer, SalonTool.Scissors, SalonTool.ThinningShears);
         else if (customer.CurrentNeed == ServiceType.Cut)
             _game.ConfigureHaircutOrder(customer, SalonTool.Clippers);
@@ -1161,6 +1220,11 @@ public sealed class SalonDemo : MonoBehaviour
 
     private void ApplyFocus(CustomerModel customer)
     {
+        if (_mobileMode)
+        {
+            _toolBar.SetActive(false);
+            return;
+        }
         CancelHaircutInteraction(true);
         foreach (var plate in _selectionPlates.Values) plate.SetActive(false);
         if (customer.Station >= 0 && _selectionPlates.TryGetValue(customer.Station, out var selected)) selected.SetActive(true);
@@ -1177,7 +1241,7 @@ public sealed class SalonDemo : MonoBehaviour
 
     private void ApplyOverview(bool immediate)
     {
-        CancelHaircutInteraction(true);
+        if (!_mobileMode) CancelHaircutInteraction(true);
         foreach (var plate in _selectionPlates.Values) plate.SetActive(false);
         _cameraPositionTarget = _overviewCameraPosition;
         _cameraSizeTarget = 8.35f;
@@ -1197,11 +1261,18 @@ public sealed class SalonDemo : MonoBehaviour
 
     private void BuildToolBar(CustomerModel customer)
     {
-        for (int i = _toolBar.transform.childCount - 1; i >= 0; i--)
+        if (_mobileMode) return;
+        Transform buttonParent = ToolButtonParent();
+        for (int i = buttonParent.childCount - 1; i >= 0; i--)
         {
-            var child = _toolBar.transform.GetChild(i);
-            Transform focusRoot = SalonUiFactory.DirectChildRoot(_focusLabel.transform, _toolBar.transform);
-            if (child != focusRoot) SalonUiFactory.HideAndDestroy(child.gameObject);
+            var child = buttonParent.GetChild(i);
+            if (_toolButtonRoot != null)
+                SalonUiFactory.HideAndDestroy(child.gameObject);
+            else
+            {
+                Transform focusRoot = SalonUiFactory.DirectChildRoot(_focusLabel.transform, _toolBar.transform);
+                if (child != focusRoot) SalonUiFactory.HideAndDestroy(child.gameObject);
+            }
         }
         ResetToolSelection();
         if (customer.State == CustomerState.Finished)
@@ -1234,9 +1305,12 @@ public sealed class SalonDemo : MonoBehaviour
                 string stationHint = customer.IsDyeCleanupReady ? "显色完成 · 请处理染膏" :
                     customer.ProcessStage == ServiceProcessStage.DyeProcessing
                         ? "染发中 · 玩家可去服务其他顾客"
-                        : "HairStation · 请选择工具";
+                        : "理发工位 · 请选择工具";
+                bool autoBlowAwaitingCollection = customer.AutoBlowRunning ||
+                    customer.AutoBlowSafetyStopped;
                 bool canOperate = !customer.IsProcessing &&
                     customer.ActiveServiceAction == ActiveServiceAction.None &&
+                    !autoBlowAwaitingCollection &&
                     (customer.ServiceExecution == null ||
                      customer.ServiceExecution.State != ServiceExecutionState.Executing);
                 int toolIndex = 1;
@@ -1244,8 +1318,20 @@ public sealed class SalonDemo : MonoBehaviour
                 {
                     float x = -252f + (toolIndex - 1) * 126f;
                     if (stationTool == SalonTool.BlowDryer)
-                        AddServiceAction("≋", "吹风机", toolIndex, x,
-                            ActiveServiceAction.ManualBlow, canOperate, 116f);
+                    {
+                        if (_game.HasAutoBlowStand)
+                        {
+                            string label = autoBlowAwaitingCollection ? "收取吹发" : "自动吹风";
+                            AddActionButton("≋", label, toolIndex, x,
+                                () => HandleBlowAction(customer),
+                                canOperate || autoBlowAwaitingCollection, 116f);
+                        }
+                        else
+                        {
+                            AddServiceAction("≋", "吹风机", toolIndex, x,
+                                ActiveServiceAction.ManualBlow, canOperate, 116f);
+                        }
+                    }
                     else if (stationTool == SalonTool.DyeBottle && customer.IsDyeCleanupReady)
                         AddActionButton("◆", "处理染膏", toolIndex, x, () =>
                         {
@@ -1346,20 +1432,19 @@ public sealed class SalonDemo : MonoBehaviour
             RefreshToolButtons();
             RefreshTutorialPresentation();
         }, interactable, width);
-        Transform added = _toolBar.transform.Find("Tool " + index);
+        Transform added = ToolButtonParent().Find("Tool " + index);
         if (added != null) added.gameObject.AddComponent<SalonTutorialToolButton>().Action = action;
     }
 
     private void AddActionButton(string symbol, string label, int index, float x,
         UnityEngine.Events.UnityAction action, bool interactable = true, float width = 178f)
     {
-        var button = UiButton(symbol + "\n" + label, _toolBar.transform, new Vector2(.5f, .5f),
-            new Vector2(x, -17f), new Vector2(width, 105f), interactable ? Cream : new Color(.45f, .42f, .39f, .55f), action);
+        var button = UiButton(symbol + "\n" + label, ToolButtonParent(), new Vector2(.5f, .5f),
+            new Vector2(x, -24f), new Vector2(width, 114f),
+            interactable ? Cream : new Color(.45f, .42f, .39f, .55f), action);
         button.interactable = interactable;
         button.gameObject.name = "Tool " + index;
-        var text = button.GetComponentInChildren<Text>();
-        text.color = Ink;
-        text.fontSize = width < 140f ? 21 : 26;
+        StyleToolButton(button, symbol, label, width);
     }
 
     private void HandleBlowAction(CustomerModel customer)
@@ -1392,8 +1477,8 @@ public sealed class SalonDemo : MonoBehaviour
     private void AddTool(string symbol, string label, int index, float x, SalonTool? tool,
         bool interactable = true, float width = 178f)
     {
-        var button = UiButton(symbol + "\n" + label, _toolBar.transform, new Vector2(.5f, .5f),
-            new Vector2(x, -17f), new Vector2(width, 105f),
+        var button = UiButton(symbol + "\n" + label, ToolButtonParent(), new Vector2(.5f, .5f),
+            new Vector2(x, -24f), new Vector2(width, 114f),
             interactable ? Cream : new Color(.45f, .42f, .39f, .55f), () =>
         {
             if (!interactable) return;
@@ -1411,14 +1496,34 @@ public sealed class SalonDemo : MonoBehaviour
         });
         button.interactable = interactable;
         button.gameObject.name = "Tool " + index;
-        var text = button.GetComponentInChildren<Text>();
+        StyleToolButton(button, symbol, label, width);
+    }
+
+    private Transform ToolButtonParent() => _toolButtonRoot != null ? _toolButtonRoot : _toolBar.transform;
+
+    private static void StyleToolButton(Button button, string symbol, string label, float width)
+    {
+        Text text = button.GetComponentInChildren<Text>();
         text.color = Ink;
-        text.fontSize = width < 140f ? 21 : 26;
+        text.fontSize = width < 140f ? 20 : 24;
+        string iconPath = label.Contains("剪") ? "DemandBubble/tool-scissors" :
+            label.Contains("吹风") ? "DemandBubble/tool-dryer" :
+            label.Contains("染") ? "DemandBubble/tool-brush" : null;
+        if (iconPath == null)
+        {
+            text.text = (symbol == "🫧" ? "≈" : symbol) + "\n" + label;
+            return;
+        }
+        text.text = label;
+        RectTransform textRect = (RectTransform)text.transform;
+        textRect.anchoredPosition = new Vector2(0f, -34f);
+        textRect.sizeDelta = new Vector2(width - 12f, 38f);
+        HudArtwork("Tool Icon", button.transform, iconPath, new Vector2(0f, 18f), new Vector2(56f, 56f));
     }
 
     private void RefreshToolButtons()
     {
-        foreach (Transform child in _toolBar.transform)
+        foreach (Transform child in ToolButtonParent())
         {
             if (!child.name.StartsWith("Tool ")) continue;
             int index = int.Parse(child.name.Substring(5));
@@ -1476,7 +1581,7 @@ public sealed class SalonDemo : MonoBehaviour
                     pair.Value.SetActive(true);
         }
         if (_toolBar == null || !_toolBar.activeSelf) return;
-        foreach (Transform child in _toolBar.transform)
+        foreach (Transform child in ToolButtonParent())
         {
             var marker = child.GetComponent<SalonTutorialToolButton>();
             if (marker == null) continue;
@@ -1695,10 +1800,17 @@ public sealed class SalonDemo : MonoBehaviour
         }
         view.CustomerUI.SetSelected(ShouldShowCustomerStatusAtStation(
             customer, customer == _game.SelectedCustomer, view.IsAtMovementDestination));
+        if (_mobileMode)
+        {
+            bool waiting = customer.State == CustomerState.Waiting || customer.State == CustomerState.Entering;
+            view.CustomerUI.VisualRoot.localScale = Vector3.one * (waiting ? .65f : 1f);
+            view.CustomerUI.UrgencyContainer.gameObject.SetActive(!waiting);
+        }
     }
 
     public bool HandleHaircutPointerDown(SalonCustomerView view, int pointerId)
     {
+        if (_mobileMode) return false;
         if (view == null || view.Customer == null || _game == null || _haircutInteraction == null) return false;
         if (_game.ViewState != SalonViewState.WorkstationFocus || _game.SelectedCustomer != view.Customer) return false;
         var customer = view.Customer;
@@ -1896,8 +2008,9 @@ public sealed class SalonDemo : MonoBehaviour
         }
         else
         {
+            // SalonGameModel.Tick now advances every timed service action for both input
+            // paths. This method only reads the result for presentation.
             duration = Mathf.Max(.01f, customer.ActiveServiceDuration);
-            _game.TickActiveServiceAction(customer, Time.deltaTime);
         }
         if (action != ActiveServiceAction.WrapTowel && action != ActiveServiceAction.RemoveTowel)
         {
@@ -2074,6 +2187,9 @@ public sealed class SalonDemo : MonoBehaviour
 
     private void HandleCoinPileClick(CoinPileView pile)
     {
+        if (_mobileMode && (pile == null || pile.Drop == null || !CanInteractWithSalon() ||
+            !_playerServiceAnchors.TryGetValue(pile.Drop.WorkstationId, out var workAnchor) ||
+            !SalonMobileNavigation.CanReach(_player.position, workAnchor.position, 1.8f))) return;
         if (pile == null || pile.Drop == null || !_game.Payments.BeginCollection(pile.Drop.Id)) return;
         pile.PlayCollection(_hudCanvas, _coinHudTarget, _camera, () =>
         {
@@ -2135,14 +2251,19 @@ public sealed class SalonDemo : MonoBehaviour
 
     private void OnApplicationFocus(bool hasFocus)
     {
-        if (!hasFocus) CancelHaircutInteraction(false);
+        if (!hasFocus)
+        {
+            if (_mobileMode) OnApplicationPause(true);
+            else CancelHaircutInteraction(false);
+        }
     }
 
     private void OnApplicationPause(bool paused)
     {
         if (paused)
         {
-            CancelHaircutInteraction(false);
+            if (_mobileMode) _mobileControls?.ResetInput();
+            else CancelHaircutInteraction(false);
             if (_dayController != null && (_dayController.State == DayState.Business ||
                                            _dayController.State == DayState.ClosingGrace))
             {
@@ -2209,23 +2330,42 @@ public sealed class SalonDemo : MonoBehaviour
     {
         if (_player == null) return;
         Vector3 flatTarget = new Vector3(_playerTarget.x, _player.position.y, _playerTarget.z);
+        Vector3 navigationTarget = ResolvePlayerNavigationTarget(flatTarget);
         if (_playerCharacter != null)
         {
             Vector3 positionBeforeMove = _player.position;
-            _playerCharacter.MoveTowards(flatTarget, Time.deltaTime);
+            _playerCharacter.MoveTowards(navigationTarget, Time.deltaTime);
             if (IsAnyCutStationMovementBlocked(_player.position))
                 _player.position = positionBeforeMove;
             FacePlayerTowardStructuredStation(flatTarget);
             return;
         }
-        Vector3 delta = flatTarget - _player.position;
+        Vector3 delta = navigationTarget - _player.position;
         if (delta.sqrMagnitude < .015f) return;
         Vector3 fallbackPositionBeforeMove = _player.position;
-        _player.position = Vector3.MoveTowards(_player.position, flatTarget, 5.5f * Time.deltaTime);
+        _player.position = Vector3.MoveTowards(_player.position, navigationTarget, 5.5f * Time.deltaTime);
         if (IsAnyCutStationMovementBlocked(_player.position))
             _player.position = fallbackPositionBeforeMove;
         if (delta.sqrMagnitude > .01f) _player.rotation = Quaternion.Slerp(_player.rotation, Quaternion.LookRotation(delta), 1f - Mathf.Exp(-12f * Time.deltaTime));
         FacePlayerTowardStructuredStation(flatTarget);
+    }
+
+    private Vector3 ResolvePlayerNavigationTarget(Vector3 destination)
+    {
+        if (!_hasPlayerRoute || (_playerRouteDestination - destination).sqrMagnitude > .001f)
+        {
+            var layouts = new List<ResolvedCutStationLayout>();
+            foreach (CutStation station in _cutStations.Values)
+                if (station != null) layouts.Add(station.Layout);
+            _playerRoute = SalonPlayerRoute.Build(_player.position, destination, layouts);
+            _playerRouteDestination = destination;
+            _playerRouteIndex = 0;
+            _hasPlayerRoute = true;
+        }
+        while (_playerRouteIndex < _playerRoute.Length &&
+               Vector3.Distance(_player.position, _playerRoute[_playerRouteIndex]) < .04f) _playerRouteIndex++;
+        return _playerRouteIndex < _playerRoute.Length ? _playerRoute[_playerRouteIndex] :
+            _playerRoute.Length > 0 ? destination : _player.position;
     }
 
     public static bool IsCutStationMovementBlocked(ResolvedCutStationLayout layout, Vector3 worldPoint)
@@ -2429,11 +2569,13 @@ public sealed class SalonDemo : MonoBehaviour
         AssetDefinition asset;
         try { asset = AssetManifestLoader.LoadFromResources().Find(assetId); }
         catch (System.Exception) { return; }
-        if (asset?.Shadow == null || !asset.Shadow.Enabled) return;
+        if (asset == null) return;
         var anchor = new GameObject("Shadow Anchor [" + assetId + "]").transform;
         anchor.SetParent(parent, false);
         anchor.localPosition = localFloorPosition;
-        ContactShadow.Apply(anchor, asset.Shadow, asset.Sorting?.Order - 1 ?? -1);
+        if (asset.Collision != null) anchor.gameObject.AddComponent<SalonFurnitureObstacle>().Initialize(asset);
+        if (asset.Shadow != null && asset.Shadow.Enabled)
+            ContactShadow.Apply(anchor, asset.Shadow, asset.Sorting?.Order - 1 ?? -1);
     }
 
     private static GameObject SelectionPlate(Transform parent, Vector3 position, Vector3 scale)
@@ -2607,6 +2749,14 @@ public sealed class SalonDemo : MonoBehaviour
     private static TMP_FontAsset TopHudFont()
     {
         if (_topHudFont != null) return _topHudFont;
+        Font packagedUiFont = SalonUiFactory.GetPackagedUiFont();
+        if (packagedUiFont != null)
+            _topHudFont = TMP_FontAsset.CreateFontAsset(packagedUiFont);
+        if (_topHudFont != null)
+        {
+            _topHudFont.name = "Top HUD Packaged CJK Font";
+            return _topHudFont;
+        }
 #if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
         _topHudFont = TMP_FontAsset.CreateFontAsset(
             "/System/Library/Fonts/Supplemental/Arial Unicode.ttf", 0, 90, 9,
@@ -2646,7 +2796,7 @@ public sealed class SalonDemo : MonoBehaviour
         rect.anchoredPosition = position;
         rect.sizeDelta = dimensions;
         label.text = text;
-        label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        label.font = SalonUiFactory.GetPackagedUiFont();
         label.fontSize = size;
         label.color = color;
         label.alignment = alignment;
@@ -2659,7 +2809,14 @@ public sealed class SalonDemo : MonoBehaviour
     private static Button UiButton(string text, Transform parent, Vector2 anchor, Vector2 position, Vector2 size, Color color, UnityEngine.Events.UnityAction action)
     {
         var go = UiPanel("Button", parent, color, anchor, anchor, position, size);
+        SalonUiFactory.StyleRoundedPanel(go, new Color(.22f, .12f, .07f, .48f), new Vector2(0f, -4f));
         var button = go.AddComponent<Button>();
+        var colors = button.colors;
+        colors.highlightedColor = Color.Lerp(color, Color.white, .16f);
+        colors.pressedColor = Color.Lerp(color, Color.black, .12f);
+        colors.disabledColor = new Color(.45f, .42f, .39f, .55f);
+        colors.fadeDuration = .08f;
+        button.colors = colors;
         UiLabel(text, go.transform, 27, Color.white, TextAnchor.MiddleCenter, Vector2.zero, size - new Vector2(12f, 12f));
         if (action != null) button.onClick.AddListener(action);
         return button;
@@ -3277,6 +3434,32 @@ public sealed class SalonSafeArea : MonoBehaviour
 public static class SalonUiFactory
 {
     private static Sprite _circleSprite;
+    private static Sprite _roundedPanelSprite;
+    private static Font _packagedUiFont;
+
+    public static Font GetPackagedUiFont()
+    {
+        if (_packagedUiFont != null) return _packagedUiFont;
+        _packagedUiFont = Resources.Load<Font>("Fonts/NotoSansSC-UI");
+        return _packagedUiFont ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+    }
+
+    public static void StyleRoundedPanel(GameObject target, Color? outlineColor = null,
+        Vector2? outlineDistance = null)
+    {
+        if (target == null) return;
+        Image image = target.GetComponent<Image>();
+        if (image != null)
+        {
+            image.sprite = GetRoundedPanelSprite();
+            image.type = Image.Type.Sliced;
+        }
+        if (!outlineColor.HasValue) return;
+        Outline outline = target.GetComponent<Outline>() ?? target.AddComponent<Outline>();
+        outline.effectColor = outlineColor.Value;
+        outline.effectDistance = outlineDistance ?? new Vector2(0f, -5f);
+        outline.useGraphicAlpha = true;
+    }
 
     public static Transform DirectChildRoot(Transform element, Transform container)
     {
@@ -3324,6 +3507,36 @@ public static class SalonUiFactory
         return _circleSprite;
     }
 
+    public static Sprite GetRoundedPanelSprite()
+    {
+        if (_roundedPanelSprite != null) return _roundedPanelSprite;
+        const int size = 64;
+        const float radius = 13f;
+        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        texture.name = "Procedural Rounded UI Panel";
+        texture.wrapMode = TextureWrapMode.Clamp;
+        texture.filterMode = FilterMode.Bilinear;
+        var pixels = new Color[size * size];
+        Vector2 center = new Vector2((size - 1) * .5f, (size - 1) * .5f);
+        Vector2 inner = new Vector2((size - 1) * .5f - radius, (size - 1) * .5f - radius);
+        for (int y = 0; y < size; y++)
+        for (int x = 0; x < size; x++)
+        {
+            Vector2 delta = new Vector2(Mathf.Abs(x - center.x), Mathf.Abs(y - center.y));
+            Vector2 corner = new Vector2(Mathf.Max(delta.x - inner.x, 0f),
+                Mathf.Max(delta.y - inner.y, 0f));
+            float signedDistance = corner.magnitude - radius;
+            float alpha = Mathf.Clamp01(.75f - signedDistance);
+            pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
+        }
+        texture.SetPixels(pixels);
+        texture.Apply();
+        _roundedPanelSprite = Sprite.Create(texture, new Rect(0f, 0f, size, size),
+            new Vector2(.5f, .5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(16f, 16f, 16f, 16f));
+        _roundedPanelSprite.name = "Rounded UI Panel";
+        return _roundedPanelSprite;
+    }
+
     public static Text CreateLabel(string text, Transform parent, Color textColor, Color backingColor)
     {
         var panel = new GameObject("Label Backing", typeof(RectTransform), typeof(Image));
@@ -3331,6 +3544,7 @@ public static class SalonUiFactory
         var image = panel.GetComponent<Image>();
         image.color = backingColor;
         image.raycastTarget = false;
+        StyleRoundedPanel(panel);
         var textObject = new GameObject("Label", typeof(RectTransform), typeof(Text));
         textObject.transform.SetParent(panel.transform, false);
         var textRect = textObject.GetComponent<RectTransform>();
@@ -3340,6 +3554,7 @@ public static class SalonUiFactory
         var label = textObject.GetComponent<Text>();
         label.text = text;
         label.color = textColor;
+        label.font = GetPackagedUiFont();
         label.raycastTarget = false;
         return label;
     }

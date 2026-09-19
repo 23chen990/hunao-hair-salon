@@ -169,7 +169,12 @@ namespace HairSalon.ServiceArchitecture
             if (physical.ShampooState == ShampooState.ClumpedOnDryHair) blockers.Add(ExitConstraint.NoClumpedShampoo);
             if (physical.ShampooState != ShampooState.None) blockers.Add(ExitConstraint.NoShampooResidue);
             if (physical.IsTowelWrapped) blockers.Add(ExitConstraint.NoTowel);
-            if (physical.Wetness > config.ExitWetnessThreshold) blockers.Add(ExitConstraint.DryEnough);
+            // Wet hair is only an exit constraint when the order explicitly asks for Dry.
+            // Wash-only and Wash+Cut customers can leave with a wet head once all
+            // displayed milestones and the remaining physical cleanup constraints are met.
+            bool requiresDry = order.RequiredServices.Contains(RequiredService.Dry);
+            if (requiresDry && physical.Wetness > config.ExitWetnessThreshold)
+                blockers.Add(ExitConstraint.DryEnough);
             if (isMoving) blockers.Add(ExitConstraint.NotMoving);
             if (hasActiveAction) blockers.Add(ExitConstraint.NoActiveAction);
             return new ServiceExitReadinessResult(blockers);

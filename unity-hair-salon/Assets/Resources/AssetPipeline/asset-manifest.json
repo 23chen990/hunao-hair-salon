@@ -3,151 +3,1181 @@
   "BuildVersion": "0.8.0-pipeline",
   "Assets": [
     {
-      "Id": "furniture-cut-station-classic",
+      "Id": "furniture-cashier-counter",
       "Type": "furniture",
-      "ResourcePath": "builtin://furniture/cut-station-classic",
+      "ResourcePath": "builtin://furniture/cashier-counter",
       "Status": "approved",
-      "Directions": ["back-wall", "right-wall"],
-      "Pivot": { "x": 0.5, "y": 0.0 },
-      "Footprint": { "Center": { "x": 0.0, "y": -0.45 }, "Size": { "x": 2.45, "y": 2.65 } },
-      "Collision": { "Center": { "x": 0.0, "y": 0.18 }, "Size": { "x": 1.8, "y": 1.08 } },
-      "Shadow": { "Enabled": true, "Size": { "x": 2.1, "y": 1.2 }, "Offset": { "x": 0.0, "y": -0.05 }, "Opacity": 0.26, "Softness": 0.75 },
-      "InteractionAnchors": [
-        { "Id": "customer-seat", "Position": { "x": 0.0, "y": 0.52, "z": -0.42 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } },
-        { "Id": "stylist-work", "Position": { "x": 0.0, "y": 0.0, "z": -1.4 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } },
-        { "Id": "queue", "Position": { "x": 2.65, "y": 0.0, "z": -1.15 }, "Facing": { "x": -1.0, "y": 0.0, "z": 0.0 } },
-        { "Id": "tool", "Position": { "x": 1.08, "y": 1.02, "z": -0.2 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } },
-        { "Id": "service-vfx", "Position": { "x": 0.0, "y": 2.05, "z": -0.42 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } }
+      "Directions": [
+        "back-wall",
+        "right-wall"
       ],
-      "RequiredAnchors": ["customer-seat", "stylist-work", "queue", "tool", "service-vfx"],
-      "Sorting": { "Layer": "Default", "Order": 5, "DepthOffset": 0.0, "SortByWorldZ": true }
-    },
-    {
-      "Id": "furniture-wash-station",
-      "Type": "furniture",
-      "ResourcePath": "builtin://furniture/wash-station",
-      "Status": "approved",
-      "Directions": ["back-wall", "right-wall"],
-      "Pivot": { "x": 0.5, "y": 0.0 },
-      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 2.7, "y": 3.5 } },
-      "Collision": { "Center": { "x": 0.0, "y": 0.2 }, "Size": { "x": 2.2, "y": 3.05 } },
-      "Shadow": { "Enabled": true, "Size": { "x": 2.5, "y": 3.1 }, "Offset": { "x": 0.0, "y": -0.1 }, "Opacity": 0.24, "Softness": 0.8 },
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 5.6,
+          "y": 2.4
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 5.3,
+          "y": 2.2
+        }
+      },
+      "Shadow": {
+        "Enabled": true,
+        "Size": {
+          "x": 5.2,
+          "y": 2
+        },
+        "Offset": {
+          "x": 0,
+          "y": 0
+        },
+        "Opacity": 0.24,
+        "Softness": 0.82
+      },
       "InteractionAnchors": [
-        { "Id": "customer-seat", "Position": { "x": 0.0, "y": 0.6, "z": -0.2 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } },
-        { "Id": "stylist-work", "Position": { "x": -1.55, "y": 0.0, "z": -0.7 }, "Facing": { "x": 1.0, "y": 0.0, "z": 0.0 } },
-        { "Id": "queue", "Position": { "x": -2.25, "y": 0.0, "z": -1.2 }, "Facing": { "x": 1.0, "y": 0.0, "z": 0.0 } }
+        {
+          "Id": "payment",
+          "Position": {
+            "x": -0.7,
+            "y": 0,
+            "z": -1.55
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        }
       ],
-      "RequiredAnchors": ["customer-seat", "stylist-work", "queue"],
-      "Sorting": { "Layer": "Default", "Order": 4, "DepthOffset": 0.0, "SortByWorldZ": true }
-    },
-    {
-      "Id": "furniture-dryer-chair",
-      "Type": "furniture",
-      "ResourcePath": "builtin://furniture/dryer-chair",
-      "Status": "approved",
-      "Directions": ["back-wall", "right-wall"],
-      "Pivot": { "x": 0.5, "y": 0.0 },
-      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 2.4, "y": 2.4 } },
-      "Collision": { "Center": { "x": 0.0, "y": 0.1 }, "Size": { "x": 1.7, "y": 1.5 } },
-      "Shadow": { "Enabled": true, "Size": { "x": 1.9, "y": 1.5 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.25, "Softness": 0.76 },
-      "InteractionAnchors": [
-        { "Id": "customer-seat", "Position": { "x": 0.0, "y": 0.52, "z": -0.25 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } },
-        { "Id": "stylist-work", "Position": { "x": -1.45, "y": 0.0, "z": -0.55 }, "Facing": { "x": 1.0, "y": 0.0, "z": 0.0 } }
+      "RequiredAnchors": [
+        "payment"
       ],
-      "RequiredAnchors": ["customer-seat", "stylist-work"],
-      "Sorting": { "Layer": "Default", "Order": 4, "DepthOffset": 0.0, "SortByWorldZ": true }
-    },
-    {
-      "Id": "furniture-perm-station",
-      "Type": "furniture",
-      "ResourcePath": "builtin://furniture/perm-station",
-      "Status": "approved",
-      "Directions": ["back-wall", "right-wall"],
-      "Pivot": { "x": 0.5, "y": 0.0 },
-      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 2.45, "y": 2.7 } },
-      "Collision": { "Center": { "x": 0.0, "y": 0.15 }, "Size": { "x": 2.0, "y": 2.25 } },
-      "Shadow": { "Enabled": true, "Size": { "x": 2.2, "y": 2.4 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.27, "Softness": 0.78 },
-      "InteractionAnchors": [
-        { "Id": "customer-seat", "Position": { "x": 0.0, "y": 0.45, "z": -0.1 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } },
-        { "Id": "stylist-work", "Position": { "x": -1.65, "y": 0.0, "z": -0.7 }, "Facing": { "x": 1.0, "y": 0.0, "z": 0.0 } }
-      ],
-      "RequiredAnchors": ["customer-seat", "stylist-work"],
-      "Sorting": { "Layer": "Default", "Order": 4, "DepthOffset": 0.0, "SortByWorldZ": true }
-    },
-    {
-      "Id": "furniture-waiting-sofa",
-      "Type": "furniture",
-      "ResourcePath": "builtin://furniture/waiting-sofa",
-      "Status": "approved",
-      "Directions": ["back-wall", "right-wall"],
-      "Pivot": { "x": 0.5, "y": 0.0 },
-      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 5.2, "y": 1.8 } },
-      "Collision": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 5.0, "y": 1.5 } },
-      "Shadow": { "Enabled": true, "Size": { "x": 4.9, "y": 1.5 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.25, "Softness": 0.8 },
-      "InteractionAnchors": [
-        { "Id": "wait-left", "Position": { "x": -1.5, "y": 0.65, "z": -0.1 }, "Facing": { "x": 0.0, "y": 0.0, "z": -1.0 } },
-        { "Id": "wait-right", "Position": { "x": 1.5, "y": 0.65, "z": -0.1 }, "Facing": { "x": 0.0, "y": 0.0, "z": -1.0 } }
-      ],
-      "RequiredAnchors": ["wait-left", "wait-right"],
-      "Sorting": { "Layer": "Default", "Order": 3, "DepthOffset": 0.0, "SortByWorldZ": true }
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 4,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
     },
     {
       "Id": "furniture-coffee-table",
       "Type": "furniture",
       "ResourcePath": "builtin://furniture/coffee-table",
       "Status": "approved",
-      "Directions": ["back-wall", "right-wall"],
-      "Pivot": { "x": 0.5, "y": 0.0 },
-      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 3.2, "y": 1.2 } },
-      "Collision": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 3.0, "y": 1.0 } },
-      "Shadow": { "Enabled": true, "Size": { "x": 3.0, "y": 1.0 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.2, "Softness": 0.82 },
+      "Directions": [
+        "back-wall",
+        "right-wall"
+      ],
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 3.2,
+          "y": 1.2
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 3,
+          "y": 1
+        }
+      },
+      "Shadow": {
+        "Enabled": true,
+        "Size": {
+          "x": 3,
+          "y": 1
+        },
+        "Offset": {
+          "x": 0,
+          "y": 0
+        },
+        "Opacity": 0.2,
+        "Softness": 0.82
+      },
       "InteractionAnchors": [],
       "RequiredAnchors": [],
-      "Sorting": { "Layer": "Default", "Order": 2, "DepthOffset": 0.0, "SortByWorldZ": true }
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 2,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
     },
     {
-      "Id": "furniture-cashier-counter",
+      "Id": "furniture-cut-station-classic",
       "Type": "furniture",
-      "ResourcePath": "builtin://furniture/cashier-counter",
+      "ResourcePath": "builtin://furniture/cut-station-classic",
       "Status": "approved",
-      "Directions": ["back-wall", "right-wall"],
-      "Pivot": { "x": 0.5, "y": 0.0 },
-      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 5.6, "y": 2.4 } },
-      "Collision": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 5.3, "y": 2.2 } },
-      "Shadow": { "Enabled": true, "Size": { "x": 5.2, "y": 2.0 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.24, "Softness": 0.82 },
-      "InteractionAnchors": [
-        { "Id": "payment", "Position": { "x": -0.7, "y": 0.0, "z": -1.55 }, "Facing": { "x": 0.0, "y": 0.0, "z": 1.0 } }
+      "Directions": [
+        "back-wall",
+        "right-wall"
       ],
-      "RequiredAnchors": ["payment"],
-      "Sorting": { "Layer": "Default", "Order": 4, "DepthOffset": 0.0, "SortByWorldZ": true }
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": -0.45
+        },
+        "Size": {
+          "x": 2.45,
+          "y": 2.65
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0.18
+        },
+        "Size": {
+          "x": 1.8,
+          "y": 1.08
+        }
+      },
+      "Shadow": {
+        "Enabled": true,
+        "Size": {
+          "x": 2.1,
+          "y": 1.2
+        },
+        "Offset": {
+          "x": 0,
+          "y": -0.05
+        },
+        "Opacity": 0.26,
+        "Softness": 0.75
+      },
+      "InteractionAnchors": [
+        {
+          "Id": "customer-seat",
+          "Position": {
+            "x": 0,
+            "y": 0.52,
+            "z": -0.42
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        {
+          "Id": "stylist-work",
+          "Position": {
+            "x": 0,
+            "y": 0,
+            "z": -1.4
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        {
+          "Id": "queue",
+          "Position": {
+            "x": 2.65,
+            "y": 0,
+            "z": -1.15
+          },
+          "Facing": {
+            "x": -1,
+            "y": 0,
+            "z": 0
+          }
+        },
+        {
+          "Id": "tool",
+          "Position": {
+            "x": 1.08,
+            "y": 1.02,
+            "z": -0.2
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        {
+          "Id": "service-vfx",
+          "Position": {
+            "x": 0,
+            "y": 2.05,
+            "z": -0.42
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        }
+      ],
+      "RequiredAnchors": [
+        "customer-seat",
+        "stylist-work",
+        "queue",
+        "tool",
+        "service-vfx"
+      ],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 5,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
+    },
+    {
+      "Id": "furniture-dryer-chair",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/dryer-chair",
+      "Status": "approved",
+      "Directions": [
+        "back-wall",
+        "right-wall"
+      ],
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 2.4,
+          "y": 2.4
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0.1
+        },
+        "Size": {
+          "x": 1.7,
+          "y": 1.5
+        }
+      },
+      "Shadow": {
+        "Enabled": true,
+        "Size": {
+          "x": 1.9,
+          "y": 1.5
+        },
+        "Offset": {
+          "x": 0,
+          "y": 0
+        },
+        "Opacity": 0.25,
+        "Softness": 0.76
+      },
+      "InteractionAnchors": [
+        {
+          "Id": "customer-seat",
+          "Position": {
+            "x": 0,
+            "y": 0.52,
+            "z": -0.25
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        {
+          "Id": "stylist-work",
+          "Position": {
+            "x": -1.45,
+            "y": 0,
+            "z": -0.55
+          },
+          "Facing": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        }
+      ],
+      "RequiredAnchors": [
+        "customer-seat",
+        "stylist-work"
+      ],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 4,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
+    },
+    {
+      "Id": "furniture-magazine-rack-wood",
+      "DisplayName": "木质杂志架（柔和自然阴影）",
+      "Category": "magazine-rack",
+      "Type": "furniture",
+      "ResourcePath": "Imported/furniture-magazine-rack-wood",
+      "VisualPath": "Imported/furniture-magazine-rack-wood",
+      "Visuals": [
+        {
+          "Orientation": "free",
+          "ResourcePath": "Imported/furniture-magazine-rack-wood"
+        }
+      ],
+      "Status": "candidate",
+      "Directions": [
+        "free"
+      ],
+      "DefaultOrientation": "free",
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "DesiredWorldSize": {
+        "x": 2.613784,
+        "y": 2.803721
+      },
+      "ScalePolicy": "footprint-isometric",
+      "ImportProfile": "production-2.5d-rendered",
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 1.7,
+          "y": 0.75
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0.02
+        },
+        "Size": {
+          "x": 1.5,
+          "y": 0.65
+        }
+      },
+      "Shadow": {
+        "Mode": "baked",
+        "Enabled": false,
+        "Size": {
+          "x": 1.8,
+          "y": 0.8
+        },
+        "Offset": {
+          "x": 0.04,
+          "y": -0.03
+        },
+        "Opacity": 0,
+        "Softness": 0.82
+      },
+      "InteractionAnchors": [],
+      "RequiredAnchors": [],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 3,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      },
+      "CandidateValidation": {
+        "Role": "ordinary",
+        "ServiceType": "none",
+        "StationId": -1,
+        "TargetObjectName": "",
+        "WorldPosition": {
+          "x": 4,
+          "y": 0,
+          "z": 5.5
+        },
+        "HideObjectNames": [
+          "Shelf",
+          "Bottle"
+        ],
+        "HideRadius": 1.15
+      },
+      "SourceHash": "00bf361949d088a5859f675c5eeb8925aff6923539d643e5a3f68a3b3245a9cb",
+      "Source": {
+        "OriginalPath": "/Users/kker/Downloads/本页生成元素_自然阴影_整理/像素风木质杂志架与柔和阴影.png",
+        "Width": 1211,
+        "Height": 1299,
+        "Bytes": 1221440,
+        "HasAlpha": true,
+        "VisibleBounds": [
+          0,
+          0,
+          1195,
+          1299
+        ],
+        "EffectiveBounds": [
+          128,
+          5,
+          1072,
+          1291
+        ]
+      }
+    },
+    {
+      "Id": "furniture-perm-station",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/perm-station",
+      "Status": "approved",
+      "Directions": [
+        "back-wall",
+        "right-wall"
+      ],
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 2.45,
+          "y": 2.7
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0.15
+        },
+        "Size": {
+          "x": 2,
+          "y": 2.25
+        }
+      },
+      "Shadow": {
+        "Enabled": true,
+        "Size": {
+          "x": 2.2,
+          "y": 2.4
+        },
+        "Offset": {
+          "x": 0,
+          "y": 0
+        },
+        "Opacity": 0.27,
+        "Softness": 0.78
+      },
+      "InteractionAnchors": [
+        {
+          "Id": "customer-seat",
+          "Position": {
+            "x": 0,
+            "y": 0.45,
+            "z": -0.1
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        {
+          "Id": "stylist-work",
+          "Position": {
+            "x": -1.65,
+            "y": 0,
+            "z": -0.7
+          },
+          "Facing": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        }
+      ],
+      "RequiredAnchors": [
+        "customer-seat",
+        "stylist-work"
+      ],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 4,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
     },
     {
       "Id": "furniture-product-shelf",
       "Type": "furniture",
       "ResourcePath": "builtin://furniture/product-shelf",
       "Status": "approved",
-      "Directions": ["back-wall", "right-wall"],
-      "Pivot": { "x": 0.5, "y": 0.0 },
-      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 3.0, "y": 0.75 } },
-      "Collision": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 3.0, "y": 0.65 } },
-      "Shadow": { "Enabled": true, "Size": { "x": 2.8, "y": 0.65 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.2, "Softness": 0.85 },
+      "Directions": [
+        "back-wall",
+        "right-wall"
+      ],
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 3,
+          "y": 0.75
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 3,
+          "y": 0.65
+        }
+      },
+      "Shadow": {
+        "Enabled": true,
+        "Size": {
+          "x": 2.8,
+          "y": 0.65
+        },
+        "Offset": {
+          "x": 0,
+          "y": 0
+        },
+        "Opacity": 0.2,
+        "Softness": 0.85
+      },
       "InteractionAnchors": [],
       "RequiredAnchors": [],
-      "Sorting": { "Layer": "Default", "Order": 2, "DepthOffset": 0.0, "SortByWorldZ": true }
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 2,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
+    },
+    {
+      "Id": "furniture-waiting-sofa",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/waiting-sofa",
+      "Status": "approved",
+      "Directions": [
+        "back-wall",
+        "right-wall"
+      ],
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 5.2,
+          "y": 1.8
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 5,
+          "y": 1.5
+        }
+      },
+      "Shadow": {
+        "Enabled": true,
+        "Size": {
+          "x": 4.9,
+          "y": 1.5
+        },
+        "Offset": {
+          "x": 0,
+          "y": 0
+        },
+        "Opacity": 0.25,
+        "Softness": 0.8
+      },
+      "InteractionAnchors": [
+        {
+          "Id": "wait-left",
+          "Position": {
+            "x": -1.5,
+            "y": 0.65,
+            "z": -0.1
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": -1
+          }
+        },
+        {
+          "Id": "wait-right",
+          "Position": {
+            "x": 1.5,
+            "y": 0.65,
+            "z": -0.1
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": -1
+          }
+        }
+      ],
+      "RequiredAnchors": [
+        "wait-left",
+        "wait-right"
+      ],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 3,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
+    },
+    {
+      "Id": "furniture-wash-station",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/wash-station",
+      "Status": "approved",
+      "Directions": [
+        "back-wall",
+        "right-wall"
+      ],
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 2.7,
+          "y": 3.5
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0.2
+        },
+        "Size": {
+          "x": 2.2,
+          "y": 3.05
+        }
+      },
+      "Shadow": {
+        "Enabled": true,
+        "Size": {
+          "x": 2.5,
+          "y": 3.1
+        },
+        "Offset": {
+          "x": 0,
+          "y": -0.1
+        },
+        "Opacity": 0.24,
+        "Softness": 0.8
+      },
+      "InteractionAnchors": [
+        {
+          "Id": "customer-seat",
+          "Position": {
+            "x": 0,
+            "y": 0.6,
+            "z": -0.2
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        {
+          "Id": "stylist-work",
+          "Position": {
+            "x": -1.55,
+            "y": 0,
+            "z": -0.7
+          },
+          "Facing": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        },
+        {
+          "Id": "queue",
+          "Position": {
+            "x": -2.25,
+            "y": 0,
+            "z": -1.2
+          },
+          "Facing": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        }
+      ],
+      "RequiredAnchors": [
+        "customer-seat",
+        "stylist-work",
+        "queue"
+      ],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 4,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
+    },
+    {
+      "Id": "furniture-wash-station-vintage-right-wall",
+      "DisplayName": "复古洗发椅工作站（右墙向）",
+      "Category": "wash-station",
+      "Type": "furniture",
+      "ResourcePath": "Imported/furniture-wash-station-vintage-right-wall",
+      "VisualPath": "Imported/furniture-wash-station-vintage-right-wall",
+      "Visuals": [
+        {
+          "Orientation": "right-wall",
+          "ResourcePath": "Imported/furniture-wash-station-vintage-right-wall"
+        }
+      ],
+      "Status": "NEEDS-REVIEW",
+      "Directions": [
+        "right-wall"
+      ],
+      "DefaultOrientation": "right-wall",
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "DesiredWorldSize": {
+        "x": 4.57801,
+        "y": 4.57801
+      },
+      "ScalePolicy": "footprint-isometric",
+      "ImportProfile": "production-2.5d-rendered",
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 2.7,
+          "y": 3.5
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0.2
+        },
+        "Size": {
+          "x": 2.2,
+          "y": 3.05
+        }
+      },
+      "Shadow": {
+        "Mode": "baked",
+        "Enabled": false,
+        "Size": {
+          "x": 2.7,
+          "y": 3.5
+        },
+        "Offset": {
+          "x": 0,
+          "y": -0.1
+        },
+        "Opacity": 0,
+        "Softness": 0.8
+      },
+      "InteractionAnchors": [
+        {
+          "Id": "customer-seat",
+          "Position": {
+            "x": 0,
+            "y": 0.6,
+            "z": -0.2
+          },
+          "Facing": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        },
+        {
+          "Id": "stylist-work",
+          "Position": {
+            "x": -1.55,
+            "y": 0,
+            "z": -0.7
+          },
+          "Facing": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        },
+        {
+          "Id": "queue",
+          "Position": {
+            "x": -2.25,
+            "y": 0,
+            "z": -1.2
+          },
+          "Facing": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        },
+        {
+          "Id": "tool",
+          "Position": {
+            "x": 1.08,
+            "y": 1.02,
+            "z": -0.2
+          },
+          "Facing": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        },
+        {
+          "Id": "service-vfx",
+          "Position": {
+            "x": 0,
+            "y": 2.05,
+            "z": -0.42
+          },
+          "Facing": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        }
+      ],
+      "RequiredAnchors": [
+        "customer-seat",
+        "stylist-work",
+        "queue",
+        "tool",
+        "service-vfx"
+      ],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 4,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      },
+      "CandidateValidation": {
+        "Role": "service-station",
+        "ServiceType": "wash",
+        "StationId": 0,
+        "TargetObjectName": "Wash Workstation 1",
+        "WorldPosition": {
+          "x": 9,
+          "y": 0,
+          "z": -0.3
+        },
+        "HideObjectNames": [
+          "Plant Pot",
+          "Faceted Leaf"
+        ],
+        "HideRadius": 2.2
+      },
+      "SourceHash": "d0ffacbb09f847154ff08458ae54621b256742c8fc6fa33b715566401c070cbb",
+      "Source": {
+        "OriginalPath": "/Users/kker/Downloads/本页生成元素_自然阴影_整理/等距视角复古洗发椅工作站.png",
+        "Width": 1254,
+        "Height": 1254,
+        "Bytes": 1139156,
+        "HasAlpha": true,
+        "VisibleBounds": [
+          25,
+          78,
+          1238,
+          1254
+        ],
+        "EffectiveBounds": [
+          45,
+          80,
+          1216,
+          1240
+        ]
+      }
     },
     {
       "Id": "prop-potted-plant",
       "Type": "prop",
       "ResourcePath": "builtin://prop/potted-plant",
       "Status": "approved",
-      "Directions": ["free"],
-      "Pivot": { "x": 0.5, "y": 0.0 },
-      "Footprint": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 1.0, "y": 1.0 } },
-      "Collision": { "Center": { "x": 0.0, "y": 0.0 }, "Size": { "x": 0.75, "y": 0.75 } },
-      "Shadow": { "Enabled": true, "Size": { "x": 0.8, "y": 0.6 }, "Offset": { "x": 0.0, "y": 0.0 }, "Opacity": 0.22, "Softness": 0.8 },
+      "Directions": [
+        "free"
+      ],
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 1,
+          "y": 1
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 0.75,
+          "y": 0.75
+        }
+      },
+      "Shadow": {
+        "Enabled": true,
+        "Size": {
+          "x": 0.8,
+          "y": 0.6
+        },
+        "Offset": {
+          "x": 0,
+          "y": 0
+        },
+        "Opacity": 0.22,
+        "Softness": 0.8
+      },
       "InteractionAnchors": [],
       "RequiredAnchors": [],
-      "Sorting": { "Layer": "Default", "Order": 2, "DepthOffset": 0.0, "SortByWorldZ": true }
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 2,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
+    },
+    {
+      "Id": "furniture-wash-station-crafted",
+      "DisplayName": "原创建模洗发台",
+      "Category": "wash-station",
+      "Type": "furniture",
+      "ResourcePath": "Models/WashCraft/wash-station",
+      "Status": "review",
+      "Directions": [
+        "back-wall"
+      ],
+      "DefaultOrientation": "back-wall",
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "DesiredWorldSize": {
+        "x": 2.12,
+        "y": 2.3
+      },
+      "ScalePolicy": "explicit",
+      "ImportProfile": "authored-3d",
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 2.2,
+          "y": 3.05
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 2.2,
+          "y": 3.05
+        }
+      },
+      "Shadow": {
+        "Mode": "procedural",
+        "Enabled": true,
+        "Size": {
+          "x": 2.35,
+          "y": 3.15
+        },
+        "Offset": {
+          "x": 0.06,
+          "y": -0.06
+        },
+        "Opacity": 0.2,
+        "Softness": 0.85
+      },
+      "InteractionAnchors": [
+        {
+          "Id": "customer-seat",
+          "Position": {
+            "x": 0,
+            "y": 1.75,
+            "z": -0.6
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        {
+          "Id": "stylist-work",
+          "Position": {
+            "x": -1.55,
+            "y": 0,
+            "z": -0.55
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        {
+          "Id": "stylist-work-right",
+          "Position": {
+            "x": 1.55,
+            "y": 0,
+            "z": -0.55
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        {
+          "Id": "service-vfx",
+          "Position": {
+            "x": -0.18,
+            "y": 2.65,
+            "z": -0.6
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        }
+      ],
+      "RequiredAnchors": [
+        "customer-seat",
+        "stylist-work",
+        "service-vfx"
+      ],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 0,
+        "DepthOffset": 0,
+        "SortByWorldZ": false
+      }
+    },
+    {
+      "Id": "prop-salon-room-crafted",
+      "DisplayName": "木饰面与青绿砖洗发区环境",
+      "Category": "room-finish",
+      "Type": "prop",
+      "ResourcePath": "Models/WashCraft/room-finish",
+      "Status": "review",
+      "Directions": [
+        "free"
+      ],
+      "DefaultOrientation": "free",
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "DesiredWorldSize": {
+        "x": 22,
+        "y": 3.7
+      },
+      "ScalePolicy": "explicit",
+      "ImportProfile": "authored-3d",
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 22,
+          "y": 13.4
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 22,
+          "y": 13.4
+        }
+      },
+      "Shadow": {
+        "Mode": "none",
+        "Enabled": false
+      },
+      "InteractionAnchors": [],
+      "RequiredAnchors": [],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 0,
+        "DepthOffset": 0,
+        "SortByWorldZ": false
+      }
     }
   ]
 }

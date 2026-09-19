@@ -1,0 +1,104 @@
+{
+  "status": "PASS",
+  "browserPath": "/Users/kker/.cache/puppeteer/chrome-headless-shell/mac_arm-147.0.7727.57/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "baseUrl": "loopback ephemeral port",
+  "externalRequests": 0,
+  "results": [
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "pointerType": "mouse",
+      "controls": [
+        {
+          "id": "face-prev",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "face-next",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "undo",
+          "width": 119.328125,
+          "height": 48
+        },
+        {
+          "id": "restart",
+          "width": 119.328125,
+          "height": 48
+        },
+        {
+          "id": "next-seed",
+          "width": 119.34375,
+          "height": 48
+        },
+        {
+          "id": "hint",
+          "width": 182,
+          "height": 48
+        },
+        {
+          "id": "simulate-ad",
+          "width": 182,
+          "height": 48
+        }
+      ],
+      "movesToSolve": 2,
+      "wrongCellsObserved": 2,
+      "finalSeed": 2,
+      "consoleErrors": []
+    },
+    {
+      "viewport": {
+        "width": 430,
+        "height": 932
+      },
+      "pointerType": "touch",
+      "controls": [
+        {
+          "id": "face-prev",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "face-next",
+          "width": 48,
+          "height": 48
+        },
+        {
+          "id": "undo",
+          "width": 132.65625,
+          "height": 48
+        },
+        {
+          "id": "restart",
+          "width": 132.671875,
+          "height": 48
+        },
+        {
+          "id": "next-seed",
+          "width": 132.671875,
+          "height": 48
+        },
+        {
+          "id": "hint",
+          "width": 202,
+          "height": 48
+        },
+        {
+          "id": "simulate-ad",
+          "width": 202,
+          "height": 48
+        }
+      ],
+      "movesToSolve": 2,
+      "wrongCellsObserved": 2,
+      "finalSeed": 2,
+      "consoleErrors": []
+    }
+  ]
+}

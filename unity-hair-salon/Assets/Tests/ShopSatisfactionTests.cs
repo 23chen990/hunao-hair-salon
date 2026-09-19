@@ -4,6 +4,27 @@ using NUnit.Framework;
 
 public sealed class ShopSatisfactionTests
 {
+    [Test]
+    public void NewDayRestoresOpeningValueAndAllowsReusedCustomerNumbersToSettleOnce()
+    {
+        var model = new ShopSatisfactionModel();
+        var customer = new CustomerModel
+        {
+            Id = 0,
+            State = CustomerState.Leaving,
+            ServiceResult = CustomerServiceResult.HappyCompletion
+        };
+        Assert.IsTrue(model.TrySettleCustomer(customer));
+        Assert.IsFalse(model.TrySettleCustomer(customer));
+        var beginDay = typeof(ShopSatisfactionModel).GetMethod("BeginDay");
+        Assert.IsNotNull(beginDay, "Reused daily customer IDs must not share yesterday's settlement history.");
+        beginDay.Invoke(model, new object[] { 84 });
+        Assert.AreEqual(84, model.CurrentSatisfaction);
+        Assert.IsTrue(model.TrySettleCustomer(customer));
+        Assert.IsFalse(model.TrySettleCustomer(customer));
+        Assert.AreEqual(87, model.CurrentSatisfaction);
+    }
+
     [TestCase(100, SatisfactionMood.Happy, "100/100", 1f)]
     [TestCase(80, SatisfactionMood.Happy, "80/100", .8f)]
     [TestCase(79, SatisfactionMood.Neutral, "79/100", .79f)]
