@@ -237,6 +237,13 @@ class MobileDriver:
             x,z=path[0]; dx=x-point[0]; dz=z-point[1]; length=math.hypot(dx,dz)
             right=self.state['cameraRight'];forward=self.state['cameraForward']
             rl=math.hypot(right['x'],right['z']);fl=math.hypot(forward['x'],forward['z'])
+            # HairSalonDemo's approved 2D mode moves in world +Z while the
+            # rendered camera looks vertically down, so its telemetry has no
+            # useful horizontal forward projection. Keep the browser driver
+            # aligned with the runtime's actual movement basis.
+            if fl < .01:
+                forward={'x':0.0,'z':1.0}
+                fl=1.0
             # Smaller analog input near corners prevents stale telemetry from overshooting.
             speed=max(.18, min(.85, length / 4))
             self.joystick(speed*(dx*right['x']+dz*right['z'])/(length*rl),
