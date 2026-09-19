@@ -126,7 +126,8 @@ tracked tree 总计 154 MB。本轮没有删除任何正式资产。
 - 第 1 段用 `_washServiceAdapter.BeginTimedAction / CompleteTimedAction`（领域「打湿」「打泡沫」动作）
 - 后台用既有 `BackgroundTaskModel`（`Start(idealStart, idealEnd, dangerAt, now)`）
 - 事故用既有 `UpdateServiceStage` 的 `FoamOptimalStart / FoamMinorLate / FoamModerateLate` 升级分支
-- 迟到惩罚用既有 `ServiceConfig.OverdueRinseDuration`（冲洗从 2s 延长到 2.75s）
+- 迟到惩罚在领域层复用既有 `ServiceConfig.OverdueRinseDuration`（默认输入为 2.75s）；正式移动路径的
+  `FinishWashRinse` 是即时收尾 API，不会把玩家实际锁住 2.75s，因此「迟到造成可感知的额外操作时间」目前尚未实现，标记为【需要试玩验证】
 - 视觉用既有 `SalonDemo.UpdateCustomerViews` 的泡沫等待进度环（`WashStage.FoamWait` / `ReadyToRinse`
   都是 `WashStage.Foamy` 的枚举别名，因此旧 View 分支天然命中，无需改 UI）
 
@@ -259,7 +260,7 @@ t= 132s active=2 pending=1 done=17                   | 收尾
 | --- | --- | --- | --- |
 | 理想窗口 | 4s | 无 | 冲洗 2.0s |
 | Minor | 7s | `AccidentSeverity.Minor` | 满意度下降，冲洗仍 2.0s |
-| Moderate | 12s | `AccidentSeverity.Moderate` | 满意度进一步下降，**冲洗延长到 2.75s**，玩家可以明显感觉到「要多花时间」 |
+| Moderate | 12s | `AccidentSeverity.Moderate` | 满意度进一步下降；领域冲洗动作选择 `OverdueRinseDuration = 2.75s`，但正式移动 API 当前即时收尾，玩家是否能感知额外操作时间【需要试玩验证】 |
 
 既有其他事故（overcut、blow timeout）保持不变，没有动。
 
@@ -366,8 +367,11 @@ docs/development/phase-0-2/*.md                           (新增 6 份)
 | `DayOneTargetIsAchievableWithoutPerfectPlay` | Day 1 目标可达，且每单都能收到钱 |
 | `TheDirectorEasesOffInsteadOfPunishingAnOverloadedPlayer` | 玩家不作为时 Director 放慢客流而不是继续堆人 |
 
-所有 13 条只依赖 `SalonGameModel` 与 `ServiceArchitecture`，不依赖 View，
-因此**移动和桌面两条输入路径最终都必须满足同一组行为**。
+前一轮的 13 条测试只依赖 `SalonGameModel` 与 `ServiceArchitecture`，不依赖 View；本轮另加
+`WashCannotFinishRinseBeforeFoamIsReady` 锁定模型 readiness guard。它们锁定的是共享领域规则，
+不代表移动与桌面拥有完全相同的 gameplay sequence：正式移动是
+`BeginWashFoamHold → BackgroundTask → FinishWashRinse`，Desktop / QA 普通入口仍可能走
+`BeginServiceExecution(Wash)`，详见本轮最终验收报告的「Phase 1 残余语义分叉」。
 
 ---
 
@@ -376,13 +380,14 @@ docs/development/phase-0-2/*.md                           (新增 6 份)
 | 验收项 | Before (`5dde4ea`) | After |
 | --- | --- | --- |
 | Node 资产管线测试 | 17 / 17 通过 | 17 / 17 通过 |
-| Unity EditMode | 595 / 595 通过 | **608 / 608 通过** |
+| Unity EditMode | 595 / 595 通过 | **609 / 609 通过**（本轮 readiness guard 后复跑） |
 | Manifest / 资产校验 | 13 assets 通过 | 13 assets 通过 |
 | WebGL Demo 构建 | 成功 | 成功 |
 | Chromium Demo smoke | 通过（含调试模式） | 通过（含调试模式） |
 | Chromium 候选场景 smoke | 通过 | 通过（未回归） |
 
-新增 13 条；修改 2 条（见第 9 节，属有意行为变更）；**没有任何原本通过的测试变成失败**。
+前一阶段新增 13 条、修改 2 条（见第 9 节，属有意行为变更）；本轮再新增
+`WashCannotFinishRinseBeforeFoamIsReady` 1 条。最终 **609 / 609 通过**，没有任何原本通过的测试变成失败。
 
 ### 关于 Phase 0 时见到的 3 个 Node 失败
 
@@ -398,8 +403,8 @@ docs/development/phase-0-2/*.md                           (新增 6 份)
 
 | Gate A 要求 | 证据 |
 | --- | --- |
-| 现有成果没被破坏 | EditMode 608/608、Node 17/17、WebGL 构建 + Demo smoke 全绿；`ActionResolver`/`ActionResultApplier`/`Stage3WashServiceAdapter` 一行未改 |
-| 正式路径更统一 | 洗头：移动与桌面现在共用同一个 `TickActiveServiceAction` 推进点（此前只有桌面循环调用）；剪发时长统一由模型给出；行为由同一组 View-free 测试锁定 |
+| 现有成果没被破坏 | EditMode 609/609、Node 17/17、WebGL 构建 + Demo smoke 全绿；`ActionResolver`/`ActionResultApplier`/`Stage3WashServiceAdapter` 一行未改 |
+| 共享规则得到保护 | 移动与桌面共享模型推进与裁定规则，剪发时长由模型给出；但 Wash 的输入序列仍是移动 `BeginWashFoamHold → BackgroundTask → FinishWashRinse`、Desktop/QA 可能走 `BeginServiceExecution(Wash)`，不能宣称两条路径完全统一 |
 | 洗剪吹形成优先级压力 | 模拟实测 t=100s 出现「正在剪 + 吹发后台 + 洗头待办 + 新客进场 + 1 人等候」，pending=4 |
 | 3 分钟内出现忙乱 | 2 人出现在 ~24s，3 人 ~48s，4 人 ~76s；均在 120 秒营业内自然发生 |
 | 下一阶段不用推翻底层 | 本轮没有重写任何有重测试覆盖的核心服务；STATE_OWNERSHIP + TECH_DEBT_NEXT 已标定下一阶段该动哪里 |
