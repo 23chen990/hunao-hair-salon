@@ -1098,6 +1098,7 @@ namespace HairSalon
             if (customer.ServiceExecution != null &&
                 customer.ServiceExecution.State == ServiceExecutionState.Executing) return false;
             if (PlayerBusy) return false;
+            if (!IsWashFoamReadyToRinse(customer)) return false;
 
             if (!_washServiceAdapter.BeginTimedAction(
                     customer, ServiceActionType.Shower, ServiceTool.Shower, WorldElapsed)) return false;

@@ -72,6 +72,32 @@ public sealed class Phase2BusySalonFlowTests
     }
 
     [Test]
+    public void WashCannotFinishRinseBeforeFoamIsReady()
+    {
+        SalonGameModel game = NewGame();
+        CustomerModel customer = SpawnServing(game, 3012,
+            new[] { ServiceType.Wash, ServiceType.Cut }, 0);
+
+        Assert.IsTrue(game.BeginWashFoamHold(customer));
+        game.Tick(game.ServiceConfig.ShampooDuration + .01f);
+
+        Assert.AreEqual(BackgroundTaskState.Running, customer.BackgroundTask.State);
+        Assert.IsTrue(game.IsWashFoamWaitRunning(customer));
+        Assert.IsFalse(game.IsWashFoamReadyToRinse(customer));
+
+        int stepBefore = customer.Step;
+        Assert.IsFalse(game.FinishWashRinse(customer),
+            "The model must reject a rinse before the foam reaches its ready window.");
+        Assert.AreEqual(ServiceType.Wash, customer.CurrentNeed);
+        Assert.AreEqual(stepBefore, customer.Step);
+
+        game.Tick(game.ServiceConfig.FoamOptimalStart + .01f);
+        Assert.IsTrue(game.IsWashFoamReadyToRinse(customer));
+        Assert.IsTrue(game.FinishWashRinse(customer));
+        Assert.AreEqual(ServiceType.Cut, customer.CurrentNeed);
+    }
+
+    [Test]
     public void WashCannotStartWhileThePlayerIsBusyWithAnotherCustomer()
     {
         SalonGameModel game = NewGame();
