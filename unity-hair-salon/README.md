@@ -6,7 +6,14 @@ Unity `6000.5.8f1` / C# / uGUI，16:9 横屏。本版本仍使用程序化 Low-P
 
 ## 最简单的试玩方式
 
-直接打开 `Builds/HairSalonDemo.app`。如果 macOS 首次阻止打开，请右键应用并选择“打开”。
+现在只有一个正式试玩入口：`HairSalonDemo` 场景/构建。浏览器包和 macOS 包都从
+`Assets/Scenes/HairSalonDemo.unity` 构建，不能再出现“旧 Demo”和“移动 Demo”各自一套的情况。
+
+- macOS：直接打开 `Builds/HairSalonDemo.app`。如果 macOS 首次阻止打开，请右键应用并选择“打开”。
+- 浏览器：用静态服务器打开 `Builds/WebGLDemo/index.html`（不要直接双击 `index.html`）。
+- 进入后先点击“开始营业”；鼠标拖动左下摇杆或使用 `WASD`/方向键移动，右下按钮或 `Space` 交互。
+
+`AssetTestLab`、Candidate 和 Reference 仍是独立的技术检查场景，不是第二个可玩的产品入口。
 
 也可以使用 Unity `6000.5.8f1` 打开本目录，打开 `Assets/Scenes/HairSalonDemo.unity`，然后点击顶部播放按钮。
 

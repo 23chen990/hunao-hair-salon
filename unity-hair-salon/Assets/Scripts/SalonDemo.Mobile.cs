@@ -43,6 +43,20 @@ public sealed partial class SalonDemo
         public bool Available;
     }
 
+    /// <summary>
+    /// Keeps the formal playable entry on the authored salon presentation.
+    /// The procedural 2D greybox remains useful for diagnostics, but it must
+    /// be explicitly requested so the browser build and the reusable Unity
+    /// demo cannot silently become different games.
+    /// </summary>
+    public static bool ShouldUseSimple2DPresentation(string absoluteUrl)
+    {
+        if (string.IsNullOrEmpty(absoluteUrl)) return false;
+        string url = absoluteUrl.ToLowerInvariant();
+        return url.Contains("?simple2d=1") || url.Contains("&simple2d=1") ||
+               url.Contains("?simple2d=true") || url.Contains("&simple2d=true");
+    }
+
     private void ConfigureMobileGame()
     {
         // Acceptance harnesses exercise their original APIs. The playable entry always uses mobile controls.
@@ -50,7 +64,7 @@ public sealed partial class SalonDemo
             !HairSalon.AssetPipeline.BrowserCoreFlowSmoke.IsRequested(Application.absoluteURL) &&
             !Application.absoluteURL.Contains("washCraft=detail") &&
             !Application.absoluteURL.Contains("washCraft=service");
-        _simple2DMode = _mobileMode;
+        _simple2DMode = ShouldUseSimple2DPresentation(Application.absoluteURL);
         if (!_mobileMode) return;
         _mobileSaves = new PlayerPrefsSalonProgressRepository();
         _mobileProgress = _mobileSaves.Load() ?? SalonProgressData.CreateDefault();
