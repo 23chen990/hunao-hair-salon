@@ -1,6 +1,33 @@
 # 《胡闹理发店》当前状态
 
-> 更新时间：2026-09-07（Asia/Shanghai）
+> 更新时间：2026-09-23（Asia/Shanghai）
+
+## 2026-09-23 当前工作区复核
+
+- 当前工作区改动已落入最新 WebGL 构建；Node 资产管线 `17/17`、UI 字体检查通过、Unity EditMode `638/638`，Demo/Asset Lab/Candidate/Reference 四个 WebGL 构建成功。
+- 当前构建真实触控整局报告：`unity-hair-salon/Builds/MobileEvidenceCurrent/report.json`；首日 `3/3` 单、余额 `540`、满意度 `69`、后台吹发期间处理另一位顾客、自动结算、手动金币收取 `0` 次、错误 `0`。
+- 当前构建失败/重试报告：`unity-hair-salon/Builds/MobileEvidenceFailureCurrent/report.json`；失败局 `0/3`，重试回到第 1 天，余额 `0`、满意度 `90`、错误 `0`。
+- 一局时长已按《胡闹厨房》的可操作关卡节奏调整：正式移动入口为营业 `180` 秒 + 最多 `15` 秒 ClosingGrace；收尾是独立的离场/结算缓冲。达到目标并完成离场时可能提前结算，暂停不消耗营业时间。旧的 120/150 秒记录保留为历史决策过程；当前仍需真人试玩记录实际首局时长和完成率。
+- 调整后的真实触控证据：`Builds/MobileEvidenceSecondCustomerAcceptanceOvercooked180/report.json` 正确接待路径通过，`Builds/MobileEvidenceWrongStationOvercooked180/report.json` 错误工位→纠正路径通过，均为 844×390、浏览器错误 `0`。
+- 旧的 `TECH_HANDOFF.md` 仍保留 9 月 18 日历史审计；当前接续入口已补在其 §17，后续以本节、`docs/gameplay-repair-2026-09-20.md` 和最新实玩复现为准。
+
+## 当前：玩法与操作修复（2026-09-20）
+
+- 按产品负责人最新反馈优先修玩法体验，暂不做 UI 视觉调整。
+- 移动端剪发按实际按住/松手判定，支持提前松手后补剪、后续多步工具顺序；暂停保留进度，多指点暂停从按下时即生效。
+- 接待新客时仍可给在座顾客收尾；已接待目标不再硬锁下一次交互，玩家靠近在座顾客时可以先冲洗、剪发或吹发收尾，再回来安排新客。
+- 实玩首日发现接待后跑向工位期间顾客仍按完整排队速度掉耐心；现在接待成功会进入护送宽限，玩家到工位前不会继续扣这位顾客的等待耐心，首日基础掉耐心也调到可教学的节奏。
+- 失败订单不计目标；收客同时考虑已完成与未完成订单，避免目标 3 单却接进 8 人再被清场扣分，流失后可补客。
+- 按最新反馈移除金币堆玩法：完整订单完成后收入立即结算到余额，不再生成金币堆、靠近收取或在闭店时兜底拾取。
+- 补回完整“洗 → 吹 → 付款”订单回归，确认多步骤订单不会在洗发后提前结算；最新门禁：Node 17/17、Unity EditMode 628/628、四个 WebGL 构建和 844×390 Chromium 场景检查通过；移动入口整局触控 3/3 单、余额 540、无浏览器错误。
+- 第二位顾客接待回归已覆盖：订单收入即时结算后，安排工位不会再被上一单的待收金币交互打断；真实触控记录在 `Builds/MobileEvidenceNoCoins/`。
+- 设备占用现在参与可见操作门禁：下一类兼容工位全部被占时，不再给出可按的“转移顾客”，而是显示“等待空闲工位”；释放工位后才恢复转移，避免把不可执行任务当成最高优先级。
+- 最新回归：Node 17/17、字体字符检查通过；Unity EditMode 629/629；Manifest/资源检查、四个 WebGL 构建和 844×390 Chromium 四场景检查通过；新构建真实触控首日 3/3 单、余额 540、满意度 69、后台吹发期间完成另一项服务、无浏览器错误。
+- 日结生命周期已修复：达标后停止接待新客，但 `Finished/Leaving` 顾客会保留到真正 `Exited`，最后一位顾客先走出店外再显示结算；新增离店时序回归测试。
+- 最新离店修复门禁：Unity EditMode 630/630，真实触控报告位于 `Builds/CustomerExitTimingFinal/report.json`，三位顾客均记录到 `Finished → Leaving` 后才进入结算，无浏览器错误。
+- 接待上限与离场显示现在使用两套计数：`Finished/Leaving` 仍保持日结和离场动画，但不再重复占用“未完成订单”名额；新增 `MobileAdmissionDoesNotCountFinishedCustomersStillLeavingAsUnfinishedOrders` 回归。
+- HTTP 试玩：`http://127.0.0.1:8910/WebGLDemo/`。下次可在 Finder 双击根目录 `启动试玩.command`，自动打开本地 HTTP 版本。
+- 本轮复现、验证与限制见 `docs/gameplay-repair-2026-09-20.md`。历史阶段认可不代表最新版本已通过产品体验验收。
 
 ## 试玩入口整合（2026-09-20）
 
@@ -196,3 +223,44 @@
 3. 除剪发工位外，正式移动碰撞尚未系统性接入每件家具的 Manifest collision。
 4. 部分 UI 资源的 Unity 导入类型仍为 Default Texture，而不是 Sprite，运行时依靠自建 Sprite 或特殊加载逻辑。
 5. 角色源图存在非透明背景版本，处理后的方向帧透明区差异较大；当前不影响已批准 Demo，但替换动画时需先在实验室核对脚底稳定性。
+
+## 2026-09-23 顾客接待与离场回归修复（当前有效）
+
+本轮针对产品负责人指出的两个具体问题完成复现、最小修复和真实触控复核：
+
+- 第一个顾客离开时瞬间消失：旧离场路径穿过剪发工位碰撞，`UpdateCustomerViews` 每帧把 `Leaving` 顾客回滚；顾客随后被模型移除，所以画面只看到瞬间消失。现在离场路径先进入低位安全通道，再沿左侧出口离开；`Leaving` 不再被剪发工位移动回滚，路线也有正式工位/出口植物碰撞回归测试，并把离场时长调到足够走完整条路线。
+- 第二个顾客无法接待：旧的 `_mobileGuidedCustomer` 可能残留为已经离场的第一位顾客，移动目标搜索会跳过后续等待顾客；同时排队顾客只有抵达目标点后才被视为可接待。现在每次移动交互前清理失效引导对象，等待顾客可以直接成为接待目标，接待和护送动作分开执行，不会把“转移顾客”误当成“接待顾客”。
+- 日结提前清场：结果状态原先停止更新视图，导致 `Finished/Leaving` 顾客在离场动画完成前被清掉。现在有可见离场旅程时延迟结果面板，持续更新到顾客进入 `Exited` 后再结算。
+
+专项回归：`ReportedGameplayRegressionTests` 为 3/3，`CustomerExitRouteRegressionTests` 为 2/2；全量 Unity EditMode 为 635/635，Node 资产管线为 17/17，四个 WebGL 构建和 844×390 Chromium 检查均通过。真实触控报告 `unity-hair-salon/Builds/MobileEvidenceReportedFinal3/report.json` 记录首位顾客最大屏幕位移 226.08px、到达出口距离约 0、并在第一位顾客仍为 `Leaving` 时成功接待第二位（目标顾客 id 1，动作 `Greet`）。失败重试报告为 `unity-hair-salon/Builds/MobileEvidenceReportedFailureFinal2/report.json`。
+
+对应截图为 `unity-hair-salon/Builds/MobileEvidenceReportedFinal3/14-first-customer-leaving.png`；全量门禁结果为 `unity-hair-salon/Builds/PipelineEditMode.xml` 与 `unity-hair-salon/Builds/PipelineEvidence/browser-check-all.json`。这部分内容取代本文件中较早的 630/630 和旧移动证据描述；旧报告保留作历史记录，不再作为本轮缺陷已解决的依据。
+
+## 2026-09-23 第二位顾客接待后的指引断档修复（当前有效）
+
+产品负责人再次反馈“第二个顾客还是无法正常接待”后，重新用真实 Chromium 触控复现。此前版本其实把第二位设置成 `guided=1`，但玩家仍在排队区时，目标搜索因距离洗发锚点超过 1.5 而返回空目标，右侧按钮退回灰色“靠近顾客”，排队卡片也仍显示等待状态。这会让玩家无法知道接待已成功、下一步应该去哪。
+
+本轮修复 `SalonDemo.Mobile.cs`：引导顾客始终保留为当前目标；没有到达兼容工位时显示禁用的“前往洗发工位”，目标仍指向第二位；到达空闲洗发锚点后切换为可用的“安排洗发”。没有改变订单、工位布局或 UI 视觉方向，只补齐了接待后的连续指引。
+
+新增 `SecondCustomerReceptionRegressionTests.GuidedWashCustomerExplainsNextStepAndCanBeAssigned`，覆盖首日真实 O002（洗发→吹发）完整首段：第一位离场期间，第二位 `Greet` 可用；触摸后目标仍为第二位、动作 `Assign`、按钮显示“前往洗发工位”；到站后“安排洗发”可用，执行后第二位进入 `MovingToStation` 并分配到洗发工位 0。
+
+最终真实触控证据：`unity-hair-salon/Builds/MobileEvidenceSecondCustomerAcceptance/report.json`，其中 `secondCustomerReceptionFlow.passed=true`、`greetTouch.targetCustomer=1`、`guidedTarget.action=前往洗发工位`、`assignBeforeTouch.action=安排洗发`、`assignedCustomer.state=MovingToStation`，浏览器错误为空。截图为 `15-second-customer-greet-ready.png`、`16-second-customer-guided-to-wash.png`、`17-second-customer-wash-assign-ready.png`、`18-second-customer-assigned-to-wash.png`。
+
+专项回归为 `SecondCustomerReceptionRegressionTests` 1/1、`ReportedGameplayRegressionTests` 3/3、`CustomerExitRouteRegressionTests` 2/2；本轮完整门禁为 Node 17/17、Unity EditMode 636/636、四个 WebGL 构建和 844×390 Chromium 场景检查通过。
+
+## 2026-09-23 错误工位路径恢复（当前有效）
+
+产品负责人澄清：第二位顾客 O002 的需求是洗发，之前把她带去剪发区时无法继续，是因为移动入口又把流程错误误当成了物理无效。这个收紧与已经批准的 `ACTION_RULE_MATRIX`、4A.5 报告和 Phase 6 测试冲突；“流程上不正确”应当允许执行，再由模型记录后果。
+
+本轮只恢复这条已经决定的自由度，没有重做订单、房间布局或 UI 方向：
+
+- 接待 O002 后，系统默认仍推荐空闲洗发工位；玩家如果走到任意空闲剪发工位，按钮会显示“安排剪发工位”并保持可用。
+- 执行错误安排后，`SalonGameModel.Assign` 记录 `WrongStationCount=1`、`ReactionKind=Confused`，满意度按既定规则下降一次；顾客不会被自动撤销或自动送回。
+- 顾客到错工位后，移动入口显示“转移顾客”；玩家可以再带到空闲洗发工位，错误次数和已经扣除的满意度保留，困惑反应清除。
+- 空闲工位仍受真实占用限制；没有空位时不提供物理上无法执行的安排。这保持“物理无效可禁用、流程错误可执行”的边界。
+
+新增 `SecondCustomerReceptionRegressionTests.GuidedWashCustomerCanBeAssignedToWrongHaircutStationWithFeedback`，并用真实 844×390 Chromium 触控跑通完整错误→纠正路径。证据在 `unity-hair-salon/Builds/MobileEvidenceWrongStation/report.json`：真实动作依次为“接待 2 号”→“安排剪发工位”→“转移顾客”→“安排洗发”；满意度 `70→67`，错误工位次数为 1，最终回到洗发工位。正确引导证据仍在 `unity-hair-salon/Builds/MobileEvidenceSecondCustomerAcceptanceFinal/report.json`，没有回归。
+
+最终门禁：Node 资产管线 17/17，UI 字体检查 367/629，Unity EditMode 638/638，Demo/Asset Lab/Candidate/Reference 四个 WebGL 构建成功，844×390 Chromium 场景检查无错误；专项 XML 为 `Builds/MobileAdmissionRegressionFinal.xml`（14/14）、`Builds/SecondCustomerReceptionRegressionFinal.xml`（2/2）、`Builds/ReportedGameplayRegressionFinal.xml`（3/3）和 `Builds/CustomerExitRouteRegressionFinal.xml`（2/2）。最新正确/错误路径证据分别为 `Builds/MobileEvidenceSecondCustomerAcceptanceFinal2/` 与 `Builds/MobileEvidenceWrongStationFinal2/`。
+
+旧的 `docs/development/phase-0-2/MAIN_PATH_AUDIT.md` 中关于“移动入口只给兼容工位”的内容是历史审计快照，不能覆盖后续批准的错误工位规则；当前行为以规则矩阵、模型测试和本节证据为准。

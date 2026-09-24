@@ -133,7 +133,7 @@
 | 手动长按吹发 | `StartManualBlow` / `TickManualBlow` / `EndManualBlowHold` | 移动路径完全没有入口 |
 | 细分洗头步骤 | `BeginWashAction` / `PerformQuickAction(WrapTowel/RemoveTowel)` | 只存在于 `washCraft=*` 与 QA 脚本 |
 | 染发 / 烫发 | `BeginProcessingServiceApply` / `ResolveDyeCleanup` | 移动订单池 O001–O005 不含 Dye/Perm，正式路径不可达 |
-| 错误工位 / 错误工具 | `ApplyWrongStationTool`、`WrongStationCount` | 移动 `FindMobileTarget` 只在工位不兼容时给「转移顾客」，不会进入错误服务 |
+| 错误工位 / 错误工具 | `ApplyWrongStationTool`、`WrongStationCount` | **历史审计快照**：移动入口当时只给「转移顾客」。2026-09-23 已恢复错误工位可执行并可纠正；错误工具仍未接入移动入口。 |
 | 工具栏工具选择 | `PlayerContext.SelectServiceAction` | 移动无工具选择概念 |
 | 订单加权抽取 | `DaySettings.PickOrder(Random.value)` | 移动改用 `SalonMobileDayConfig.PickOrderForSpawn` |
 | 多工具剪发订单 | `ConfigureHaircutOrder(..., Scissors, ThinningShears)` | 移动恒定为单剪刀 |

@@ -121,6 +121,7 @@ public sealed partial class SalonDemo : MonoBehaviour
     private int _activeHaircutPointer = int.MinValue;
     private int _nextCustomerId;
     private float _spawnCooldown;
+    private bool _deferredResultPending;
     private Vector3[] _playerRoute = new Vector3[0];
     private int _playerRouteIndex;
     private Vector3 _playerRouteDestination;
@@ -179,6 +180,13 @@ public sealed partial class SalonDemo : MonoBehaviour
     {
         if (customer == null) return false;
         return customer.State != CustomerState.Leaving && customer.State != CustomerState.Exited;
+    }
+
+    public static bool ShouldPreferMobileTarget(bool candidateAvailable, float candidateDistance,
+        bool currentAvailable, float currentDistance)
+    {
+        if (candidateAvailable != currentAvailable) return candidateAvailable;
+        return candidateDistance < currentDistance;
     }
 
     public static bool HasArmedToolSelection(int selectedToolIndex,
@@ -273,12 +281,26 @@ public sealed partial class SalonDemo : MonoBehaviour
     private void Update()
     {
         if (_game == null || _dayController == null) return;
-        _dayController.Tick(Time.deltaTime, CountActiveCustomers());
+        _dayController.TickWithAdmissionCount(Time.deltaTime, CountActiveCustomers(), CountUnfinishedCustomers());
         UpdateDayHud();
         RefreshMobileDayPresentation();
         EmitMobileEvidence();
         if (_dayController.IsPaused || _dayController.State == DayState.PreOpen ||
-            _dayController.State == DayState.Result || _dayController.State == DayState.ClosedManagement) return;
+            _dayController.State == DayState.ClosedManagement) return;
+        if (_dayController.State == DayState.Result)
+        {
+            // A forced/timeout Result can arrive while a customer is already
+            // on the visible exit route. Keep ticking that route until the
+            // view is removed, then finish the normal result presentation.
+            if (_deferredResultPending)
+            {
+                _game.Tick(Time.deltaTime);
+                UpdateCustomerViews();
+                UpdateCamera();
+            }
+            else TryFinalizeDeferredResult();
+            return;
+        }
         _game.Tick(Time.deltaTime);
         MaintainCustomerFlow(Time.deltaTime);
         if (_mobileMode) UpdateMobilePlay(Time.deltaTime);
@@ -288,6 +310,7 @@ public sealed partial class SalonDemo : MonoBehaviour
             UpdateActiveServiceInteraction();
         }
         UpdateCustomerViews();
+        TryFinalizeDeferredResult();
         UpdateCamera();
         if (!_mobileMode) UpdatePlayer();
     }
@@ -394,6 +417,7 @@ public sealed partial class SalonDemo : MonoBehaviour
         BuildWaitingZone(salon);
         BuildCashier(salon);
         BuildShelvesAndPlants(salon);
+        BuildStage1SupplyProps(salon);
         GameObject playerPrefab = Resources.Load<GameObject>("Characters/Hairdresser");
         if (playerPrefab == null)
             throw new MissingReferenceException("Hairdresser prefab is missing at Resources/Characters/Hairdresser.");
@@ -402,6 +426,7 @@ public sealed partial class SalonDemo : MonoBehaviour
         playerInstance.transform.position = new Vector3(0f, .05f, -3.2f);
         _player = playerInstance.transform;
         _playerCharacter = playerInstance.GetComponent<HairdresserCharacter>();
+        BuildStage1CarryVisual(_player);
         _playerTarget = _player.position;
         ConfigureSimple2DPresentation();
     }
@@ -683,8 +708,9 @@ public sealed partial class SalonDemo : MonoBehaviour
 
         HudArtwork("Settings Backplate", right, "TopHUD/settings-backplate-final", new Vector2(-62f, -70f),
             new Vector2(108f, 108f), true, 1f, new Vector2(1f, 1f));
-        HudImageButton("Settings", right, "TopHUD/settings-icon", new Vector2(-62f, -70f),
+        Button settingsButton = HudImageButton("Settings", right, "TopHUD/settings-icon", new Vector2(-62f, -70f),
             new Vector2(96f, 96f), TogglePause, new Vector2(1f, 1f), new Vector2(72f, 72f));
+        if (_mobileMode) BindMobilePauseButton(settingsButton);
         RefreshTopHudDay(1);
         RefreshTopHudSatisfaction();
     }
@@ -849,17 +875,20 @@ public sealed partial class SalonDemo : MonoBehaviour
         }
         else if (state == DayState.Result)
         {
-            CancelHaircutInteraction(true);
-            if (_game.Customers.Count > 0) _game.ForceCloseRemainingCustomers(_dayController.Stats);
-            _dayController.FinalizeDayReputation();
-            _game.SetFirstDayCompleteForDebug(true);
-            ClearCustomerViews();
-            if (_mobileMode) CollectMobilePaymentsAtClose();
-            ClearDayPaymentPickups();
-            ShowResultPanel();
+            // A result notification is normally emitted only after the day
+            // controller sees zero active customers. Keep this guard at the
+            // presentation boundary as well: a visible Finished/Leaving
+            // customer still owns a live exit route and must not be force
+            // closed or have its view destroyed by a stale result callback.
+            if (HasVisibleExitJourney())
+            {
+                _deferredResultPending = true;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.Log("[Phase 7 DayStats] " + _dayController.Stats);
+                Debug.Log("[Salon] Result deferred while a customer is leaving.");
 #endif
+                return;
+            }
+            CompleteResultPresentation();
         }
         else if (state == DayState.ClosedManagement)
         {
@@ -871,6 +900,39 @@ public sealed partial class SalonDemo : MonoBehaviour
         }
         HandleMobileDayState(state);
         UpdateDayHud();
+    }
+
+    private bool HasVisibleExitJourney()
+    {
+        if (_game == null || _game.Customers == null) return false;
+        for (int i = 0; i < _game.Customers.Count; i++)
+        {
+            CustomerState state = _game.Customers[i].State;
+            if (state == CustomerState.Finished || state == CustomerState.Leaving)
+                return true;
+        }
+        return false;
+    }
+
+    private void TryFinalizeDeferredResult()
+    {
+        if (!_deferredResultPending || HasVisibleExitJourney()) return;
+        CompleteResultPresentation();
+    }
+
+    private void CompleteResultPresentation()
+    {
+        _deferredResultPending = false;
+        CancelHaircutInteraction(true);
+        if (_game.Customers.Count > 0) _game.ForceCloseRemainingCustomers(_dayController.Stats);
+        _dayController.FinalizeDayReputation();
+        _game.SetFirstDayCompleteForDebug(true);
+        ClearCustomerViews();
+        ClearDayPayments();
+        ShowResultPanel();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log("[Phase 7 DayStats] " + _dayController.Stats);
+#endif
     }
 
     private void ShowResultPanel()
@@ -919,8 +981,6 @@ public sealed partial class SalonDemo : MonoBehaviour
         if (_dayController == null || _dayController.State != DayState.ClosedManagement) return;
         CancelHaircutInteraction(true);
         ClearCustomerViews();
-        foreach (CoinPileView pile in FindObjectsByType<CoinPileView>())
-            if (pile != null) Destroy(pile.gameObject);
         _game.ResetForNextDay();
         _dayController.PrepareNextDay();
         _coinBalanceLabel.text = _game.Balance.ToString("N0");
@@ -948,7 +1008,11 @@ public sealed partial class SalonDemo : MonoBehaviour
                                        _dayController.State != DayState.ClosingGrace)) return;
         bool paused = !_dayController.IsPaused;
         _dayController.SetPaused(paused);
-        if (_mobileMode) _mobileControls?.ResetInput();
+        if (_mobileMode)
+        {
+            if (paused) SuspendMobileInput();
+            else _mobileControls?.ResetInput();
+        }
         else if (paused) CancelHaircutInteraction(false);
         if (_pausePanel != null) _pausePanel.SetActive(paused);
         if (paused && _resumeButton != null && EventSystem.current != null)
@@ -1007,30 +1071,16 @@ public sealed partial class SalonDemo : MonoBehaviour
         if (moodSprite != null) _satisfactionSmile.sprite = moodSprite;
     }
 
+    private void ClearDayPayments()
+    {
+        _game?.Payments.ClearDayDrops();
+    }
+
     private void ClearCustomerViews()
     {
         for (int i = _customerViews.Count - 1; i >= 0; i--)
             if (_customerViews[i] != null) Destroy(_customerViews[i].gameObject);
         _customerViews.Clear();
-    }
-
-    private void ClearDayPaymentPickups()
-    {
-        foreach (CoinPileView pile in FindObjectsByType<CoinPileView>())
-            if (pile != null) DestroySceneObject(pile.gameObject);
-        _game?.Payments.ClearDayDrops();
-    }
-
-    private static void DestroySceneObject(GameObject target)
-    {
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-        {
-            DestroyImmediate(target);
-            return;
-        }
-#endif
-        Destroy(target);
     }
 
     public static string FormatClock(float seconds)
@@ -1088,11 +1138,15 @@ public sealed partial class SalonDemo : MonoBehaviour
         if (customer == null) return false;
         _nextCustomerId++;
         _dayController.Stats.RecordSpawn(customer);
-        if (_mobileMode) _game.ConfigureHaircutOrder(customer, SalonTool.Scissors);
-        else if (customer.CurrentNeed == ServiceType.Cut && (id & 1) == 0)
-            _game.ConfigureHaircutOrder(customer, SalonTool.Scissors, SalonTool.ThinningShears);
-        else if (customer.CurrentNeed == ServiceType.Cut)
-            _game.ConfigureHaircutOrder(customer, SalonTool.Clippers);
+        if (customer.CurrentNeed == ServiceType.Cut)
+        {
+            SalonTool[] haircutTools = _mobileMode
+                ? SalonMobileDayConfig.GetHaircutToolsForSpawn(DaySettings.MobileDayNumber, id)
+                : (id & 1) == 0
+                    ? new[] { SalonTool.Scissors, SalonTool.ThinningShears }
+                    : new[] { SalonTool.Clippers };
+            _game.ConfigureHaircutOrder(customer, haircutTools);
+        }
         Color[] hairColors = { Hex("C7569B"), Hex("F2B83D"), Hex("6E43A1"), Hex("353137"), Hex("E46D45") };
         CreateCustomerView(customer, EntrancePosition + new Vector3(-entranceOffset, 0f, 0f), hairColors[id % hairColors.Length], false);
         return true;
@@ -1100,8 +1154,9 @@ public sealed partial class SalonDemo : MonoBehaviour
 
     private void MaintainCustomerFlow(float dt)
     {
-        if (_dayController == null || !_dayController.CanSpawnCustomers) return;
+        if (_dayController == null) return;
         _spawnCooldown = Mathf.Max(0f, _spawnCooldown - Mathf.Max(0f, dt));
+        if (!_dayController.CanSpawnCustomers) return;
         if (_spawnCooldown > 0f) return;
         TrafficDecision decision = _trafficDirector.Evaluate(_dayController.BusinessProgress,
             BuildTrafficSnapshot(), Random.value, _dayController.Reputation.CurrentStars);
@@ -1147,7 +1202,31 @@ public sealed partial class SalonDemo : MonoBehaviour
         return new TrafficSnapshot(active, waiting, occupied, angry, 4);
     }
 
-    private int CountActiveCustomers() => BuildTrafficSnapshot().ActiveCustomers;
+    private int CountActiveCustomers()
+    {
+        if (!_mobileMode) return BuildTrafficSnapshot().ActiveCustomers;
+        // Finished and Leaving customers still have a visible exit journey.
+        // Keep the day open until they reach Exited so the result panel does
+        // not make the last customer disappear on the completion frame.
+        int activeUntilExit = 0;
+        foreach (CustomerModel customer in _game.Customers)
+            if (customer.State != CustomerState.Exited) activeUntilExit++;
+        return activeUntilExit;
+    }
+
+    private int CountUnfinishedCustomers()
+    {
+        if (!_mobileMode) return BuildTrafficSnapshot().ActiveCustomers;
+        int unfinished = 0;
+        foreach (CustomerModel customer in _game.Customers)
+        {
+            if (customer.State == CustomerState.Finished ||
+                customer.State == CustomerState.Leaving ||
+                customer.State == CustomerState.Exited) continue;
+            unfinished++;
+        }
+        return unfinished;
+    }
 
     private void HandleCustomerChanged(CustomerModel customer)
     {
@@ -1280,7 +1359,7 @@ public sealed partial class SalonDemo : MonoBehaviour
             _focusLabel.text = customer.ServiceResult == CustomerServiceResult.Failed
                 ? "发生事故 · 服务已终止"
                 : customer.ServiceFeedback == CustomerServiceFeedback.Dissatisfied
-                    ? "订单完成 · 顾客不满意" : "订单完成 · 金币已掉落";
+                    ? "订单完成 · 顾客不满意" : "订单完成 · 收入已结算";
         }
         else if (customer.State == CustomerState.Waiting || customer.Station < 0)
         {
@@ -1693,7 +1772,11 @@ public sealed partial class SalonDemo : MonoBehaviour
 
             Vector3 customerPositionBeforeMove = view.transform.position;
             view.MoveAlongCurrentRoute(customer.State, target, 5.2f, Time.deltaTime);
-            if (IsAnyCutStationMovementBlocked(view.transform.position))
+            // The cut-station collision volumes protect active customers and
+            // the player. They must not roll back an exit route: the door path
+            // deliberately leaves the chair through that footprint.
+            if (customer.State != CustomerState.Leaving && customer.State != CustomerState.Exited &&
+                IsAnyCutStationMovementBlocked(view.transform.position))
                 view.transform.position = customerPositionBeforeMove;
             // A compatible chair can never be the source of a wrong-station question mark.
             // Enforce this immediately before presentation as well as at model arrival so a
@@ -1770,6 +1853,7 @@ public sealed partial class SalonDemo : MonoBehaviour
             Vector3 targetScale = customer == _game.SelectedCustomer ? view.BaseScale * 1.08f : view.BaseScale;
             view.transform.localScale = Vector3.Lerp(view.transform.localScale, targetScale, 1f - Mathf.Exp(-16f * Time.deltaTime));
         }
+        TryFinalizeDeferredResult();
     }
 
     private void UpdateCustomerUiAnchor(SalonCustomerView view, CustomerModel customer, int waitingSlot)
@@ -2141,7 +2225,7 @@ public sealed partial class SalonDemo : MonoBehaviour
                 string rating = view.Customer.ServiceResult == CustomerServiceResult.HappyCompletion
                     ? "HAPPY · 基础 " + payment.BaseReward + " + 小费 " + payment.TipReward
                     : "NORMAL · 基础收入 " + payment.BaseReward;
-                ShowToast("金币已掉落");
+                ShowToast("收入已结算");
                 _focusLabel.text = rating;
                 StartCoroutine(ReturnToOverviewAfterResult(view, HaircutSettings.ResultFeedbackSeconds));
             }
@@ -2168,13 +2252,10 @@ public sealed partial class SalonDemo : MonoBehaviour
 
     private void HandlePaymentCreated(PaymentDropModel drop)
     {
-        if (drop == null || !_customerSeatAnchors.TryGetValue(drop.WorkstationId, out var target)) return;
-        var root = new GameObject("Coin Pile Runtime");
-        root.transform.SetParent(transform, false);
-        root.transform.position = target.position + CoinPickupLayout.OffsetFor(drop.Id);
-        var pile = root.AddComponent<CoinPileView>();
-        pile.Initialize(drop);
-        pile.Clicked += HandleCoinPileClick;
+        if (drop == null || _game == null || !_game.Payments.BeginCollection(drop.Id)) return;
+        if (!_game.Payments.CompleteCollection(drop.Id)) return;
+        _dayController?.Stats.RecordPaymentCollected(drop);
+        if (_coinBalanceLabel != null) _coinBalanceLabel.text = _game.Balance.ToString("N0");
     }
 
     private PaymentDropModel FindLatestPayment(int customerId)
@@ -2183,23 +2264,6 @@ public sealed partial class SalonDemo : MonoBehaviour
             if (_game.Payments.Drops[i].CustomerId == customerId)
                 return _game.Payments.Drops[i];
         return new PaymentDropModel();
-    }
-
-    private void HandleCoinPileClick(CoinPileView pile)
-    {
-        if (_mobileMode && (pile == null || pile.Drop == null || !CanInteractWithSalon() ||
-            !_playerServiceAnchors.TryGetValue(pile.Drop.WorkstationId, out var workAnchor) ||
-            !SalonMobileNavigation.CanReach(_player.position, workAnchor.position, 1.8f))) return;
-        if (pile == null || pile.Drop == null || !_game.Payments.BeginCollection(pile.Drop.Id)) return;
-        pile.PlayCollection(_hudCanvas, _coinHudTarget, _camera, () =>
-        {
-            pile.Clicked -= HandleCoinPileClick;
-            if (_game.Payments.CompleteCollection(pile.Drop.Id))
-            {
-                _dayController?.Stats.RecordPaymentCollected(pile.Drop);
-                if (_coinBalanceLabel != null) _coinBalanceLabel.text = _game.Balance.ToString("N0");
-            }
-        });
     }
 
     private IEnumerator ReturnToOverviewAfterResult(SalonCustomerView view, float delay)
@@ -2262,7 +2326,7 @@ public sealed partial class SalonDemo : MonoBehaviour
     {
         if (paused)
         {
-            if (_mobileMode) _mobileControls?.ResetInput();
+            if (_mobileMode) SuspendMobileInput();
             else CancelHaircutInteraction(false);
             if (_dayController != null && (_dayController.State == DayState.Business ||
                                            _dayController.State == DayState.ClosingGrace))
@@ -2281,6 +2345,7 @@ public sealed partial class SalonDemo : MonoBehaviour
         if (_game != null) _game.ViewChanged -= HandleViewChanged;
         if (_dayController != null) _dayController.StateChanged -= HandleDayStateChanged;
         if (_satisfaction != null) _satisfaction.Changed -= HandleSatisfactionChanged;
+        if (_mobileSupplies != null) _mobileSupplies.Changed -= HandleMobileSupplyChanged;
     }
 
     public void SetSatisfactionForDebug(int value) => _satisfaction?.SetCurrent(value);
@@ -2417,7 +2482,6 @@ public sealed partial class SalonDemo : MonoBehaviour
         float capturePatience = -1f;
         bool captureWhileHolding = false;
         bool completeHaircut = false;
-        bool collectCoins = false;
         bool captureBusinessHud = false;
         SalonTool captureTool = SalonTool.Scissors;
         for (int i = 0; i < args.Length - 1; i++)
@@ -2436,7 +2500,6 @@ public sealed partial class SalonDemo : MonoBehaviour
         {
             if (args[i] == "-salonCaptureHolding") captureWhileHolding = true;
             if (args[i] == "-salonCompleteHaircut") completeHaircut = true;
-            if (args[i] == "-salonCollectCoins") collectCoins = true;
             if (args[i] == "-salonCaptureBusinessHud") captureBusinessHud = true;
         }
         if (string.IsNullOrEmpty(capturePath)) yield break;
@@ -2506,12 +2569,6 @@ public sealed partial class SalonDemo : MonoBehaviour
                 yield return new WaitForSecondsRealtime(.25f);
             }
 
-            if (collectCoins)
-            {
-                CoinPileView pile = FindAnyObjectByType<CoinPileView>();
-                if (pile != null) pile.OnPointerClick(null);
-                yield return new WaitForSecondsRealtime(1.05f);
-            }
         }
         else yield return new WaitForSecondsRealtime(.4f);
         Directory.CreateDirectory(Path.GetDirectoryName(capturePath));

@@ -6,7 +6,7 @@ using UnityEngine;
 public sealed class SalonMobileSettlementTests
 {
     [Test]
-    public void ClosingCollectsPendingAndAnimatingPaymentsExactlyOnce()
+    public void PaymentCreatedSettlesImmediatelyExactlyOnce()
     {
         var root = new GameObject("Mobile closing settlement test");
         try
@@ -17,17 +17,17 @@ public sealed class SalonMobileSettlementTests
             var day = new BusinessDayController(SalonMobileDayConfig.CreateForDay(1));
             typeof(SalonDemo).GetField("_game", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(owner, game);
             typeof(SalonDemo).GetField("_dayController", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(owner, day);
-            game.Payments.CreateFinalPayment(1, 1, 100, 20);
-            var animating = game.Payments.CreateFinalPayment(2, 2, 200, 40);
-            game.Payments.BeginCollection(animating.Id);
-            var close = typeof(SalonDemo).GetMethod("CollectMobilePaymentsAtClose", BindingFlags.Instance | BindingFlags.NonPublic);
-            Assert.That(close, Is.Not.Null, "Closing must finish earned payments before destroying their animated views.");
-            close.Invoke(owner, null);
-            close.Invoke(owner, null);
+            var first = game.Payments.CreateFinalPayment(1, 1, 100, 20);
+            var second = game.Payments.CreateFinalPayment(2, 2, 200, 40);
+            var payment = typeof(SalonDemo).GetMethod("HandlePaymentCreated", BindingFlags.Instance | BindingFlags.NonPublic);
+            payment.Invoke(owner, new object[] { first });
+            payment.Invoke(owner, new object[] { second });
+            payment.Invoke(owner, new object[] { first });
             Assert.That(game.Balance, Is.EqualTo(360));
             Assert.That(day.Stats.OrderIncome, Is.EqualTo(300));
             Assert.That(day.Stats.TipIncome, Is.EqualTo(60));
-            Assert.That(game.Payments.CompleteCollection(animating.Id), Is.False);
+            Assert.That(first.State, Is.EqualTo(PaymentDropState.Collected));
+            Assert.That(second.State, Is.EqualTo(PaymentDropState.Collected));
         }
         finally { Object.DestroyImmediate(root); }
     }

@@ -10,7 +10,7 @@ Unity `6000.5.8f1` / C# / uGUI，16:9 横屏。本版本仍使用程序化 Low-P
 `Assets/Scenes/HairSalonDemo.unity` 构建，不能再出现“旧 Demo”和“移动 Demo”各自一套的情况。
 
 - macOS：直接打开 `Builds/HairSalonDemo.app`。如果 macOS 首次阻止打开，请右键应用并选择“打开”。
-- 浏览器：用静态服务器打开 `Builds/WebGLDemo/index.html`（不要直接双击 `index.html`）。
+- 浏览器：在 Finder 双击仓库根目录的 `启动试玩.command`，自动通过本地 HTTP 打开最新 WebGL 构建；保留启动的终端窗口。也可运行 `python3 tools/serve-salon.py --port 8910` 后访问 `http://127.0.0.1:8910/WebGLDemo/`，不要直接双击 `index.html`。
 - 进入后先点击“开始营业”；鼠标拖动左下摇杆或使用 `WASD`/方向键移动，右下按钮或 `Space` 交互。
 
 `AssetTestLab`、Candidate 和 Reference 仍是独立的技术检查场景，不是第二个可玩的产品入口。
@@ -33,7 +33,7 @@ sorting/depth。
 3. WASH 只显示“花洒、洗发水、毛巾”三个工具：点花洒后长按头部打湿，点洗发水后长按揉洗起泡，再用同一花洒长按冲净，最后单击毛巾快速收尾。
 4. 洗完的顾客保持毛巾包头。安排到理发椅后，先快速长按拆毛巾，再进行 CUT 或启动 BLOW。
 5. CUT 继续选择剪刀、分齿剪或推子并长按；BLOW 点击启动后后台运行，在合适窗口回来点击结束。
-6. 只有完整订单完成才在最后工位旁掉落一份金币；手动拾取后余额才增加。
+6. 完整订单完成后收入立即结算到余额，不再生成金币堆，也不需要额外跑回工位收钱。
 7. 每天先停在开店准备页，点击“开始营业”后计时和客流才启动。营业倒计时归零后不再进新顾客，但店内服务与金币拾取继续；收尾结束进入只读结算，再进入闭店经营。
 
 更完整、无需懂代码的验收清单见 `Docs/PHASE3_ACCEPTANCE.md`。

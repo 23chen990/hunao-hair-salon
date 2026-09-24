@@ -30,10 +30,17 @@ public static class SalonCustomerPath
 
     public static Vector3[] BuildLeavingRoute(Vector3 start, Vector3 destination)
     {
+        // Leave both formal haircut seats through the low lane. The old
+        // diagonal to x=-9.55 crossed the other chair and then climbed through
+        // the exit plant, so the view's movement guard rolled the customer
+        // back every frame. The right-wall seat must descend in place before
+        // moving left; its collision footprint extends to z=-.70.
+        float lowLaneZ = start.x > 0f ? -.90f : -.45f;
         return new[]
         {
-            new Vector3(-9.55f, start.y, 1.35f),
-            new Vector3(-9.55f, destination.y, 5.9f),
+            new Vector3(start.x, start.y, lowLaneZ),
+            new Vector3(-10.0f, start.y, lowLaneZ),
+            new Vector3(-10.0f, destination.y, 4.85f),
             destination
         };
     }

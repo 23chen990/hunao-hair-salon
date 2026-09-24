@@ -72,4 +72,12 @@ public sealed class SalonMobileNavigationTests
         game.Assign(customer, 1);
         Assert.That(SalonDemo.ShouldShowCustomerStatusAtStation(customer, false, false), Is.True);
     }
+
+    [Test]
+    public void ActionableMobileCustomerWinsOverCloserUnavailableCustomer()
+    {
+        Assert.IsTrue(SalonDemo.ShouldPreferMobileTarget(true, 1.7f, false, .7f));
+        Assert.IsFalse(SalonDemo.ShouldPreferMobileTarget(false, .7f, true, 1.7f));
+        Assert.IsTrue(SalonDemo.ShouldPreferMobileTarget(true, .7f, true, 1.7f));
+    }
 }

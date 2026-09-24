@@ -254,7 +254,7 @@ namespace HairSalon
         public const float EnteringSeconds = .8f;
         public const float MovingToStationSeconds = .7f;
         public const float FinishedFeedbackSeconds = 1.6f;
-        public const float LeavingSeconds = 3.4f;
+        public const float LeavingSeconds = 4.1f;
         private const float WrongServiceInterruptProgress = .3f;
         private struct AutoBlowTiming
         {
@@ -704,6 +704,19 @@ namespace HairSalon
         public void SelectCustomer(CustomerModel customer)
         {
             SelectCustomer(LocalPlayerId, customer);
+        }
+
+        /// <summary>
+        /// Marks a waiting customer as actively escorted by the player. The
+        /// mobile handoff uses this to stop the queue timer while the player
+        /// walks from the customer to a compatible station.
+        /// </summary>
+        public bool EngageCustomerForHandoff(CustomerModel customer)
+        {
+            if (customer == null || customer.State != CustomerState.Waiting || customer.HasServiceEngaged)
+                return false;
+            EngageService(customer);
+            return true;
         }
 
         public void SelectCustomer(int playerId, CustomerModel customer)
@@ -2327,8 +2340,10 @@ namespace HairSalon
 
         private float PatienceDrainMultiplier(CustomerModel customer)
         {
-            if (customer == null || customer.State == CustomerState.Entering || customer.State == CustomerState.Waiting)
+            if (customer == null || customer.State == CustomerState.Entering)
                 return 1f;
+            if (customer.State == CustomerState.Waiting)
+                return customer.HasServiceEngaged ? 0f : 1f;
             if (customer.State != CustomerState.Serving) return 0f;
             if (IsUninterruptibleOperation(customer))
                 return 0f;

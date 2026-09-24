@@ -53,7 +53,9 @@ namespace HairSalon
     /// </summary>
     public static class SalonMobileDayConfig
     {
-        public const float BusinessDurationSeconds = 120f;
+        // Match the active countdown of a short Overcooked-style service level.
+        // ClosingGrace remains a separate exit/settlement buffer.
+        public const float BusinessDurationSeconds = 180f;
         public const float ClosingGraceSeconds = 15f;
         public const int WaitingCapacity = 4;
         public const int MaxConcurrentCustomers = 6;
@@ -152,7 +154,9 @@ namespace HairSalon
             if (day == 1)
             {
                 if (progress < .3f) return Pick(new[] { "O001", "O002" }, index);
-                if (progress < .62f) return Pick(new[] { "O002", "O003" }, index);
+                // Mid-day traffic mixes wash-first and cut-first orders so
+                // neither service zone becomes a single bottleneck.
+                if (progress < .62f) return Pick(new[] { "O002", "O003", "O004" }, index);
                 if (progress < .86f) return Pick(new[] { "O003", "O004" }, index);
                 return Pick(new[] { "O004", "O005" }, index);
             }
@@ -167,6 +171,27 @@ namespace HairSalon
             if (progress < .18f) return Pick(new[] { "O001", "O002", "O003" }, index);
             if (progress < .52f) return Pick(new[] { "O003", "O004" }, index);
             return Pick(new[] { "O004", "O005" }, index);
+        }
+
+        /// <summary>
+        /// Selects the deterministic haircut rhythm for the mobile path.
+        /// The first haircut teaches the interaction with one tool; later
+        /// haircuts occasionally require a second pass at the same chair.
+        /// </summary>
+        public static SalonTool[] GetHaircutToolsForSpawn(int dayNumber, int spawnIndex)
+        {
+            int day = Math.Max(1, dayNumber);
+            int index = Math.Max(0, spawnIndex);
+            if (index == 0)
+                return new[] { SalonTool.Scissors };
+
+            // Keep a small amount of tool variety without making the opening
+            // order harder to read. Most later cuts use the approved
+            // scissors-to-thinning sequence; every fourth one is a one-step
+            // clipper order.
+            if ((day + index) % 4 == 0)
+                return new[] { SalonTool.Clippers };
+            return new[] { SalonTool.Scissors, SalonTool.ThinningShears };
         }
 
         public static DayEvaluation Evaluate(int dayNumber, int completedOrders, bool dayEnded)

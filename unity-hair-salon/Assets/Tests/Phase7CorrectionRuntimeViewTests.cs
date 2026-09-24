@@ -135,7 +135,7 @@ public sealed class Phase7CorrectionRuntimeViewTests
     }
 
     [Test]
-    public void EnteringResultClearsPendingWorldPaymentsWithoutIncome()
+    public void CompletedPaymentIsSettledBeforeResultAndCreatesNoWorldPickup()
     {
         var root = new GameObject("Corrected Phase7 Pickup Cleanup Runtime");
         var demo = root.AddComponent<SalonDemo>();
@@ -143,13 +143,15 @@ public sealed class Phase7CorrectionRuntimeViewTests
         SalonGameModel game = (SalonGameModel)Field(demo, "_game");
         PaymentDropModel drop = game.Payments.CreateFinalPayment(1, 1, 100, 20);
         InvokeWithArgument(demo, "HandlePaymentCreated", drop);
-        Assert.AreEqual(1, game.Payments.Drops.Count);
+        Assert.AreEqual(PaymentDropState.Collected, drop.State);
+        Assert.AreEqual(100, Controller(demo).Stats.OrderIncome);
+        Assert.AreEqual(20, Controller(demo).Stats.TipIncome);
 
         Controller(demo).ForceResult();
 
         Assert.AreEqual(0, game.Payments.Drops.Count);
-        Assert.AreEqual(0, Controller(demo).Stats.OrderIncome);
-        Assert.AreEqual(0, Controller(demo).Stats.TipIncome);
+        Assert.AreEqual(100, Controller(demo).Stats.OrderIncome);
+        Assert.AreEqual(20, Controller(demo).Stats.TipIncome);
         UnityEngine.Object.DestroyImmediate(root);
         DestroyRuntimeObjects();
     }

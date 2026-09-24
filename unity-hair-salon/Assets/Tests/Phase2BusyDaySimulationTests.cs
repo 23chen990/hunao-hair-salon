@@ -12,8 +12,8 @@ using NUnit.Framework;
 ///   1. 现有 Director 参数能不能自然产生 2 → 3 → 4 的并发爬升；
 ///   2. Day 1 的目标订单在一个称职玩家手里能不能达成。
 ///
-/// 注意：模拟里玩家是"瞬间移动"的（模型层没有玩家位置），因此真实游玩只会更忙，
-/// 这里的并发数字是保守下界。
+/// 注意：模型层没有玩家位置，模拟不证明实际触控体验；完整操作由 Chromium 回归检查。
+/// 压力测试单独禁用目标收客门槛，达标与结算测试使用真实目标。
 /// </summary>
 public sealed class Phase2BusyDaySimulationTests
 {
@@ -40,9 +40,9 @@ public sealed class Phase2BusyDaySimulationTests
     // ------------------------------------------------------------------ 验收
 
     [Test]
-    public void MobileDayOneNaturallyClimbsFromTwoToThreeAndPeaksAtFour()
+    public void UnfinishedMobileDayClimbsFromTwoToThreeAndPeaksAtFour()
     {
-        Report report = RunDay(1);
+        Report report = RunDay(1, pressureOnly: true);
 
         TestContext.Out.WriteLine(report.Trace);
 
@@ -61,7 +61,7 @@ public sealed class Phase2BusyDaySimulationTests
     [Test]
     public void ACompetentPlayerStillHasSeveralThingsPendingAtThePeak()
     {
-        Report report = RunDay(1);
+        Report report = RunDay(1, pressureOnly: true);
         Assert.GreaterOrEqual(report.PeakPendingActions, 3,
             "At the busiest moment the player must have at least three separate things waiting. " +
             "Trace: " + report.Trace);
@@ -88,7 +88,7 @@ public sealed class Phase2BusyDaySimulationTests
 
     // ------------------------------------------------------------------ 模拟器
 
-    private static Report RunDay(int dayNumber, bool playerActs = true)
+    private static Report RunDay(int dayNumber, bool playerActs = true, bool pressureOnly = false)
     {
         var game = new SalonGameModel(
             serviceConfig: SalonMobileDayConfig.CreateServiceConfig(),
@@ -100,6 +100,9 @@ public sealed class Phase2BusyDaySimulationTests
             });
         var day = new BusinessDayController(SalonMobileDayConfig.CreateForDay(dayNumber));
         day.StartDay(dayNumber);
+        // Test the existing traffic curve independently from the new early
+        // goal settlement; a completed goal correctly stops this curve early.
+        if (pressureOnly) day.Config.TargetOrders = int.MaxValue;
         day.StartBusiness();
         var director = new CustomerTrafficDirector(day.Config);
         var haircut = new HaircutConfig();
@@ -180,6 +183,13 @@ public sealed class Phase2BusyDaySimulationTests
                     StateBreakdown(game)));
         }
 
+        // The Demo collects earned payments on entry to Result, including the
+        // last customer's drop when the day ends without another gameplay tick.
+        foreach (PaymentDropModel drop in game.Payments.Drops)
+        {
+            game.Payments.BeginCollection(drop.Id);
+            if (game.Payments.CompleteCollection(drop.Id)) day.Stats.RecordPaymentCollected(drop);
+        }
         report.Spawned = day.Stats.SpawnedCustomers;
         report.CompletedOrders = day.Stats.CompletedOrders;
         report.Abandoned = day.Stats.AbandonedBeforeService;

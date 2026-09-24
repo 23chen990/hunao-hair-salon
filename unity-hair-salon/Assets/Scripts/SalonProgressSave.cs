@@ -20,6 +20,9 @@ namespace HairSalon
         public int DayNumber = 1;
         public int Balance;
         public bool AutoBlowPurchased;
+        // Optional field added without a schema bump: older JSON simply reads
+        // the missing value as false, while the pad purchase survives reloads.
+        public bool SupplyRackExpansionPurchased;
         public bool FirstDayComplete;
         public bool DaySettled;
         public int ShopSatisfaction = DefaultShopSatisfaction;
@@ -124,6 +127,7 @@ namespace HairSalon
                 DayNumber = DayNumber,
                 Balance = Balance,
                 AutoBlowPurchased = AutoBlowPurchased,
+                SupplyRackExpansionPurchased = SupplyRackExpansionPurchased,
                 FirstDayComplete = FirstDayComplete,
                 DaySettled = DaySettled,
                 ShopSatisfaction = ShopSatisfaction,

@@ -329,7 +329,8 @@ namespace HairSalon
             }
             _accidentByCustomer[customer.Id] = customer.AccidentSeverity;
 
-            if (customer.State == CustomerState.Finished && _servedCustomers.Add(customer.Id))
+            if (customer.State == CustomerState.Finished && customer.ServiceResult != CustomerServiceResult.Failed &&
+                _servedCustomers.Add(customer.Id))
             {
                 CompletedOrders++;
                 if (customer.ServiceResult == CustomerServiceResult.HappyCompletion) HappyCustomers++;
@@ -403,7 +404,7 @@ namespace HairSalon
     public sealed class BusinessDayController
     {
         private readonly CustomerTrafficDirector _trafficDirector;
-
+        private int _unfinishedOrders;
         public DayConfig Config { get; }
         public DayState State { get; private set; } = DayState.PreOpen;
         public int DayNumber { get; private set; } = 1;
@@ -413,7 +414,11 @@ namespace HairSalon
             Math.Max(0f, Math.Min(1f, 1f - BusinessRemainingTime / Config.BusinessDuration));
         public DayPressurePhase CurrentPressurePhase => _trafficDirector.GetPhase(BusinessProgress);
         public bool IsPaused { get; private set; }
-        public bool CanSpawnCustomers => State == DayState.Business && BusinessRemainingTime > 0f && !IsPaused;
+        private bool MobileGoalReached => Config.IsMobileProfile && Config.TargetOrders > 0 &&
+                                          Stats.CompletedOrders >= Config.TargetOrders;
+        public bool CanSpawnCustomers => State == DayState.Business && BusinessRemainingTime > 0f &&
+                                         !IsPaused && (!Config.IsMobileProfile || Config.TargetOrders <= 0 ||
+                                         Stats.CompletedOrders + _unfinishedOrders < Config.TargetOrders);
         public DayStats Stats { get; private set; }
         public ShopReputationModel Reputation { get; }
         public DayEvaluation CurrentDayEvaluation => EvaluateDay();
@@ -435,6 +440,7 @@ namespace HairSalon
             if (Config.IsMobileProfile)
                 SalonMobileDayConfig.ApplyForDay(Config, DayNumber);
             Stats = new DayStats(DayNumber);
+            _unfinishedOrders = 0;
             BusinessRemainingTime = Math.Max(0f, Config.BusinessDuration);
             ClosingGraceRemainingTime = Math.Max(0f, Config.ClosingGraceDuration);
             IsPaused = false;
@@ -449,21 +455,45 @@ namespace HairSalon
 
         public void Tick(float dt, int activeCustomerCount)
         {
+            TickWithAdmissionCount(dt, activeCustomerCount, activeCustomerCount, 0);
+        }
+
+        public void Tick(float dt, int activeCustomerCount, int pendingSettlementCount)
+        {
+            TickWithAdmissionCount(dt, activeCustomerCount, activeCustomerCount, pendingSettlementCount);
+        }
+
+        /// <summary>
+        /// Advances the day with separate lifecycle and admission counts.
+        /// Finished/Leaving customers still keep the day alive until their
+        /// visible exit route completes, but they are already completed (or
+        /// already failed) and must not consume another unfinished-order slot.
+        /// </summary>
+        public void TickWithAdmissionCount(float dt, int activeUntilExitCount,
+            int unfinishedOrderCount, int pendingSettlementCount = 0)
+        {
+            _unfinishedOrders = Math.Max(0, unfinishedOrderCount);
             if (IsPaused || State == DayState.PreOpen || State == DayState.Result ||
                 State == DayState.ClosedManagement) return;
             float step = Math.Max(0f, dt);
+            int pending = Math.Max(0, pendingSettlementCount);
+            if (MobileGoalReached && activeUntilExitCount <= 0 && pending <= 0)
+            {
+                SetState(DayState.Result);
+                return;
+            }
             if (State == DayState.Business)
             {
                 BusinessRemainingTime = Math.Max(0f, BusinessRemainingTime - step);
                 if (BusinessRemainingTime <= 0f)
                 {
-                    if (activeCustomerCount <= 0) SetState(DayState.Result);
+                    if (activeUntilExitCount <= 0 && pending <= 0) SetState(DayState.Result);
                     else SetState(DayState.ClosingGrace);
                 }
                 return;
             }
             ClosingGraceRemainingTime = Math.Max(0f, ClosingGraceRemainingTime - step);
-            if (activeCustomerCount <= 0 || ClosingGraceRemainingTime <= 0f)
+            if ((activeUntilExitCount <= 0 && pending <= 0) || ClosingGraceRemainingTime <= 0f)
                 SetState(DayState.Result);
         }
 

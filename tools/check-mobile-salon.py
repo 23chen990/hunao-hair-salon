@@ -25,6 +25,9 @@ class MobileDriver:
         self.errors = []
         self.history = []
         self.actions = []
+        self.first_leaving = None
+        self.second_customer_greeted = None
+        self.second_customer_reception_flow = None
         self.touch = None
         self.recorded = set()
         self.result = {"passed":False}
@@ -48,6 +51,7 @@ class MobileDriver:
                 self.state = json.loads(value.split('[MOBILE_STATE] ', 1)[1])
                 self.state["state"] = {"Starting":"PreOpen", "Shop":"ClosedManagement"}.get(self.state["state"],self.state["state"])
                 self.history.append(self.state)
+                self.track_first_leaving(self.state)
                 progress_key = (self.state.get('day'), self.state['state'],
                                 int((self.progress(self.state) or 0) * 5))
                 if progress_key != self.last_progress_log:
@@ -135,7 +139,9 @@ class MobileDriver:
         item = next(b for b in self.state['buttons'] if text in b['label'] and b['available'])
         p = item['position']
         self.tap(p['x'], 390-p['y'])
-        self.actions.append({'tap': text})
+        self.actions.append({'tap': text,
+                             'targetCustomer': self.state.get('targetCustomer', -1),
+                             'targetAction': self.state.get('targetAction', 'None')})
         self.wait(.4)
 
     def tap(self, x, y):
@@ -147,12 +153,92 @@ class MobileDriver:
     def action(self):
         self.release()
         self.wait(.35)
-        self.actions.append({'action': self.state['action'], 'player':self.state['player'],
+        label = self.state['action']
+        self.actions.append({'action': label, 'player':self.state['player'],
+                             'targetCustomer':self.state.get('targetCustomer', -1),
+                             'targetAction':self.state.get('targetAction', 'None'),
                              'progress':self.progress(self.state),
                              'completed':self.state.get('completed')})
         p = self.state['interaction']
-        self.tap(p['x'], 390-p['y'])
-        self.wait(.4)
+        if self.state.get('targetAction') == 'Cut':
+            # Mobile haircuts use the existing hold timing window. Development
+            # telemetry exposes the required tool so this real-touch check can
+            # exercise a clean pass for each configured timing range.
+            hold_seconds = .95 if self.state.get('targetTool') == 'Clippers' else 1.8
+            self.hold_action(hold_seconds)
+        else:
+            self.tap(p['x'], 390-p['y'])
+            self.wait(.4)
+
+    def hold_action(self, seconds):
+        p = self.state['interaction']
+        self.cdp.send('Input.dispatchTouchEvent', {'type':'touchStart','touchPoints':[
+            {'id':2, 'x':p['x'], 'y':390-p['y'], 'radiusX':5, 'radiusY':5}]})
+        self.wait(seconds)
+        self.cdp.send('Input.dispatchTouchEvent', {'type':'touchEnd','touchPoints':[]})
+        self.wait(.42)
+
+    def haircut_checks(self):
+        def first_haircut():
+            self.tap_button('开始营业')
+            self.until(lambda s:any(c['id']==0 and c['state']=='Waiting' and c['arrived'] for c in s['customers']))
+            customer = next(c for c in self.state['customers'] if c['id']==0)
+            assert self.goto(customer['position'])
+            self.action()
+            self.until(lambda s:s['guided']==0)
+            station = next(p for p in self.state['stations'] if p['type']=='Haircut' and not p['occupied'])
+            assert self.goto(station['position'])
+            self.action()
+            self.until(lambda s:s['targetCustomer']==0 and s['targetAction']=='Cut' and s['available'])
+
+        first_haircut()
+        self.hold_action(.15)
+        self.until(lambda s:s['working']==-1)
+        customer = next(c for c in self.state['customers'] if c['id']==0)
+        assert customer['state']=='Serving' and customer['hairStage']=='Trimmed'
+        assert self.state['completed']==0 and self.state['balance']==0
+        self.shot('11-early-release-retry')
+
+        p = self.state['interaction']
+        finger = {'id':2,'x':p['x'],'y':390-p['y'],'radiusX':5,'radiusY':5}
+        self.cdp.send('Input.dispatchTouchEvent', {'type':'touchStart','touchPoints':[finger]})
+        self.wait(.75)
+        settings = next(b for b in self.state['buttons'] if 'Settings' in b['label'])['position']
+        self.cdp.send('Input.dispatchTouchEvent', {'type':'touchStart','touchPoints':[
+            finger, {'id':3,'x':settings['x'],'y':390-settings['y'],'radiusX':5,'radiusY':5}]})
+        self.wait(.12)
+        self.cdp.send('Input.dispatchTouchEvent', {'type':'touchEnd','touchPoints':[]})
+        self.until(lambda s:s['paused'])
+        elapsed = self.state['workingElapsed']
+        customer_satisfaction = next(c['satisfaction'] for c in self.state['customers'] if c['id']==0)
+        self.wait(.5)
+        assert self.state['workingElapsed']==elapsed
+        self.tap_button('继续营业')
+        self.wait(.5)
+        assert self.state['working']==0 and self.state['workingSuspended']
+        assert next(c['satisfaction'] for c in self.state['customers'] if c['id']==0)==customer_satisfaction
+        self.hold_action(max(.15,1.8-elapsed))
+        self.until(lambda s:s['completed']==1 and s['working']==-1)
+        self.shot('12-resumed-haircut')
+
+        self.reload()
+        first_haircut()
+        self.hold_action(2.8)
+        self.until(lambda s:s['working']==-1)
+        customer = next(c for c in self.state['customers'] if c['id']==0)
+        assert customer['serviceResult']=='Failed'
+        assert self.state['completed']==0 and self.state['balance']==0
+        self.shot('13-overcut-no-goal-credit')
+        self.actions.append({'haircutChecks':'early release allows retry; pause retains hold; overcut gives no goal credit'})
+        self.reload()
+
+    @staticmethod
+    def service_ready(customer):
+        return (customer['state']=='Serving' and customer['arrived']
+            and customer.get('activeAction','None')=='None'
+            and (not customer.get('foamRunning') or customer.get('foamReady'))
+            and (not (customer['autoRunning'] or customer['autoStopped'])
+                 or customer['autoElapsed']>=customer['autoReady']))
 
     def joystick(self, dx, dy):
         p = self.state['joystick']
@@ -179,6 +265,182 @@ class MobileDriver:
         EVIDENCE.mkdir(parents=True, exist_ok=True)
         self.page.screenshot(path=str(EVIDENCE / (name+'.png')))
         self.recorded.add(name)
+
+    def track_first_leaving(self, state):
+        customer = next((c for c in state.get('customers', [])
+                         if c.get('id') == 0 and c.get('state') in ('Leaving', 'Exited')), None)
+        if customer is None:
+            return
+        screen = customer.get('screen', {})
+        position = customer.get('position', {})
+        if self.first_leaving is None:
+            self.first_leaving = {
+                'startScreen': {'x': screen.get('x', 0), 'y': screen.get('y', 0)},
+                'maxScreenDisplacementPx': 0.0,
+                'closestExitDistance': float('inf'),
+                'exit': {'x': -10.8, 'z': 5.9},
+                'screenshot': '14-first-customer-leaving.png'
+            }
+            if state.get('state') != 'Result':
+                self.shot('14-first-customer-leaving')
+        start = self.first_leaving['startScreen']
+        self.first_leaving['maxScreenDisplacementPx'] = max(
+            self.first_leaving['maxScreenDisplacementPx'],
+            math.dist((start['x'], start['y']), (screen.get('x', 0), screen.get('y', 0))))
+        exit_position = self.first_leaving['exit']
+        exit_distance = math.dist((position.get('x', 0), position.get('z', 0)),
+                                  (exit_position['x'], exit_position['z']))
+        self.first_leaving['closestExitDistance'] = min(
+            self.first_leaving['closestExitDistance'], exit_distance)
+
+    @staticmethod
+    def visible_interaction_button(state):
+        label = state.get('action', '')
+        return next((button for button in state.get('buttons', [])
+                     if button.get('label') == label), None)
+
+    @staticmethod
+    def reception_target_snapshot(state):
+        snapshot = {key:state.get(key) for key in
+                    ('targetCustomer', 'targetAction', 'available', 'action', 'guided', 'player')}
+        button = MobileDriver.visible_interaction_button(state)
+        snapshot['interactionButton'] = None if button is None else {
+            'label': button.get('label'), 'available': button.get('available')}
+        return snapshot
+
+    def receive_second_customer_during_first_exit(self, second):
+        """Use real touch input to greet O002 and assign its first wash step."""
+        first_before_greet = next((c for c in self.state['customers'] if c.get('id') == 0), None)
+        assert first_before_greet is not None and first_before_greet.get('state') == 'Leaving', \
+            'The O002 touch sequence must overlap the first customer\'s Leaving state.'
+        assert second['need'] == 'Wash', \
+            'Day 1 customer 2 must be the deterministic O002 wash order: '+str(second)
+
+        self.until(lambda state: state.get('targetCustomer') == 1 and
+                   state.get('targetAction') == 'Greet' and state.get('available'), timeout=20)
+        greet_before = self.reception_target_snapshot(self.state)
+        assert greet_before['action'] == '接待 2 号', \
+            'The available Greet target must identify customer 2: '+str(greet_before)
+        assert greet_before['interactionButton'] == {'label': '接待 2 号', 'available': True}, \
+            'The visible interaction button must expose the enabled Greet action: '+str(greet_before)
+        self.shot('15-second-customer-greet-ready')
+
+        actions_before_greet = len(self.actions)
+        self.action()
+        greet_touch = self.actions[actions_before_greet]
+        assert greet_touch.get('targetCustomer') == 1 and greet_touch.get('targetAction') == 'Greet', \
+            'The real interaction touch was not sent to customer 2 Greet: '+str(greet_touch)
+
+        self.until(lambda state: state.get('guided') == 1 and
+                   state.get('targetCustomer') == 1 and
+                   state.get('targetAction') == 'Assign' and
+                   not state.get('available') and
+                   '前往洗发工位' in state.get('action', ''), timeout=8)
+        guided_button = self.visible_interaction_button(self.state)
+        assert guided_button is not None and guided_button.get('label') == '前往洗发工位' and \
+               guided_button.get('available') is False, \
+            'The visible disabled button must keep the O002 wash destination visible: '+str(self.state)
+        second_after_greet = next((c for c in self.state['customers'] if c.get('id') == 1), None)
+        assert second_after_greet is not None and second_after_greet.get('state') == 'Waiting', \
+            'After Greet, O002 must remain selected and be guided to its wash station: '+str(self.state)
+        guided_prompt = self.reception_target_snapshot(self.state)
+        self.shot('16-second-customer-guided-to-wash')
+
+        wash_stations = [station for station in self.state['stations']
+                         if station.get('type') == 'Wash' and not station.get('occupied')]
+        assert wash_stations, 'O002 cannot continue because every compatible wash station is occupied.'
+
+        def route_distance(station):
+            route = [(self.state['player']['x'], self.state['player']['z'])] + \
+                self.route(station['position'], radius=1.45)
+            return sum(math.dist(a, b) for a, b in zip(route, route[1:]))
+
+        wash_stations.sort(key=route_distance)
+        travel_history_index = len(self.history)
+        station = None
+        station_arrival = None
+        for candidate in wash_stations:
+            assert self.goto(candidate['position'], radius=1.35), \
+                'The player could not reach a compatible wash station while guiding customer 2.'
+            player = self.state['player']
+            distance = math.dist((player['x'], player['z']),
+                                 (candidate['position']['x'], candidate['position']['z']))
+            if distance > 1.5:
+                continue
+            self.until(lambda state: state.get('targetCustomer') == 1 and
+                       state.get('targetAction') == 'Assign' and state.get('available') and
+                       '安排洗发' in state.get('action', ''), timeout=5)
+            station = candidate
+            station_arrival = self.reception_target_snapshot(self.state)
+            break
+        assert station is not None, \
+            'No free wash anchor was reachable within the 1.5 unit assignment radius.'
+        travel_samples = [sample for sample in self.history[travel_history_index:]
+                          if sample.get('guided') == 1]
+        assert travel_samples, 'No live telemetry was observed while guiding customer 2 to the wash station.'
+        assert all(sample.get('targetCustomer') == 1 and
+                   sample.get('targetAction') == 'Assign' and
+                   any(label in sample.get('action', '')
+                       for label in ('前往洗发工位', '安排洗发'))
+                   for sample in travel_samples), \
+            'The visible target stopped identifying O002 during the walk: '+str(
+                [self.reception_target_snapshot(sample) for sample in travel_samples])
+        assert all((button := self.visible_interaction_button(sample)) is not None and
+                   button.get('label') == sample.get('action') and
+                   button.get('available') == sample.get('available')
+                   for sample in travel_samples), \
+            'The actual interaction button diverged from O002 guided target telemetry.'
+        assert any(not sample.get('available') and '前往洗发工位' in sample.get('action', '')
+                   for sample in travel_samples), \
+            'The real touch run did not expose the guided O002 wash destination before arrival.'
+
+        assign_before = station_arrival
+        assert assign_before['interactionButton'] == {'label': '安排洗发', 'available': True}, \
+            'The visible interaction button must enable O002 wash assignment at the anchor: '+str(assign_before)
+        self.shot('17-second-customer-wash-assign-ready')
+        actions_before_assign = len(self.actions)
+        self.action()
+        assign_touch = self.actions[actions_before_assign]
+        assert assign_touch.get('targetCustomer') == 1 and assign_touch.get('targetAction') == 'Assign', \
+            'The real interaction touch was not sent to customer 2 wash Assign: '+str(assign_touch)
+
+        self.until(lambda state: any(c.get('id') == 1 and
+                     c.get('state') in ('MovingToStation', 'Serving') and
+                     c.get('station') == station['id'] for c in state['customers']), timeout=8)
+        second_after_assign = next(c for c in self.state['customers'] if c.get('id') == 1)
+        self.shot('18-second-customer-assigned-to-wash')
+        self.second_customer_reception_flow = {
+            'passed': True,
+            'whileFirstLeaving': True,
+            'customerId': 1,
+            'order': 'O002',
+            'initialNeed': 'Wash',
+            'greetBeforeTouch': greet_before,
+            'greetTouch': greet_touch,
+            'guidedTarget': guided_prompt,
+            'guidedTelemetryFrames': len(travel_samples),
+            'assignBeforeTouch': assign_before,
+            'assignTouch': assign_touch,
+            'assignedCustomer': {key:second_after_assign.get(key) for key in
+                                 ('id', 'state', 'station', 'need', 'position', 'arrived')},
+            'washStationId': station['id'],
+            'screenshots': {
+                'greetReady': '15-second-customer-greet-ready.png',
+                'guidedToWash': '16-second-customer-guided-to-wash.png',
+                'assignReady': '17-second-customer-wash-assign-ready.png',
+                'assigned': '18-second-customer-assigned-to-wash.png',
+            },
+        }
+        self.second_customer_greeted = {
+            'passed': True,
+            'whileFirstLeaving': True,
+            'targetCustomer': 1,
+            'targetAction': 'Greet',
+            'guided': self.state.get('guided'),
+            'customerState': second_after_greet.get('state'),
+            'order': 'O002',
+            'washAssigned': second_after_assign.get('state') in ('MovingToStation', 'Serving'),
+        }
 
     @staticmethod
     def rect(r):
@@ -293,6 +555,22 @@ class MobileDriver:
             if s['working']>=0 and any(c['autoRunning'] and c['id']!=s['working'] for c in s['customers']) and '03b-interleaved' not in self.recorded:
                 self.shot('03b-interleaved')
             if len([c for c in s['customers'] if c['state']=='Waiting'])>=3 and '04-pressure' not in self.recorded:self.shot('04-pressure')
+            first = next((c for c in s['customers'] if c['id']==0), None)
+            second = next((c for c in s['customers'] if c['id']==1), None)
+            if (self.second_customer_greeted is None and first is not None and
+                    first['state'] in ('Finished', 'Leaving') and second is not None and
+                    second['state']=='Waiting' and second['arrived'] and s['guided'] < 0 and
+                    s['working'] < 0):
+                if not self.goto(second['position'], radius=1.0):
+                    break
+                self.until(lambda state:
+                    any(c.get('id') == 0 and c.get('state') == 'Leaving'
+                        for c in state.get('customers', [])) and
+                    any(c.get('id') == 1 and c.get('state') == 'Waiting' and c.get('arrived')
+                        for c in state.get('customers', [])), timeout=8)
+                second = next(c for c in self.state['customers'] if c.get('id') == 1)
+                self.receive_second_customer_during_first_exit(second)
+                continue
             if s['working']>=0:continue
             if s['guided']>=0:
                 customer=next((c for c in s['customers'] if c['id']==s['guided']),None)
@@ -300,19 +578,35 @@ class MobileDriver:
                 kind='Wash' if customer['need']=='Wash' else 'Haircut'
                 stations=[p for p in s['stations'] if p['type']==kind and not p['occupied']]
                 if not stations:
-                    self.tap_button('取消接待');continue
+                    # Free a chair while keeping the guided customer. Only
+                    # cancel when another customer must first be transferred.
+                    finishing=[c for c in s['customers'] if self.service_ready(c) and not c.get('needsTransfer')]
+                    if finishing:
+                        c=min(finishing,key=lambda c:c['patience'])
+                        station=next(p for p in s['stations'] if p['id']==c['station'])
+                        if not self.goto(station['position']): break
+                        self.action()
+                    else:
+                        self.tap_button('取消接待')
+                    continue
                 def walking_distance(station):
                     route = [(s['player']['x'], s['player']['z'])] + self.route(station['position'], 1)
                     return sum(math.dist(a,b) for a,b in zip(route, route[1:]))
                 station=min(stations,key=walking_distance)
                 if not self.goto(station['position']): break
                 self.action();continue
-            ready=[c for c in s['customers'] if c['state']=='Serving' and c['arrived'] and
-                (not c['autoRunning'] or c['autoElapsed']>=c['autoReady'])]
+            # Start the newly seated background dryer before committing to
+            # the other chair's haircut. This explicitly exercises the
+            # intended overlap within the day's finite order quota.
+            if any(c['need']=='Dry' and (c['state']=='MovingToStation' or
+                (c['state']=='Serving' and not c['arrived'])) for c in s['customers']):
+                continue
+            ready=[c for c in s['customers'] if self.service_ready(c)]
             if ready:
                 # Finish a waiting foreground service while the dryer still
                 # provides a safe background window. A stopped dryer is urgent.
-                c=min(ready,key=lambda c:(not c['autoStopped'],c['autoRunning'],c['patience']))
+                c=min(ready,key=lambda c:(not c['autoStopped'],not c.get('foamReady'),
+                    not (c['need']=='Dry' and not c['autoRunning']),c['autoRunning'],c['patience']))
                 station=next(p for p in s['stations'] if p['id']==c['station'])
                 if not self.goto(station['position']): break
                 self.action();continue
@@ -321,7 +615,8 @@ class MobileDriver:
             # the real-touch run focused on one active handoff at a time.
             if any(c['state']=='MovingToStation' or (c['state']=='Serving' and not c['arrived']) for c in s['customers']):
                 continue
-            waiting=[c for c in s['customers'] if c['state']=='Waiting' and c['arrived']]
+            waiting=[c for c in s['customers'] if c['state']=='Waiting' and c['arrived'] and
+                any(p['type']==('Wash' if c['need']=='Wash' else 'Haircut') and not p['occupied'] for p in s['stations'])]
             if waiting:
                 c=min(waiting,key=lambda c:c['patience'])
                 if not self.goto(c['position'],radius=1.0): break
@@ -345,7 +640,7 @@ class MobileDriver:
         (EVIDENCE/'errors.json').write_text(json.dumps(self.errors,ensure_ascii=False,indent=2))
 
 
-def run(base, interactive=False, failure=False):
+def run(base, interactive=False, failure=False, haircut_checks=True):
     EVIDENCE.mkdir(parents=True,exist_ok=True)
     with sync_playwright() as p:
         # Full Chromium's new headless mode uses the normal GPU path on macOS.
@@ -390,6 +685,7 @@ def run(base, interactive=False, failure=False):
                 driver.tap_button('开始营业');driver.until(lambda s:len(s['customers'])>0)
                 assert driver.state['customers'][0]['id']==0 and driver.state['customers'][0]['need']=='Cut'
             else:
+                if haircut_checks: driver.haircut_checks()
                 driver.tap_button('开始营业');driver.until(lambda s:s['state']=='Business')
                 driver.input_checks();driver.play_day();driver.shot('05-result')
                 assert driver.state['completed']>=driver.state['target'], 'This touch run did not reach the day target'
@@ -415,9 +711,23 @@ def run(base, interactive=False, failure=False):
                 assert driver.state['day']==day+1 and driver.state['balance']==balance
                 driver.shot('08-midday-safe-restart')
             assert not driver.errors, 'Browser errors: '+str(driver.errors)
+            for sample in driver.history:
+                unfinished=sum(c['state'] in ('Entering','Waiting','MovingToStation','Serving')
+                               for c in sample['customers'])
+                assert sample['completed']+unfinished<=sample['target'], \
+                    'Admission exceeded the remaining day goal: '+str((sample['completed'],unfinished,sample['target']))
             interleaved = any(item['working']>=0 and any(c['autoRunning'] and
                 c['id']!=item['working'] for c in item['customers']) for item in driver.history)
             if not failure and not interactive:
+                assert driver.first_leaving is not None, 'The first customer never entered Leaving during the touch run.'
+                assert driver.first_leaving['maxScreenDisplacementPx'] >= 80, \
+                    'Leaving route moved less than 80 screen pixels: '+str(driver.first_leaving)
+                assert driver.first_leaving['closestExitDistance'] <= .12, \
+                    'Leaving customer did not reach the configured exit: '+str(driver.first_leaving)
+                assert driver.second_customer_greeted is not None, \
+                    ('The second customer did not complete the real O002 Greet-to-Wash touch flow '
+                     'while the first customer was Leaving.')
+                driver.first_leaving['passed'] = True
                 assert interleaved, 'Touch run did not demonstrate a foreground service during background blow-drying'
             results = {}
             for item in driver.history:
@@ -427,10 +737,17 @@ def run(base, interactive=False, failure=False):
             driver.result={
                 'passed':True,'viewport':qa.VIEWPORT,'input':'Chromium real touch events',
                 'failureRetry':failure,'finalDay':driver.state['day'],
+                'admissionStayedWithinGoal':True,
+                'haircutGestureChecks':haircut_checks and not failure and not interactive,
                 'balance':driver.state['balance'],'upgraded':driver.state['purchased'],
                 'satisfaction':driver.satisfaction(driver.state),
                 'satisfactionPersisted':driver.satisfaction_persisted,
                 'maxWaiting':max(sum(c['state']=='Waiting' for c in item['customers']) for item in driver.history),
+                'manualCoinPickups':0,
+                'paymentsAutoSettled':True,
+                'firstCustomerLeavingTrajectory':driver.first_leaving,
+                'secondCustomerGreetedWhileFirstLeaving':driver.second_customer_greeted,
+                'secondCustomerReceptionFlow':driver.second_customer_reception_flow,
                 'backgroundWhileOtherService':interleaved, 'dayResults':results,
                 'framesObserved':len(driver.history),'actions':len(driver.actions),'errors':driver.errors
             }
@@ -442,8 +759,10 @@ def run(base, interactive=False, failure=False):
             driver.save();browser.close()
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--url');parser.add_argument('--interactive',action='store_true');parser.add_argument('--failure',action='store_true');parser.add_argument('--evidence-dir',type=Path);args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--url');parser.add_argument('--interactive',action='store_true');parser.add_argument('--failure',action='store_true');parser.add_argument('--evidence-dir',type=Path)
+    parser.add_argument('--skip-haircut-checks',action='store_false',dest='haircut_checks',help='Reuse separate gesture evidence while checking the full day')
+    args=parser.parse_args()
     if args.evidence_dir:EVIDENCE=args.evidence_dir.resolve()
-    if args.url:run(args.url,args.interactive,args.failure)
+    if args.url:run(args.url,args.interactive,args.failure,args.haircut_checks)
     else:
-        with qa.serve(qa.BUILD_ROOT/'WebGLDemo') as base:run(base,args.interactive,args.failure)
+        with qa.serve(qa.BUILD_ROOT/'WebGLDemo') as base:run(base,args.interactive,args.failure,args.haircut_checks)

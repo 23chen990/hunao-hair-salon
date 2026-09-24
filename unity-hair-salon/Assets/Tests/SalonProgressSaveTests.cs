@@ -27,6 +27,7 @@ public sealed class SalonProgressSaveTests
         AssertField(dataType, "DayNumber", typeof(int));
         AssertField(dataType, "Balance", typeof(int));
         AssertField(dataType, "AutoBlowPurchased", typeof(bool));
+        AssertField(dataType, "SupplyRackExpansionPurchased", typeof(bool));
         AssertField(dataType, "FirstDayComplete", typeof(bool));
         AssertField(dataType, "DaySettled", typeof(bool));
         AssertField(dataType, "ShopSatisfaction", typeof(int));
@@ -124,6 +125,18 @@ public sealed class SalonProgressSaveTests
         object loaded = Invoke(repository, "Load");
         Assert.IsNotNull(loaded);
         Assert.AreEqual(90, GetField(loaded, "ShopSatisfaction"));
+        Assert.IsFalse((bool)GetField(loaded, "SupplyRackExpansionPurchased"));
+    }
+
+    [Test]
+    public void ClonePreservesSupplyRackExpansionPurchase()
+    {
+        var data = SalonProgressData.CreateDefault();
+        data.SupplyRackExpansionPurchased = true;
+
+        SalonProgressData clone = data.Clone();
+
+        Assert.IsTrue(clone.SupplyRackExpansionPurchased);
     }
 
     private static object CreateRepository()

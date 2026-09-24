@@ -1178,6 +1178,301 @@
         "DepthOffset": 0,
         "SortByWorldZ": false
       }
+    },
+    {
+      "Id": "furniture-supply-crate",
+      "DisplayName": "洗发补给箱（程序化灰盒）",
+      "Category": "stage1-supply-source",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/supply-crate",
+      "Status": "review",
+      "Directions": [
+        "free"
+      ],
+      "DefaultOrientation": "free",
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 1.7,
+          "y": 1.2
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 1.45,
+          "y": 0.95
+        }
+      },
+      "Shadow": {
+        "Mode": "procedural",
+        "Enabled": true,
+        "Size": {
+          "x": 1.55,
+          "y": 1.05
+        },
+        "Offset": {
+          "x": 0,
+          "y": -0.04
+        },
+        "Opacity": 0.24,
+        "Softness": 0.8
+      },
+      "InteractionAnchors": [
+        {
+          "Id": "pickup",
+          "Position": {
+            "x": 0,
+            "y": 0,
+            "z": -0.86
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        }
+      ],
+      "RequiredAnchors": [
+        "pickup"
+      ],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 1,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
+    },
+    {
+      "Id": "furniture-wash-supply-rack",
+      "DisplayName": "共享洗发补给架（程序化灰盒）",
+      "Category": "stage1-supply-buffer",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/wash-supply-rack",
+      "Status": "review",
+      "Directions": [
+        "back-wall",
+        "free"
+      ],
+      "DefaultOrientation": "back-wall",
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 2.4,
+          "y": 1.05
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 2.15,
+          "y": 0.82
+        }
+      },
+      "Shadow": {
+        "Mode": "procedural",
+        "Enabled": true,
+        "Size": {
+          "x": 2.25,
+          "y": 0.9
+        },
+        "Offset": {
+          "x": 0,
+          "y": -0.04
+        },
+        "Opacity": 0.22,
+        "Softness": 0.82
+      },
+      "InteractionAnchors": [
+        {
+          "Id": "pickup",
+          "Position": {
+            "x": 0,
+            "y": 0,
+            "z": -0.76
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        {
+          "Id": "dropoff",
+          "Position": {
+            "x": 0,
+            "y": 0,
+            "z": 0.76
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": -1
+          }
+        }
+      ],
+      "RequiredAnchors": [
+        "pickup",
+        "dropoff"
+      ],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 1,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
+    },
+    {
+      "Id": "prop-wash-kit",
+      "DisplayName": "洗发用品包（程序化灰盒）",
+      "Category": "stage1-supply-item",
+      "Type": "prop",
+      "ResourcePath": "builtin://prop/wash-kit",
+      "Status": "review",
+      "Directions": [
+        "free"
+      ],
+      "DefaultOrientation": "free",
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 0.34,
+          "y": 0.28
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 0.28,
+          "y": 0.22
+        }
+      },
+      "Shadow": {
+        "Mode": "procedural",
+        "Enabled": true,
+        "Size": {
+          "x": 0.3,
+          "y": 0.24
+        },
+        "Offset": {
+          "x": 0,
+          "y": 0
+        },
+        "Opacity": 0.2,
+        "Softness": 0.78
+      },
+      "InteractionAnchors": [],
+      "RequiredAnchors": [],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 2,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
+    },
+    {
+      "Id": "expansion-pad-wash-rack",
+      "DisplayName": "洗发补给架施工点（程序化灰盒）",
+      "Category": "stage2-proximity-expansion",
+      "Type": "prop",
+      "ResourcePath": "builtin://prop/expansion-pad-wash-rack",
+      "Status": "review",
+      "Directions": [
+        "free"
+      ],
+      "DefaultOrientation": "free",
+      "Pivot": {
+        "x": 0.5,
+        "y": 0
+      },
+      "Footprint": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 2.2,
+          "y": 2.2
+        }
+      },
+      "Collision": {
+        "Center": {
+          "x": 0,
+          "y": 0
+        },
+        "Size": {
+          "x": 1.8,
+          "y": 1.8
+        }
+      },
+      "Shadow": {
+        "Mode": "procedural",
+        "Enabled": true,
+        "Size": {
+          "x": 1.9,
+          "y": 1.9
+        },
+        "Offset": {
+          "x": 0,
+          "y": 0
+        },
+        "Opacity": 0.16,
+        "Softness": 0.9
+      },
+      "InteractionAnchors": [
+        {
+          "Id": "stand",
+          "Position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "Facing": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        }
+      ],
+      "RequiredAnchors": [
+        "stand"
+      ],
+      "Sorting": {
+        "Layer": "Default",
+        "Order": 1,
+        "DepthOffset": 0,
+        "SortByWorldZ": true
+      }
     }
   ]
 }
