@@ -13,6 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE = ROOT / 'unity-hair-salon/Builds/MobileEvidence'
 MAX_DAY_WALL_SECONDS = 8 * 60
 MAX_GOTO_WALL_SECONDS = 45
+SUPPLY_SOURCE = {'x': 8.35, 'y': .2, 'z': .7}
+SUPPLY_RACK = {'x': -1.25, 'y': .2, 'z': 4.6}
 spec = importlib.util.spec_from_file_location('salon_browser', ROOT/'tools/browser-check.py')
 qa = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(qa)
@@ -49,6 +51,9 @@ class MobileDriver:
         if '[MOBILE_STATE] ' in value:
             try:
                 self.state = json.loads(value.split('[MOBILE_STATE] ', 1)[1])
+                if not isinstance(self.state, dict):
+                    self.state = None
+                    return
                 self.state["state"] = {"Starting":"PreOpen", "Shop":"ClosedManagement"}.get(self.state["state"],self.state["state"])
                 self.history.append(self.state)
                 self.track_first_leaving(self.state)
@@ -572,6 +577,21 @@ class MobileDriver:
                 self.receive_second_customer_during_first_exit(second)
                 continue
             if s['working']>=0:continue
+            # The wash step consumes the shared rack stock. Keep this as a
+            # real joystick route so the formal mobile check covers pickup,
+            # unload and wash consumption instead of silently using a model
+            # fixture.
+            active_wash = any(c['need']=='Wash' and c['state']=='Serving' and
+                              self.service_ready(c) for c in s['customers'])
+            if active_wash and s.get('washRackWashKits', 0) <= 0:
+                if s.get('carriedWashKits', 0) > 0:
+                    if not self.goto(SUPPLY_RACK, radius=.7): break
+                    self.wait(.5)
+                    continue
+                if s.get('sourceWashKits', 0) > 0:
+                    if not self.goto(SUPPLY_SOURCE, radius=.7): break
+                    self.wait(.5)
+                    continue
             if s['guided']>=0:
                 customer=next((c for c in s['customers'] if c['id']==s['guided']),None)
                 if not customer:continue

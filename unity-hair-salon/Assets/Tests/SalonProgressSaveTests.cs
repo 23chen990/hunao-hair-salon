@@ -28,6 +28,7 @@ public sealed class SalonProgressSaveTests
         AssertField(dataType, "Balance", typeof(int));
         AssertField(dataType, "AutoBlowPurchased", typeof(bool));
         AssertField(dataType, "SupplyRackExpansionPurchased", typeof(bool));
+        AssertField(dataType, "SupplyRackExpansionPaid", typeof(int));
         AssertField(dataType, "FirstDayComplete", typeof(bool));
         AssertField(dataType, "DaySettled", typeof(bool));
         AssertField(dataType, "ShopSatisfaction", typeof(int));
@@ -139,6 +140,49 @@ public sealed class SalonProgressSaveTests
         Assert.IsTrue(clone.SupplyRackExpansionPurchased);
     }
 
+    [Test]
+    public void ClonePreservesPartialSupplyRackExpansionPayment()
+    {
+        FieldInfo paidField = typeof(SalonProgressData).GetField("SupplyRackExpansionPaid");
+        Assert.IsNotNull(paidField);
+        var data = SalonProgressData.CreateDefault();
+        paidField.SetValue(data, 75);
+
+        SalonProgressData clone = data.Clone();
+
+        Assert.AreEqual(75, paidField.GetValue(clone));
+    }
+
+    [Test]
+    public void OldPurchasedSupplyRackSaveUpgradesToFullyPaid()
+    {
+        FieldInfo paidField = typeof(SalonProgressData).GetField("SupplyRackExpansionPaid");
+        Assert.IsNotNull(paidField);
+        object repository = CreateRepository();
+        string primaryKey = GetKey(repository, "PrimaryKey");
+        MemoryStorageProxy.Values[primaryKey] =
+            "{\"SchemaVersion\":1,\"DayNumber\":1,\"Balance\":25," +
+            "\"AutoBlowPurchased\":false,\"SupplyRackExpansionPurchased\":true," +
+            "\"FirstDayComplete\":false,\"DaySettled\":false,\"ReputationStars\":3," +
+            "\"TutorialCompleted\":false,\"CompletedDays\":[],\"BestCompletedOrders\":[]}";
+
+        SalonProgressData loaded = (SalonProgressData)Invoke(repository, "Load");
+        Assert.IsNotNull(loaded);
+        Assert.IsTrue(loaded.SupplyRackExpansionPurchased);
+        Assert.AreEqual(180, paidField.GetValue(loaded));
+    }
+
+    [Test]
+    public void SaveRejectsUnlockedSupplyRackWithoutFullPayment()
+    {
+        var data = SalonProgressData.CreateDefault();
+        data.SupplyRackExpansionPurchased = true;
+        FieldInfo paidField = typeof(SalonProgressData).GetField("SupplyRackExpansionPaid");
+        Assert.IsNotNull(paidField);
+        paidField.SetValue(data, 75);
+        Assert.IsFalse(data.TryValidate(out _));
+    }
+
     private static object CreateRepository()
     {
         Type repositoryType = FindType("PlayerPrefsSalonProgressRepository");
@@ -184,6 +228,7 @@ public sealed class SalonProgressSaveTests
         string[] fields =
         {
             "SchemaVersion", "DayNumber", "Balance", "AutoBlowPurchased",
+            "SupplyRackExpansionPurchased", "SupplyRackExpansionPaid",
             "FirstDayComplete", "DaySettled", "ShopSatisfaction", "ReputationStars",
             "TutorialCompleted",
             "CompletedDays", "BestCompletedOrders"

@@ -31,6 +31,25 @@ namespace HairSalon
         public bool IsUnlocked => State == SalonProximityPurchasePadState.Unlocked;
         public float Progress => Cost <= 0 ? 1f : (float)Paid / Cost;
 
+        /// <summary>
+        /// Returns the portion of a scene payment timer that was not consumed
+        /// by a wallet-approved integer payment. The scene owns the timer and
+        /// calls this only after both the wallet and pad commit succeed.
+        /// </summary>
+        public static float RetainUnspentPaymentTime(float elapsed, int committedAmount,
+            float spendPerSecond)
+        {
+            if (float.IsNaN(elapsed) || float.IsInfinity(elapsed) || elapsed <= 0f)
+                return 0f;
+            if (committedAmount <= 0 || spendPerSecond <= 0f ||
+                float.IsNaN(spendPerSecond) || float.IsInfinity(spendPerSecond))
+                return elapsed;
+
+            double consumed = committedAmount / (double)spendPerSecond;
+            if (consumed >= elapsed) return 0f;
+            return (float)(elapsed - consumed);
+        }
+
         public SalonProximityPurchasePadModel(string padId, int cost)
         {
             if (string.IsNullOrWhiteSpace(padId))

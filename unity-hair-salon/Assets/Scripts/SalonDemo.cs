@@ -2621,18 +2621,19 @@ public sealed partial class SalonDemo : MonoBehaviour
             Block("Faceted Leaf", parent, position + new Vector3((i - 2) * .2f, .75f + (i % 2) * .28f, (i % 3 - 1) * .18f), new Vector3(.42f, .9f, .28f), i % 2 == 0 ? Hex("477B37") : Hex("6B993F"), new Vector3(i * 12f, i * 28f, (i - 2) * 18f));
     }
 
-    private static void FurnitureShadow(Transform parent, string assetId, Vector3 localFloorPosition)
+    private static Transform FurnitureShadow(Transform parent, string assetId, Vector3 localFloorPosition)
     {
         AssetDefinition asset;
         try { asset = AssetManifestLoader.LoadFromResources().Find(assetId); }
-        catch (System.Exception) { return; }
-        if (asset == null) return;
+        catch (System.Exception) { return null; }
+        if (asset == null) return null;
         var anchor = new GameObject("Shadow Anchor [" + assetId + "]").transform;
         anchor.SetParent(parent, false);
         anchor.localPosition = localFloorPosition;
         if (asset.Collision != null) anchor.gameObject.AddComponent<SalonFurnitureObstacle>().Initialize(asset);
         if (asset.Shadow != null && asset.Shadow.Enabled)
             ContactShadow.Apply(anchor, asset.Shadow, asset.Sorting?.Order - 1 ?? -1);
+        return anchor;
     }
 
     private static GameObject SelectionPlate(Transform parent, Vector3 position, Vector3 scale)

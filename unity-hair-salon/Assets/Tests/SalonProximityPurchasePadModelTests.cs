@@ -1,5 +1,7 @@
 using HairSalon;
 using NUnit.Framework;
+using System;
+using System.Reflection;
 
 public class SalonProximityPurchasePadModelTests
 {
@@ -97,6 +99,79 @@ public class SalonProximityPurchasePadModelTests
         Assert.AreEqual(45, pad.Paid);
         Assert.AreEqual(75, pad.CalculatePayment(1f, 1000, 75));
         Assert.AreEqual(SalonProximityPurchasePadState.Building, pad.State);
+    }
+
+    [TestCase(30)]
+    [TestCase(60)]
+    [TestCase(90)]
+    [TestCase(120)]
+    public void IntegratedPaymentClockKeepsSubFrameRemainderAtEveryFrameRate(int framesPerSecond)
+    {
+        MethodInfo remainderMethod = typeof(SalonProximityPurchasePadModel).GetMethod(
+            "RetainUnspentPaymentTime", BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(remainderMethod,
+            "The scene payment path must expose a transaction-safe time remainder helper.");
+
+        var pad = new SalonProximityPurchasePadModel("pad", 180);
+        int balance = 180;
+        float elapsed = 0f;
+        float deltaTime = 1f / framesPerSecond;
+        int frames = 0;
+        while (!pad.IsUnlocked && frames < framesPerSecond * 8)
+        {
+            elapsed += deltaTime;
+            int amount = pad.CalculatePayment(elapsed, balance, 60f);
+            if (amount > 0)
+            {
+                Assert.LessOrEqual(amount, balance);
+                Assert.IsTrue(pad.ApplyPayment(amount));
+                balance -= amount;
+                elapsed = (float)remainderMethod.Invoke(null,
+                    new object[] { elapsed, amount, 60f });
+            }
+            frames++;
+        }
+
+        Assert.IsTrue(pad.IsUnlocked, "The 180-coin build should finish in a bounded time.");
+        Assert.AreEqual(0, balance);
+        Assert.AreEqual(180, pad.Paid);
+        Assert.That(frames / (float)framesPerSecond, Is.InRange(2.95f, 3.2f),
+            "A nominal 60 coins/second payment must not stretch with frame rate.");
+        Assert.That(elapsed, Is.GreaterThanOrEqualTo(0f));
+        Assert.That(elapsed, Is.LessThan(deltaTime + 0.0001f));
+    }
+
+    [Test]
+    public void IntegratedPaymentClockHandlesNonUniformDeltaTimesWithoutLosingCredit()
+    {
+        MethodInfo remainderMethod = typeof(SalonProximityPurchasePadModel).GetMethod(
+            "RetainUnspentPaymentTime", BindingFlags.Public | BindingFlags.Static);
+        Assert.IsNotNull(remainderMethod);
+
+        var pad = new SalonProximityPurchasePadModel("pad", 180);
+        int balance = 180;
+        float elapsed = 0f;
+        float[] deltas = { .007f, .021f, .013f, .031f, .009f, .019f };
+        int index = 0;
+        float wallTime = 0f;
+        while (!pad.IsUnlocked && wallTime < 8f)
+        {
+            float dt = deltas[index++ % deltas.Length];
+            wallTime += dt;
+            elapsed += dt;
+            int amount = pad.CalculatePayment(elapsed, balance, 60f);
+            if (amount > 0)
+            {
+                Assert.IsTrue(pad.ApplyPayment(amount));
+                balance -= amount;
+                elapsed = (float)remainderMethod.Invoke(null,
+                    new object[] { elapsed, amount, 60f });
+            }
+        }
+
+        Assert.IsTrue(pad.IsUnlocked);
+        Assert.AreEqual(0, balance);
+        Assert.That(wallTime, Is.InRange(2.95f, 3.2f));
     }
 
     [Test]

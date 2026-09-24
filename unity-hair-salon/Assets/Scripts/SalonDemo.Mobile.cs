@@ -43,6 +43,7 @@ public sealed partial class SalonDemo
     private GameObject _mobileSupplyPadRoot;
     private TextMesh _mobileSupplyPadLabel;
     private GameObject _mobileExpandedRackRoot;
+    private Transform _mobileExpandedRackShadowAnchor;
     private Transform _mobileCarryVisualRoot;
     private readonly List<GameObject> _mobileCarryItems = new List<GameObject>();
     private readonly List<GameObject> _mobileSourceItems = new List<GameObject>();
@@ -52,12 +53,13 @@ public sealed partial class SalonDemo
     private float _mobilePadSpendElapsed;
     private bool _mobilePadWasNear;
     private bool _mobilePadInsufficientToastShown;
+    private bool _mobilePadCheckpointDirty;
     private bool _mobileExpandedRackBuilt;
     private const float MobileSupplyTickInterval = .24f;
     private const int MobileSupplySourceStock = 12;
     private const int MobileSupplyCarryCapacity = 3;
     private const int MobileSupplyRackCapacity = 6;
-    private const int MobileSupplyPadCost = 180;
+    private const int MobileSupplyPadCost = SalonProgressData.SupplyRackExpansionCost;
     private const float MobileSupplyPadSpendRate = 60f;
     private static readonly Vector3 MobileSupplySourcePosition = new Vector3(8.35f, .2f, 1.65f);
     private static readonly Vector3 MobileWashRackPosition = new Vector3(-1.25f, .2f, 5.55f);
@@ -114,8 +116,7 @@ public sealed partial class SalonDemo
         _mobileSupplies.Changed += HandleMobileSupplyChanged;
         _mobileSupplyPad = new SalonProximityPurchasePadModel(
             "expansion-pad-wash-rack", MobileSupplyPadCost);
-        if (_mobileProgress.SupplyRackExpansionPurchased)
-            _mobileSupplyPad.ApplyPayment(MobileSupplyPadCost);
+        RestoreMobileSupplyPadProgress(_mobileProgress);
     }
 
     /// <summary>
@@ -221,7 +222,8 @@ public sealed partial class SalonDemo
     {
         if (!_mobileMode || _mobileExpandedRackBuilt || _mobileSupplyStageRoot == null) return;
         Transform stage = _mobileSupplyStageRoot;
-        FurnitureShadow(stage, "furniture-wash-supply-rack", MobileExpandedWashRackPosition);
+        _mobileExpandedRackShadowAnchor = FurnitureShadow(stage, "furniture-wash-supply-rack",
+            MobileExpandedWashRackPosition);
         _mobileExpandedRackRoot = new GameObject("Expanded Wash Supply Rack");
         _mobileExpandedRackRoot.transform.SetParent(stage, false);
         _mobileExpandedRackRoot.transform.localPosition = MobileExpandedWashRackPosition;
@@ -246,6 +248,34 @@ public sealed partial class SalonDemo
         _mobileExpandedRackBuilt = true;
         UpdateMobileSupplyVisuals();
         if (_mobileControls != null) BuildMobileCollisionMap();
+    }
+
+    private void RemoveExpandedWashRackVisual()
+    {
+        if (_mobileExpandedRackRoot != null)
+        {
+            _mobileExpandedRackRoot.SetActive(false);
+            DestroyMobileObject(_mobileExpandedRackRoot);
+        }
+        if (_mobileExpandedRackShadowAnchor != null)
+        {
+            _mobileExpandedRackShadowAnchor.gameObject.SetActive(false);
+            DestroyMobileObject(_mobileExpandedRackShadowAnchor.gameObject);
+        }
+        _mobileExpandedRackRoot = null;
+        _mobileExpandedRackShadowAnchor = null;
+        _mobileExpandedWashRackPoint = null;
+        _mobileExpandedRackItems.Clear();
+        _mobileExpandedRackBuilt = false;
+        if (_mobileControls != null) BuildMobileCollisionMap();
+        UpdateMobileSupplyVisuals();
+    }
+
+    private static void DestroyMobileObject(UnityEngine.Object target)
+    {
+        if (target == null) return;
+        if (Application.isPlaying) Destroy(target);
+        else DestroyImmediate(target);
     }
 
     private void UpdateMobilePurchasePadVisual()
@@ -294,20 +324,32 @@ public sealed partial class SalonDemo
         for (int i = 0; i < _mobileSourceItems.Count; i++)
             if (_mobileSourceItems[i] != null)
                 _mobileSourceItems[i].SetActive(i < Mathf.Min(3, _mobileSupplies.SourceWashKits));
-        int remainingRackItems = _mobileSupplies.WashRackWashKits;
+        int primaryRackItems;
+        int expandedRackItems;
+        if (_mobileExpandedRackItems.Count > 0)
+        {
+            // The two racks are unload entrances into one shared six-item
+            // stock. Split the visual stack deterministically (primary gets
+            // the extra item) so the total never duplicates or disappears.
+            primaryRackItems = (_mobileSupplies.WashRackWashKits + 1) / 2;
+            expandedRackItems = _mobileSupplies.WashRackWashKits / 2;
+        }
+        else
+        {
+            primaryRackItems = _mobileSupplies.WashRackWashKits;
+            expandedRackItems = 0;
+        }
         for (int i = 0; i < _mobileRackItems.Count; i++)
             if (_mobileRackItems[i] != null)
             {
-                bool visible = i < remainingRackItems;
+                bool visible = i < primaryRackItems;
                 _mobileRackItems[i].SetActive(visible);
-                if (visible) remainingRackItems--;
             }
         for (int i = 0; i < _mobileExpandedRackItems.Count; i++)
             if (_mobileExpandedRackItems[i] != null)
             {
-                bool visible = i < remainingRackItems;
+                bool visible = i < expandedRackItems;
                 _mobileExpandedRackItems[i].SetActive(visible);
-                if (visible) remainingRackItems--;
             }
         UpdateMobilePurchasePadVisual();
     }
@@ -358,9 +400,11 @@ public sealed partial class SalonDemo
         bool nearPad = FlatDistance(_player.position, _mobileSupplyPadPoint.position) <= 1.25f;
         if (!nearPad)
         {
+            bool shouldSaveCheckpoint = _mobilePadWasNear && _mobilePadCheckpointDirty;
             _mobilePadWasNear = false;
             _mobilePadInsufficientToastShown = false;
             _mobilePadSpendElapsed = 0f;
+            if (shouldSaveCheckpoint) SaveMobileCheckpoint(false);
             UpdateMobilePurchasePadVisual();
             return;
         }
@@ -385,14 +429,15 @@ public sealed partial class SalonDemo
                 {
                     if (_mobileSupplyPad.ApplyPayment(amount))
                     {
-                        _mobilePadSpendElapsed = 0f;
+                        _mobilePadSpendElapsed = SalonProximityPurchasePadModel.RetainUnspentPaymentTime(
+                            _mobilePadSpendElapsed, amount, MobileSupplyPadSpendRate);
+                        _mobileProgress.SupplyRackExpansionPaid = _mobileSupplyPad.Paid;
+                        _mobileProgress.SupplyRackExpansionPurchased = _mobileSupplyPad.IsUnlocked;
+                        _mobilePadCheckpointDirty = true;
                         if (_coinBalanceLabel != null)
                             _coinBalanceLabel.text = _game.Balance.ToString("N0");
                         if (_mobileSupplyPad.IsUnlocked)
                         {
-                            _mobileProgress.SupplyRackExpansionPurchased = true;
-                            if (_mobileOpening != null)
-                                _mobileOpening.SupplyRackExpansionPurchased = true;
                             BuildExpandedWashRackVisual();
                             ShowToast("SUPPLY RACK OPEN");
                             SaveMobileCheckpoint(false);
@@ -405,6 +450,13 @@ public sealed partial class SalonDemo
                         _game.Payments.RestoreBalance(balanceBeforeSpend);
                         _mobilePadSpendElapsed = 0f;
                     }
+                }
+                else
+                {
+                    // A wallet rejection is a failed transaction. Do not let
+                    // the elapsed time survive and become a surprise charge
+                    // after the player earns more coins.
+                    _mobilePadSpendElapsed = 0f;
                 }
             }
             else if (_game.Balance <= 0)
@@ -436,6 +488,14 @@ public sealed partial class SalonDemo
         _coinBalanceLabel.text = _game.Balance.ToString("N0");
         RefreshMobileDayPresentation();
         if (!_mobileProgress.DaySettled) SaveMobileCheckpoint(false);
+    }
+
+    private void RestoreMobileSupplyPadProgress(SalonProgressData data)
+    {
+        if (_mobileSupplyPad == null || data == null) return;
+        int paid = Mathf.Clamp(data.SupplyRackExpansionPaid, 0, MobileSupplyPadCost);
+        if (data.SupplyRackExpansionPurchased) paid = MobileSupplyPadCost;
+        if (paid > 0) _mobileSupplyPad.ApplyPayment(paid);
     }
 
     private void BuildMobileHud(Transform safeParent)
@@ -487,7 +547,8 @@ public sealed partial class SalonDemo
         const float bodyRadius = .15f;
         _mobileObstacles.Clear();
         foreach (var obstacle in FindObjectsByType<SalonFurnitureObstacle>(FindObjectsInactive.Include))
-            _mobileObstacles.Add(obstacle.WorldBounds(bodyRadius));
+            if (obstacle.gameObject.activeInHierarchy && obstacle.transform != _mobileExpandedRackShadowAnchor)
+                _mobileObstacles.Add(obstacle.WorldBounds(bodyRadius));
         foreach (var station in _cutStations.Values)
         {
             var layout = station.Layout;
@@ -516,6 +577,7 @@ public sealed partial class SalonDemo
         data.Balance = _game.Balance;
         data.AutoBlowPurchased = _game.HasAutoBlowStand;
         data.SupplyRackExpansionPurchased = _mobileSupplyPad != null && _mobileSupplyPad.IsUnlocked;
+        data.SupplyRackExpansionPaid = _mobileSupplyPad == null ? 0 : _mobileSupplyPad.Paid;
         data.FirstDayComplete = _game.FirstDayCompleteForShop;
         data.ReputationStars = _dayController.Reputation.CurrentStars;
         data.ShopSatisfaction = _satisfaction.CurrentSatisfaction;
@@ -527,9 +589,10 @@ public sealed partial class SalonDemo
     {
         if (!_mobileMode || _mobileRestoring || _mobileSaves == null) return;
         _mobileProgress = CaptureMobileProgress(settled);
-        if (!_mobileSaves.Save(_mobileProgress))
+        bool saved = _mobileSaves.Save(_mobileProgress);
+        if (!saved)
             ShowToast("本次进度无法保存，请保留当前页面");
-        if (!settled) _mobileOpening = _mobileProgress.Clone();
+        if (saved) _mobilePadCheckpointDirty = false;
     }
 
     private void HandleMobileDayState(DayState state)
@@ -546,7 +609,11 @@ public sealed partial class SalonDemo
             _mobileGuidedCustomer = null;
             EndMobileWork();
             if (_player != null) _player.position = new Vector3(0f, .05f, -3.2f);
-            if (!_mobileRestoring) SaveMobileCheckpoint(false);
+            if (!_mobileRestoring)
+            {
+                _mobileOpening = CaptureMobileProgress(false);
+                SaveMobileCheckpoint(false);
+            }
         }
         if (state == DayState.Result)
         {
@@ -575,7 +642,15 @@ public sealed partial class SalonDemo
                     _mobileProgress.BestCompletedOrders[index], _dayController.Stats.CompletedOrders);
                 SaveMobileCheckpoint(true);
             }
-            else if (_mobileOpening != null) _mobileSaves.Save(_mobileOpening);
+            else if (_mobileOpening != null)
+            {
+                if (_mobileSaves.Save(_mobileOpening))
+                {
+                    _mobileProgress = _mobileOpening.Clone();
+                    _mobilePadCheckpointDirty = false;
+                }
+                else ShowToast("本次失败恢复无法保存，请保留当前页面");
+            }
         }
         RefreshMobileDayPresentation();
     }
@@ -626,11 +701,16 @@ public sealed partial class SalonDemo
         _mobileProgress = checkpoint;
         _mobileSupplyPad = new SalonProximityPurchasePadModel(
             "expansion-pad-wash-rack", MobileSupplyPadCost);
-        if (checkpoint.SupplyRackExpansionPurchased)
-            _mobileSupplyPad.ApplyPayment(MobileSupplyPadCost);
+        RestoreMobileSupplyPadProgress(checkpoint);
+        if (_mobileSupplyPad.IsUnlocked)
+            BuildExpandedWashRackVisual();
+        else if (_mobileExpandedRackBuilt)
+            RemoveExpandedWashRackVisual();
+        UpdateMobilePurchasePadVisual();
         _mobilePadSpendElapsed = 0f;
         _mobilePadWasNear = false;
         _mobilePadInsufficientToastShown = false;
+        _mobilePadCheckpointDirty = false;
         _dayController.PrepareDay(checkpoint.DayNumber);
         _mobileRestoring = false;
         _coinBalanceLabel.text = _game.Balance.ToString("N0");

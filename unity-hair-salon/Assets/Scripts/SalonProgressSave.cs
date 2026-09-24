@@ -15,6 +15,7 @@ namespace HairSalon
         public const int CurrentSchemaVersion = 1;
         public const int MaxDayNumber = 100000;
         public const int DefaultShopSatisfaction = 90;
+        public const int SupplyRackExpansionCost = 180;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public int DayNumber = 1;
@@ -23,6 +24,7 @@ namespace HairSalon
         // Optional field added without a schema bump: older JSON simply reads
         // the missing value as false, while the pad purchase survives reloads.
         public bool SupplyRackExpansionPurchased;
+        public int SupplyRackExpansionPaid;
         public bool FirstDayComplete;
         public bool DaySettled;
         public int ShopSatisfaction = DefaultShopSatisfaction;
@@ -59,6 +61,20 @@ namespace HairSalon
             if (Balance < 0)
             {
                 error = "Balance cannot be negative.";
+                return false;
+            }
+
+            if (SupplyRackExpansionPaid < 0 ||
+                SupplyRackExpansionPaid > SupplyRackExpansionCost)
+            {
+                error = "SupplyRackExpansionPaid is outside the supported range.";
+                return false;
+            }
+
+            if (SupplyRackExpansionPurchased &&
+                SupplyRackExpansionPaid != SupplyRackExpansionCost)
+            {
+                error = "A purchased supply rack must have the full construction payment.";
                 return false;
             }
 
@@ -128,6 +144,7 @@ namespace HairSalon
                 Balance = Balance,
                 AutoBlowPurchased = AutoBlowPurchased,
                 SupplyRackExpansionPurchased = SupplyRackExpansionPurchased,
+                SupplyRackExpansionPaid = SupplyRackExpansionPaid,
                 FirstDayComplete = FirstDayComplete,
                 DaySettled = DaySettled,
                 ShopSatisfaction = ShopSatisfaction,
@@ -296,6 +313,13 @@ namespace HairSalon
                 // an explicit zero valid for newer saves.
                 if (raw.IndexOf("\"ShopSatisfaction\"", StringComparison.Ordinal) < 0)
                     data.ShopSatisfaction = SalonProgressData.DefaultShopSatisfaction;
+
+                // R1 added the paid amount without bumping the schema. A
+                // legacy purchased flag means the rack was already built, so
+                // upgrade it atomically to the full construction amount.
+                if (raw.IndexOf("\"SupplyRackExpansionPaid\"", StringComparison.Ordinal) < 0)
+                    data.SupplyRackExpansionPaid = data.SupplyRackExpansionPurchased
+                        ? SalonProgressData.SupplyRackExpansionCost : 0;
 
                 SalonProgressData normalized = data.Clone();
                 if (!normalized.TryValidate(out _))

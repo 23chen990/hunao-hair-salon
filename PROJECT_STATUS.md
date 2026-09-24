@@ -1,5 +1,18 @@
 # 项目运行状态
 
+## 《胡闹理发店》当前入口（R1，2026-09-24）
+
+本文件其余内容是其他原型的历史状态，不覆盖理发店当前工程。理发店唯一正式工程为
+`unity-hair-salon/`，正式入口为 `Assets/Scenes/HairSalonDemo.unity`，工作分支为
+`phase-0-2-gameplay-gate`。本轮 R1 的复现、修复和验收记录见
+[`docs/development/r1-supply-growth/R1_REPORT.md`](docs/development/r1-supply-growth/R1_REPORT.md)。
+
+- 当前规则入口：`AGENTS.md`、`PROJECT_CONTEXT.md`、`STATUS.md` 和附件 R1 任务。
+- 当前证据入口：`unity-hair-salon/Builds/ProximityPadEvidence/report.json`、
+  `unity-hair-salon/Builds/MobileEvidenceSuccessR1/report.json`、
+  `unity-hair-salon/Builds/MobileEvidence/report.json` 及同目录 PNG/录屏；这些构建与截图留在本机，按仓库约定不提交到 Git。
+- R1 只处理 WashKit 补货显示、施工扣费余量、DayOpening/检查点存档一致性，并测量首个扩建点的路线收益；不进入 R2。
+
 > 更新时间：2026-08-10  
 > 当前阶段：《相位涟漪》冻结在抖音外部闸门；第二轮 P1/P2/P3 技术通过、产品未决，已锁定只让《叠孔通路》进入陌生真人静默测试
 

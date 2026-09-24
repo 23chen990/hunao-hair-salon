@@ -19,6 +19,9 @@ REPORT_DIR = ROOT / "unity-hair-salon" / "Builds" / "ProximityPadEvidence"
 REPORT_PATH = REPORT_DIR / "report.json"
 PAD = {"x": -4.25, "y": 0.2, "z": 1.1}
 FAR_POINT = {"x": 0.0, "y": 0.2, "z": -3.0}
+SOURCE = {"x": 8.35, "y": 0.2, "z": 0.7}
+ORIGINAL_RACK = {"x": -1.25, "y": 0.2, "z": 4.6}
+EXPANDED_RACK = {"x": -4.1, "y": 0.2, "z": 1.3}
 
 
 def load_module(name, path):
@@ -62,6 +65,63 @@ def complete_haircut(driver, customer_id, timeout=45):
     while driver.state.get("targetAction") == "Cut" and driver.state.get("available"):
         hold = 0.95 if driver.state.get("targetTool") == "Clippers" else 1.8
         driver.hold_action(hold)
+
+
+def measure_walk(driver, target, radius=0.55, timeout=45):
+    """Measure a real touch walk from telemetry samples, not a teleport."""
+    start_index = len(driver.history)
+    started = time.monotonic()
+    start_point = (driver.state["player"]["x"], driver.state["player"]["z"])
+    planned = driver.route(target, radius)
+    planned_points = [(driver.state["player"]["x"], driver.state["player"]["z"])] + planned
+    planned_distance = sum(
+        math.dist(a, b) for a, b in zip(planned_points, planned_points[1:])
+    )
+    assert driver.goto(target, radius=radius, timeout=timeout)
+    samples = driver.history[start_index:]
+    points = [start_point] + [
+        (sample["player"]["x"], sample["player"]["z"])
+        for sample in samples
+    ]
+    if not points:
+        points = [(driver.state["player"]["x"], driver.state["player"]["z"])]
+    measured_distance = sum(math.dist(a, b) for a, b in zip(points, points[1:]))
+    return {
+        "plannedPathDistance": planned_distance,
+        "measuredTelemetryDistance": measured_distance,
+        "wallSeconds": time.monotonic() - started,
+        "samples": len(points),
+    }
+
+
+def deliver_one_from_source(driver, rack, timeout=45):
+    """Use the same automatic pickup/dropoff loop as a player."""
+    assert measure_walk(driver, SOURCE, radius=0.55, timeout=timeout)
+    driver.wait(0.65)
+    assert driver.state.get("carriedWashKits", 0) > 0, driver.state
+    before = driver.state.get("washRackWashKits", 0)
+    route = measure_walk(driver, rack, radius=0.55, timeout=timeout)
+    wait_started = time.monotonic()
+    driver.until(lambda state: state.get("washRackWashKits", 0) > before, 8)
+    route["unloadWaitSeconds"] = time.monotonic() - wait_started
+    route["unloadCount"] = 1
+    return route
+
+
+def measure_supply_cycle(driver, rack, wash_station, timeout=45, shot_name=None):
+    """Measure source -> rack -> wash anchor with real joystick input."""
+    first = deliver_one_from_source(driver, rack, timeout)
+    if shot_name:
+        driver.shot(shot_name)
+    second = measure_walk(driver, wash_station, radius=0.75, timeout=timeout)
+    return {
+        "sourceToRack": first,
+        "rackToWash": second,
+        "pathDistance": first["measuredTelemetryDistance"] + second["measuredTelemetryDistance"],
+        "walkWallSeconds": first["wallSeconds"] + second["wallSeconds"],
+        "unloadWaitSeconds": first["unloadWaitSeconds"],
+        "unloadCount": first["unloadCount"],
+    }
 
 
 def main():
@@ -111,8 +171,46 @@ def main():
                     12,
                 )
                 paid_at_exit = driver.state.get("padPaid")
+                partial_balance = driver.state.get("balance")
                 driver.wait(0.5)
                 assert driver.state.get("padPaid") == paid_at_exit
+
+                # Leaving the pad is a safe checkpoint boundary. A page
+                # refresh must restore the same balance/Paid pair while still
+                # entering the day at PreOpen.
+                driver.reload()
+                driver.until(lambda state: state.get("state") == "PreOpen", 60)
+                assert driver.state.get("padUnlocked") is False
+                assert driver.state.get("padPaid") == paid_at_exit
+                assert driver.state.get("balance") == partial_balance
+                partial_reload_paid = driver.state.get("padPaid")
+                driver.tap_button("开始营业")
+                driver.until(lambda state: state.get("state") == "Business", 45)
+
+                # Measure the pre-purchase route from the saved partial-build
+                # checkpoint. Reloading again below resets temporary stock to
+                # the same opening values before the post-purchase run.
+                wash_station = next(
+                    station for station in driver.state["stations"]
+                    if station.get("type") == "Wash"
+                )["position"]
+                assert driver.goto(wash_station, radius=0.5, timeout=45)
+                stock_before_route = {
+                    key: driver.state.get(key) for key in
+                    ("sourceWashKits", "carriedWashKits", "washRackWashKits")
+                }
+                before_route = measure_supply_cycle(
+                    driver, ORIGINAL_RACK, wash_station, shot_name="r1-route-before")
+
+                # The partial payment is a saved checkpoint, so this reload
+                # restores both the same BUILD progress and fresh temporary
+                # supply stock before completing the construction.
+                driver.reload()
+                driver.until(lambda state: state.get("state") == "PreOpen", 60)
+                route_start_paid = driver.state.get("padPaid")
+                assert 0 <= route_start_paid <= 180
+                driver.tap_button("开始营业")
+                driver.until(lambda state: state.get("state") == "Business", 45)
 
                 assert driver.goto(PAD, radius=0.5, timeout=45)
                 deadline = time.monotonic() + 10
@@ -121,6 +219,20 @@ def main():
                 assert driver.state.get("padUnlocked") is True, driver.state
                 assert driver.state.get("padPaid") == 180, driver.state
                 unlock_balance = driver.state.get("balance")
+
+                # The second reload above reset the day's temporary stock to
+                # its opening state. Start at the same wash anchor before
+                # measuring the newly unlocked unload entrance.
+                assert driver.goto(wash_station, radius=0.5, timeout=45)
+                stock_after_route = {
+                    key: driver.state.get(key) for key in
+                    ("sourceWashKits", "carriedWashKits", "washRackWashKits")
+                }
+                assert stock_after_route == stock_before_route, (
+                    stock_before_route, stock_after_route)
+                after_route = measure_supply_cycle(
+                    driver, EXPANDED_RACK, wash_station, shot_name="r1-route-after")
+                driver.shot("r1-route-value")
 
                 driver.reload()
                 driver.until(lambda state: state.get("state") == "PreOpen", 60)
@@ -132,9 +244,21 @@ def main():
                         "earnedBalance": earned_balance,
                         "partialPaid": partial_paid,
                         "paidAtExit": paid_at_exit,
+                        "partialReloadPaid": partial_reload_paid,
+                        "partialReloadBalance": partial_balance,
+                        "routeStartPaid": route_start_paid,
                         "unlockBalance": unlock_balance,
                         "reloadUnlocked": driver.state.get("padUnlocked"),
                         "reloadPaid": driver.state.get("padPaid"),
+                        "routeMeasurement": {
+                            "startStockBeforePurchase": stock_before_route,
+                            "startStockAfterPurchase": stock_after_route,
+                            "beforePurchase": before_route,
+                            "afterPurchase": after_route,
+                            "pathDistanceDelta": after_route["pathDistance"] - before_route["pathDistance"],
+                            "walkWallSecondsDelta": after_route["walkWallSeconds"] - before_route["walkWallSeconds"],
+                            "unloadCountDelta": after_route["unloadCount"] - before_route["unloadCount"],
+                        },
                     }
                 )
             if driver.errors:
