@@ -1,0 +1,13 @@
+{
+  "name": "stacked-aperture-throwaway",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-reporter=spec tests/*.test.mjs",
+    "build": "node tools/build.mjs",
+    "audit": "node tools/audit.mjs",
+    "evidence": "node tools/render-evidence.mjs",
+    "browser:smoke": "node tools/browser-smoke.mjs",
+    "verify": "npm test && npm run build && npm run audit && npm run browser:smoke"
+  }
+}

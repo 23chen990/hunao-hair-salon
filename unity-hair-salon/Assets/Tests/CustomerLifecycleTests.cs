@@ -180,7 +180,7 @@ public sealed class CustomerLifecycleTests
     }
 
     [Test]
-    public void FormalServiceNeverResumesUnservedWaitingPressure()
+    public void FormalServiceEventuallyLeavesAfterTheDelayGraceIsSpent()
     {
         var game = new SalonGameModel();
         CustomerModel customer = SpawnServing(game, 122);
@@ -191,8 +191,9 @@ public sealed class CustomerLifecycleTests
         game.Tick(5f);
         game.Tick(20f);
 
-        Assert.AreEqual(CustomerState.Serving, customer.State);
-        Assert.AreEqual(1f, customer.Patience, .001f);
+        Assert.AreEqual(CustomerState.Exited, customer.State);
+        Assert.AreEqual(0f, customer.Patience, .001f);
+        Assert.AreEqual(1, game.AngryLeaves);
     }
 
     [Test]

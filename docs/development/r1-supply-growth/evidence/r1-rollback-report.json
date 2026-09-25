@@ -1,0 +1,156 @@
+{
+  "passed": true,
+  "input": "Chromium real touch events",
+  "build": "/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/WebGLDemo",
+  "errors": [],
+  "initialSave": {
+    "initialSavePhase": "Business",
+    "initialSaveDay": 1,
+    "initialSaveBalance": 162,
+    "initialSavePaid": 78,
+    "initialSaveUnlocked": false,
+    "initialSaveSupply": {
+      "sourceWashKits": 12,
+      "carriedWashKits": 0,
+      "washRackWashKits": 0
+    }
+  },
+  "A": {
+    "opening": {
+      "openingAPhase": "Business",
+      "openingADay": 1,
+      "openingABalance": 162,
+      "openingAPaid": 78,
+      "openingAUnlocked": false,
+      "openingASupply": {
+        "sourceWashKits": 12,
+        "carriedWashKits": 0,
+        "washRackWashKits": 0
+      }
+    },
+    "changed": {
+      "changedAPhase": "Business",
+      "changedADay": 1,
+      "changedABalance": 110,
+      "changedAPaid": 130,
+      "changedAUnlocked": false,
+      "changedASupply": {
+        "sourceWashKits": 12,
+        "carriedWashKits": 0,
+        "washRackWashKits": 0
+      }
+    },
+    "result": {
+      "label": "A_no_refresh_partial",
+      "failedCompleted": 0,
+      "failedTarget": 3,
+      "failedBalance": 74,
+      "failedPaid": 166,
+      "failedUnlocked": false,
+      "failedSupply": {
+        "sourceWashKits": 12,
+        "carriedWashKits": 0,
+        "washRackWashKits": 0
+      },
+      "failedPhase": "Result",
+      "retryPhase": "PreOpen",
+      "retryDay": 1,
+      "retryBalance": 162,
+      "retryPaid": 78,
+      "retryUnlocked": false,
+      "retrySupply": {
+        "sourceWashKits": 12,
+        "carriedWashKits": 0,
+        "washRackWashKits": 0
+      }
+    }
+  },
+  "B": {
+    "savedBeforeRefresh": {
+      "savedBeforeRefreshPhase": "Business",
+      "savedBeforeRefreshDay": 1,
+      "savedBeforeRefreshBalance": 70,
+      "savedBeforeRefreshPaid": 170,
+      "savedBeforeRefreshUnlocked": false,
+      "savedBeforeRefreshSupply": {
+        "sourceWashKits": 12,
+        "carriedWashKits": 0,
+        "washRackWashKits": 0
+      }
+    },
+    "refresh": {
+      "refreshPhase": "PreOpen",
+      "refreshDay": 1,
+      "refreshBalance": 70,
+      "refreshPaid": 170,
+      "refreshUnlocked": false,
+      "refreshSupply": {
+        "sourceWashKits": 12,
+        "carriedWashKits": 0,
+        "washRackWashKits": 0
+      }
+    },
+    "opening": {
+      "openingBPhase": "Business",
+      "openingBDay": 1,
+      "openingBBalance": 70,
+      "openingBPaid": 170,
+      "openingBUnlocked": false,
+      "openingBSupply": {
+        "sourceWashKits": 12,
+        "carriedWashKits": 0,
+        "washRackWashKits": 0
+      }
+    },
+    "changed": {
+      "changedBPhase": "Business",
+      "changedBDay": 1,
+      "changedBBalance": 60,
+      "changedBPaid": 180,
+      "changedBUnlocked": true,
+      "changedBSupply": {
+        "sourceWashKits": 12,
+        "carriedWashKits": 0,
+        "washRackWashKits": 0
+      }
+    },
+    "result": {
+      "label": "B_refresh_new_baseline_full_purchase",
+      "failedCompleted": 0,
+      "failedTarget": 3,
+      "failedBalance": 60,
+      "failedPaid": 180,
+      "failedUnlocked": true,
+      "failedSupply": {
+        "sourceWashKits": 12,
+        "carriedWashKits": 0,
+        "washRackWashKits": 0
+      },
+      "failedPhase": "Result",
+      "retryPhase": "PreOpen",
+      "retryDay": 1,
+      "retryBalance": 70,
+      "retryPaid": 170,
+      "retryUnlocked": false,
+      "retrySupply": {
+        "sourceWashKits": 12,
+        "carriedWashKits": 0,
+        "washRackWashKits": 0
+      }
+    }
+  },
+  "D": {
+    "afterFailureRefresh": {
+      "afterFailureRefreshPhase": "PreOpen",
+      "afterFailureRefreshDay": 1,
+      "afterFailureRefreshBalance": 70,
+      "afterFailureRefreshPaid": 170,
+      "afterFailureRefreshUnlocked": false,
+      "afterFailureRefreshSupply": {
+        "sourceWashKits": 12,
+        "carriedWashKits": 0,
+        "washRackWashKits": 0
+      }
+    }
+  }
+}

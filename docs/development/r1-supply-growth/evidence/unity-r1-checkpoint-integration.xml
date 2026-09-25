@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="3" result="Passed" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-25 11:10:30Z" end-time="2026-09-25 11:10:30Z" duration="0.0468439">
+  <test-suite type="TestSuite" id="1000" name="胡闹理发店灰盒 Demo" fullname="胡闹理发店灰盒 Demo" runstate="Runnable" testcasecount="673" result="Passed" start-time="2026-09-25 11:10:30Z" end-time="2026-09-25 11:10:30Z" duration="0.046844" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1762" name="HairSalon.Tests.dll" fullname="/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Library/ScriptAssemblies/HairSalon.Tests.dll" runstate="Runnable" testcasecount="673" result="Passed" start-time="2026-09-25 11:10:30Z" end-time="2026-09-25 11:10:30Z" duration="0.034344" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="31299" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestFixture" id="1516" name="SalonR1CheckpointRollbackIntegrationTests" fullname="SalonR1CheckpointRollbackIntegrationTests" classname="SalonR1CheckpointRollbackIntegrationTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-25 11:10:30Z" end-time="2026-09-25 11:10:30Z" duration="0.024829" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1517" name="FullPurchaseFailureRestoresOpeningEconomyAndSupply" fullname="SalonR1CheckpointRollbackIntegrationTests.FullPurchaseFailureRestoresOpeningEconomyAndSupply" methodname="FullPurchaseFailureRestoresOpeningEconomyAndSupply" classname="SalonR1CheckpointRollbackIntegrationTests" runstate="Runnable" seed="885421606" result="Passed" start-time="2026-09-25 11:10:30Z" end-time="2026-09-25 11:10:30Z" duration="0.015427" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1519" name="PurchasedBeforeOpeningRemainsPurchasedAfterFailure" fullname="SalonR1CheckpointRollbackIntegrationTests.PurchasedBeforeOpeningRemainsPurchasedAfterFailure" methodname="PurchasedBeforeOpeningRemainsPurchasedAfterFailure" classname="SalonR1CheckpointRollbackIntegrationTests" runstate="Runnable" seed="547599482" result="Passed" start-time="2026-09-25 11:10:30Z" end-time="2026-09-25 11:10:30Z" duration="0.000285" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1518" name="RefreshedCheckpointBecomesNewOpeningForLaterFailure" fullname="SalonR1CheckpointRollbackIntegrationTests.RefreshedCheckpointBecomesNewOpeningForLaterFailure" methodname="RefreshedCheckpointBecomesNewOpeningForLaterFailure" classname="SalonR1CheckpointRollbackIntegrationTests" runstate="Runnable" seed="1765057664" result="Passed" start-time="2026-09-25 11:10:30Z" end-time="2026-09-25 11:10:30Z" duration="0.000231" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Saving results to: /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/R1R1IntegrationTests.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

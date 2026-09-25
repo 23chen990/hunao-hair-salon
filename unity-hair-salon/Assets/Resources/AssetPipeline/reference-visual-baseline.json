@@ -1,0 +1,95 @@
+{
+  "SchemaVersion": 2,
+  "ApprovedReferencePath": "Docs/VisualReferences/salon-overview-visual-reference.png",
+  "Camera": {
+    "Projection": "orthographic",
+    "YawDegrees": 42.0,
+    "PitchDegrees": 28.0,
+    "OrthographicSize": 5.4,
+    "Viewport": { "x": 844, "y": 390 },
+    "Target": { "x": 0.0, "y": 0.55, "z": 0.1 }
+  },
+  "Ground": {
+    "VisualMode": "continuous-reference-floor",
+    "WorldWidth": 18.0,
+    "WorldDepth": 12.0,
+    "VisibleTileColumns": 56,
+    "VisibleTileRows": 36,
+    "BaseHeight": 0.12,
+    "FloorColor": { "r": 0.25, "g": 0.52, "b": 0.52, "a": 1.0 },
+    "GroutColor": { "r": 0.18, "g": 0.40, "b": 0.41, "a": 1.0 }
+  },
+  "Walls": {
+    "VisualHeight": 1.35,
+    "VisualThickness": 0.12,
+    "CollisionHeight": 3.2,
+    "CollisionThickness": 0.42,
+    "LowerTrimHeight": 0.38
+  },
+  "Player": {
+    "WorldHeight": 2.844,
+    "VisualScale": 1.32,
+    "Position": { "x": -0.8, "y": 0.05, "z": -2.25 },
+    "ReferenceCharacterDescription": "central standing stylist in approved reference, source pixels x=819 y=397 width=108 height=267"
+  },
+  "Shadow": {
+    "Direction": { "x": 0.18, "y": -0.12 },
+    "Softness": 0.82,
+    "Opacity": 0.2
+  },
+  "Density": {
+    "DefaultState": "target-density",
+    "LowDensityFloorOccupancy": 0.05,
+    "TargetDensityFloorOccupancy": 0.18,
+    "TargetFloorCoverage": 0.18,
+    "TargetObjectsPer100Tiles": 8.0
+  },
+  "Overlay": {
+    "ResourcePath": "VisualReferences/approved-salon-effect-reference",
+    "SourceSha256": "b358fd3f38b6aac7400357623c01af24e8c27e919b44e0cc4b8820e8cc1265af",
+    "FitMode": "cover-center",
+    "DefaultOpacity": 0.5
+  },
+  "VisualMetrics": {
+    "SourceImageSize": { "x": 1672, "y": 941 },
+    "RoomBounds": { "x": 0, "y": 72, "width": 1672, "height": 720 },
+    "StandingPlayerBounds": { "x": 819, "y": 397, "width": 108, "height": 267 },
+    "PlayerScreenHeightRatio": 0.345,
+    "RoomScreenWidthRatio": 1.0,
+    "RoomScreenHeightRatio": 0.932,
+    "WashToPlayerHeightRatio": 1.05,
+    "WashFootprintToVisibleFloorRatio": 0.044
+  },
+  "Categories": [
+    {
+      "Id": "standard-furniture",
+      "ReferenceAssetId": "furniture-magazine-rack-wood",
+      "Status": "visual-calibration-candidate",
+      "ReferenceWorldSize": { "x": 2.613784, "y": 2.803721, "z": 0.75 },
+      "ReferenceFootprint": { "x": 1.7, "y": 0.75 },
+      "ExpectedPlayerRelativeHeight": 0.657,
+      "ExpectedTileOccupancy": { "x": 5.29, "y": 2.25 },
+      "InteractionClearance": { "x": 0.0, "y": 0.8 }
+    },
+    {
+      "Id": "service-station",
+      "ReferenceAssetId": "furniture-cut-station-classic",
+      "Status": "engineering-debug-only",
+      "ReferenceWorldSize": { "x": 2.45, "y": 2.36, "z": 2.65 },
+      "ReferenceFootprint": { "x": 2.45, "y": 2.65 },
+      "ExpectedPlayerRelativeHeight": 0.553,
+      "ExpectedTileOccupancy": { "x": 7.62, "y": 7.95 },
+      "InteractionClearance": { "x": 2.65, "y": 1.4 }
+    },
+    {
+      "Id": "wash-station",
+      "ReferenceAssetId": "furniture-wash-station-vintage-right-wall",
+      "Status": "NEEDS-REVIEW",
+      "ReferenceWorldSize": { "x": 0.0, "y": 0.0, "z": 0.0 },
+      "ReferenceFootprint": { "x": 0.0, "y": 0.0 },
+      "ExpectedPlayerRelativeHeight": 0.0,
+      "ExpectedTileOccupancy": { "x": 0.0, "y": 0.0 },
+      "InteractionClearance": { "x": 0.0, "y": 0.0 }
+    }
+  ]
+}

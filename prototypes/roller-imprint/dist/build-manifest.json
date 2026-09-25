@@ -1,0 +1,15 @@
+{
+  "entry": "index.html",
+  "sourceFiles": [
+    "index.html",
+    "styles.css",
+    "src/model.mjs",
+    "src/solver.mjs",
+    "src/iaa.mjs",
+    "src/ui-contract.mjs",
+    "src/app.mjs"
+  ],
+  "externalAssets": 0,
+  "networkCapableExpressions": 0,
+  "throwaway": true
+}

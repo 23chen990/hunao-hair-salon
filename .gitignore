@@ -1,0 +1,63 @@
+# ---------------------------------------------------------------------------
+# 《胡闹理发店》仓库忽略规则
+# 目的：只把源码、场景、资产、测试、文档和工具脚本纳入版本控制，
+#       把 Unity 本地缓存与构建产物留在磁盘上但不入库。
+# ---------------------------------------------------------------------------
+
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Unity 生成目录（项目根与 unity-hair-salon 两处都覆盖）
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+[Ss]creenshots/
+unity-hair-salon/Artifacts/
+unity-hair-salon/Builds/
+unity-hair-salon/Library/
+unity-hair-salon/Temp/
+unity-hair-salon/Logs/
+unity-hair-salon/UserSettings/
+unity-hair-salon/MemoryCaptures/
+
+# Unity / IDE 生成文件
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.apk
+*.aab
+*.unitypackage
+*.app/
+
+# Unity 崩溃/性能采样
+crashlytics-build.properties
+sysinfo.txt
+*.log
+
+# 归档包（体积大且可由源码重新生成）
+artifacts/**/*.zip
+artifacts/**/*.tar.gz
+
+# Node
+node_modules/
+npm-debug.log*

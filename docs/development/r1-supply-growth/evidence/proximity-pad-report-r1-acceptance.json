@@ -1,0 +1,91 @@
+{
+  "passed": true,
+  "input": "Chromium real touch events",
+  "errors": [],
+  "earnedBalance": 240,
+  "partialPaid": 113,
+  "paidAtExit": 144,
+  "partialReloadPaid": 144,
+  "partialReloadBalance": 96,
+  "routeStartPaid": 165,
+  "unlockBalance": 60,
+  "reloadUnlocked": true,
+  "reloadPaid": 180,
+  "purchasedFailureRetry": {
+    "failedCompleted": 0,
+    "failedTarget": 3,
+    "failedBalance": 60,
+    "failedPaid": 180,
+    "failedUnlocked": true,
+    "failedSupply": {
+      "sourceWashKits": 12,
+      "carriedWashKits": 0,
+      "washRackWashKits": 0
+    },
+    "retryCompleted": 0,
+    "retryTarget": 3,
+    "retryBalance": 60,
+    "retryUnlocked": true,
+    "retryPaid": 180,
+    "retrySupply": {
+      "sourceWashKits": 12,
+      "carriedWashKits": 0,
+      "washRackWashKits": 0
+    }
+  },
+  "routeMeasurement": {
+    "startStockBeforePurchase": {
+      "sourceWashKits": 12,
+      "carriedWashKits": 0,
+      "washRackWashKits": 0
+    },
+    "startStockAfterPurchase": {
+      "sourceWashKits": 12,
+      "carriedWashKits": 0,
+      "washRackWashKits": 0
+    },
+    "beforePurchase": {
+      "sourceToRack": {
+        "plannedPathDistance": 9.225347471263756,
+        "measuredTelemetryDistance": 9.192881761493547,
+        "wallSeconds": 3.584005250000004,
+        "samples": 13,
+        "unloadWaitSeconds": 8.792000002699751e-06,
+        "unloadCount": 1
+      },
+      "rackToWash": {
+        "plannedPathDistance": 8.863680799093352,
+        "measuredTelemetryDistance": 8.439628781494529,
+        "wallSeconds": 3.9002688329999984,
+        "samples": 14
+      },
+      "pathDistance": 17.632510542988076,
+      "walkWallSeconds": 7.4842740830000025,
+      "unloadWaitSeconds": 8.792000002699751e-06,
+      "unloadCount": 1
+    },
+    "afterPurchase": {
+      "sourceToRack": {
+        "plannedPathDistance": 11.60038651335816,
+        "measuredTelemetryDistance": 11.377764641454757,
+        "wallSeconds": 4.3632958749999915,
+        "samples": 15,
+        "unloadWaitSeconds": 2.7499999930569174e-06,
+        "unloadCount": 1
+      },
+      "rackToWash": {
+        "plannedPathDistance": 5.752721100549108,
+        "measuredTelemetryDistance": 5.584944183922115,
+        "wallSeconds": 2.45580454200001,
+        "samples": 9
+      },
+      "pathDistance": 16.962708825376872,
+      "walkWallSeconds": 6.819100417000001,
+      "unloadWaitSeconds": 2.7499999930569174e-06,
+      "unloadCount": 1
+    },
+    "pathDistanceDelta": -0.6698017176112039,
+    "walkWallSecondsDelta": -0.6651736660000012,
+    "unloadCountDelta": 0
+  }
+}

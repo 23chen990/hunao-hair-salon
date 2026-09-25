@@ -1,0 +1,165 @@
+:root {
+  color: #1c2329;
+  background: #dfe3e5;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  overscroll-behavior: none;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  background: #cfd5d8;
+}
+
+.shell {
+  width: min(100%, 430px);
+  min-height: 100svh;
+  padding: max(8px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom));
+  background: #f2f3ef;
+}
+
+.title-row {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 6px 6px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.2;
+  letter-spacing: .04em;
+}
+
+.title-row p {
+  margin: 3px 0 0;
+  color: #536068;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+#seed-label {
+  flex: 0 0 auto;
+  min-width: 48px;
+  padding: 5px 7px;
+  border: 1px solid #9ba4a9;
+  border-radius: 4px;
+  background: #fff;
+  color: #374148;
+  font: 600 12px/1 system-ui, sans-serif;
+  text-align: center;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  background: #eceeea;
+  border: 1px solid #aab1b4;
+  border-radius: 6px;
+  touch-action: none;
+  user-select: none;
+}
+
+.controls {
+  display: grid;
+  gap: 6px;
+  padding-top: 7px;
+}
+
+.control-row {
+  display: grid;
+  gap: 6px;
+}
+
+.face-row {
+  grid-template-columns: 48px 1fr 48px;
+}
+
+.three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.two {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+button,
+.face-row output {
+  min-width: 44px;
+  min-height: 48px;
+  border: 1px solid #8e989e;
+  border-radius: 5px;
+  background: #f9faf7;
+  color: #20282e;
+  font: 650 13px/1.15 system-ui, sans-serif;
+}
+
+button {
+  padding: 5px 7px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active {
+  background: #d8dddf;
+  transform: translateY(1px);
+}
+
+button:focus-visible {
+  outline: 3px solid #347a85;
+  outline-offset: 1px;
+}
+
+.face-row output {
+  display: grid;
+  place-items: center;
+  background: #e8ebe8;
+}
+
+.debug-log {
+  margin-top: 7px;
+  color: #526068;
+  font-size: 11px;
+}
+
+.debug-log summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.debug-log pre {
+  max-height: 150px;
+  overflow: auto;
+  margin: 0;
+  padding: 7px;
+  background: #20272c;
+  color: #dbe4e6;
+  white-space: pre-wrap;
+  font: 10px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@media (max-width: 360px) {
+  .title-row p {
+    display: none;
+  }
+
+  button {
+    font-size: 12px;
+  }
+}

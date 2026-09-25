@@ -1,0 +1,144 @@
+{
+  "verifiedAt": "2026-08-10T11:56:32.075952+00:00",
+  "passed": true,
+  "requirements": {
+    "clipCount": 7,
+    "width": 390,
+    "height": 844,
+    "durationRangeSeconds": [
+      6,
+      10
+    ],
+    "videoCodec": "H.264",
+    "audioTracks": 0,
+    "realOutcomeMatchesManifest": true
+  },
+  "toolAvailability": {
+    "ffprobe": null,
+    "playwrightFfmpeg": "available locally at verification time; absolute path omitted",
+    "playwrightFfmpegSupportsMp4Demux": false,
+    "note": "The Playwright FFmpeg build has only Matroska/WebM and image2 demuxers. It successfully probed the raw WebM but cannot parse final MP4 files; final MP4 checks use OpenCV's FFmpeg backend, file, and afinfo."
+  },
+  "rawWebm": {
+    "path": "prototypes/phase-ripple-skinned/validation/raw/phase-ripple-continuous.webm",
+    "ffmpegReturnCode": 1,
+    "hasVideoVp8": true,
+    "hasAudioStream": false
+  },
+  "finalMp4FfmpegAttempt": {
+    "returnCode": 183,
+    "stderrTail": [
+      "[in#0 @ 0xc6b014000] Error opening input: Invalid data found when processing input",
+      "Error opening input file ../media/01-sync-4.mp4.",
+      "Error opening input files: Invalid data found when processing input"
+    ]
+  },
+  "clips": [
+    {
+      "id": "01-sync-4",
+      "outcome": "success",
+      "containerProbe": "../media/01-sync-4.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "../media/01-sync-4.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "146aa670bf822c381aef51b5bfbfc5ac1062a5fff21c2c4b87c90c28ced78b4b"
+    },
+    {
+      "id": "02-near-miss-4",
+      "outcome": "timeout",
+      "containerProbe": "../media/02-near-miss-4.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "../media/02-near-miss-4.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "c893366c858e421a44b361f602bf9f27952bc8a8695919c20bf285a2126103e5"
+    },
+    {
+      "id": "03-early-click-4",
+      "outcome": "timeout",
+      "containerProbe": "../media/03-early-click-4.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "../media/03-early-click-4.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "fcd21b4e79590604b6cbec59a8c0b6acd0155d5548afffa5349c102222cda532"
+    },
+    {
+      "id": "04-later-success-4",
+      "outcome": "success",
+      "containerProbe": "../media/04-later-success-4.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "../media/04-later-success-4.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "63946d7f91ea746c82f4349540a1dbb68d1c85e02bb45279e60b10f130eeeff1"
+    },
+    {
+      "id": "05-sync-6",
+      "outcome": "success",
+      "containerProbe": "../media/05-sync-6.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "../media/05-sync-6.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "45e102a6b1a1cdec3c6c7178a6fe8ac2e20700e441def6ead1b01d7c325877c9"
+    },
+    {
+      "id": "06-sync-3",
+      "outcome": "success",
+      "containerProbe": "../media/06-sync-3.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "../media/06-sync-3.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "912e48b301470ac0e3190b0ec5a9e4fd717c414d9a8aea674af429bd57478c45"
+    },
+    {
+      "id": "07-sync-5",
+      "outcome": "success",
+      "containerProbe": "../media/07-sync-5.mp4: ISO Media, MP4 Base Media v1 [ISO 14496-12:2003]",
+      "audioProbe": "afinfo found no readable audio track (AudioFileOpenURL failed)",
+      "path": "../media/07-sync-5.mp4",
+      "width": 390,
+      "height": 844,
+      "fps": 25.0,
+      "frames": 160,
+      "durationSeconds": 6.4,
+      "codec": "h264",
+      "sha256": "ee245eafd0f1ee723b42e46f6a296d09f7bdfb1ed4155f0e122911cf52d5897a"
+    }
+  ],
+  "cover": {
+    "path": "../media/phase-ripple-contact-cover.png",
+    "width": 390,
+    "height": 844,
+    "sourceClip": "05-sync-6.mp4",
+    "sourceTimeSeconds": 1.8,
+    "sha256": "93d579a712393664fff5cc5db07941f8639cf4c5c7a69200cfdc05f9c8840232"
+  }
+}

@@ -63,6 +63,28 @@ public sealed class Phase7CorrectionRuntimeViewTests
     }
 
     [Test]
+    public void NormalGameplayOpeningCustomerUsesTheApprovedFiveOrderCatalog()
+    {
+        var root = new GameObject("Approved Opening Order Runtime");
+        var demo = root.AddComponent<SalonDemo>();
+        demo.FlowSettings.InitialCustomerCount = 0;
+        Invoke(demo, "Start");
+        SalonGameModel game = (SalonGameModel)Field(demo, "_game");
+
+        Invoke(demo, "StartBusinessDay");
+        InvokeWithArgument(demo, "MaintainCustomerFlow", 0f);
+
+        Assert.AreEqual(1, game.Customers.Count);
+        CollectionAssert.DoesNotContain(game.Customers[0].Needs, ServiceType.Dye,
+            "Normal gameplay must not leak the internal dye validation order.");
+        CollectionAssert.DoesNotContain(game.Customers[0].Needs, ServiceType.Perm,
+            "Normal gameplay must not leak the internal perm validation order.");
+
+        UnityEngine.Object.DestroyImmediate(root);
+        DestroyRuntimeObjects();
+    }
+
+    [Test]
     public void ResultCopyUsesOperatingLedgerAndNeverMentionsUncollectedIncome()
     {
         var root = new GameObject("Corrected Phase7 Result Runtime");
@@ -113,7 +135,7 @@ public sealed class Phase7CorrectionRuntimeViewTests
     }
 
     [Test]
-    public void EnteringResultClearsPendingWorldPaymentsWithoutIncome()
+    public void CompletedPaymentIsSettledBeforeResultAndCreatesNoWorldPickup()
     {
         var root = new GameObject("Corrected Phase7 Pickup Cleanup Runtime");
         var demo = root.AddComponent<SalonDemo>();
@@ -121,13 +143,15 @@ public sealed class Phase7CorrectionRuntimeViewTests
         SalonGameModel game = (SalonGameModel)Field(demo, "_game");
         PaymentDropModel drop = game.Payments.CreateFinalPayment(1, 1, 100, 20);
         InvokeWithArgument(demo, "HandlePaymentCreated", drop);
-        Assert.AreEqual(1, game.Payments.Drops.Count);
+        Assert.AreEqual(PaymentDropState.Collected, drop.State);
+        Assert.AreEqual(100, Controller(demo).Stats.OrderIncome);
+        Assert.AreEqual(20, Controller(demo).Stats.TipIncome);
 
         Controller(demo).ForceResult();
 
         Assert.AreEqual(0, game.Payments.Drops.Count);
-        Assert.AreEqual(0, Controller(demo).Stats.OrderIncome);
-        Assert.AreEqual(0, Controller(demo).Stats.TipIncome);
+        Assert.AreEqual(100, Controller(demo).Stats.OrderIncome);
+        Assert.AreEqual(20, Controller(demo).Stats.TipIncome);
         UnityEngine.Object.DestroyImmediate(root);
         DestroyRuntimeObjects();
     }
@@ -152,7 +176,8 @@ public sealed class Phase7CorrectionRuntimeViewTests
                 item.name != "Corrected Phase7 Start Runtime" &&
                 item.name != "Corrected Phase7 Result Runtime" &&
                 item.name != "Corrected Phase7 Management Runtime" &&
-                item.name != "Corrected Phase7 Pickup Cleanup Runtime")
+                item.name != "Corrected Phase7 Pickup Cleanup Runtime" &&
+                item.name != "Approved Opening Order Runtime")
                 UnityEngine.Object.DestroyImmediate(item);
     }
 }

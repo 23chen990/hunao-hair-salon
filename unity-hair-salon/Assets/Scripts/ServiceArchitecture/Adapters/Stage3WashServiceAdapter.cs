@@ -21,6 +21,18 @@ namespace HairSalon
             public InMemoryActionHistory History { get; }
             public HaircutActionParameters ActiveHaircutParameters { get; set; }
             public ServiceExecutionController ExecutionController { get; set; }
+            /// <summary>
+            /// The mobile continuous service entry point represents the approved
+            /// wash hand-off. It has no wrap/remove-towel interaction, so its
+            /// order must not require those manual-only milestones.
+            /// </summary>
+            public bool UsesContinuousServiceExecution { get; set; }
+            /// <summary>
+            /// Background actions keep their domain token while the player focuses a
+            /// different customer. Foreground actions are still invalidated on focus
+            /// changes through the normal InteractionContext lifecycle.
+            /// </summary>
+            public bool PreserveActiveActionOnFocus { get; set; }
         }
 
         private readonly Dictionary<int, Session> _sessions = new Dictionary<int, Session>();
@@ -35,6 +47,13 @@ namespace HairSalon
             _resolver = new ActionResolver(_config);
         }
 
+        /// <summary>Discard per-customer service sessions at a safe day boundary.</summary>
+        public void ResetForNextDay()
+        {
+            _sessions.Clear();
+            _appliers.Clear();
+        }
+
         public void Register(CustomerModel customer)
         {
             Ensure(customer);
@@ -44,6 +63,7 @@ namespace HairSalon
             CustomerModel customer, ServiceExecutionType type, float duration, float worldTime)
         {
             Session session = Ensure(customer);
+            session.UsesContinuousServiceExecution = true;
             SynchronizeOrder(customer, session);
             session.State.Relocate(customer.Station);
             session.Interaction.Focus(customer.Id, customer.Station);
@@ -81,7 +101,9 @@ namespace HairSalon
             {
                 if (pair.Key == customer.Id) continue;
                 InteractionContext context = pair.Value.Interaction;
-                if (context.FocusedCustomerId >= 0)
+                bool preserveBackgroundAction = pair.Value.PreserveActiveActionOnFocus &&
+                    context.ActiveActionToken != null;
+                if (context.FocusedCustomerId >= 0 && !preserveBackgroundAction)
                     context.ClearInteractionContext(ClearReason.CustomerChanged);
             }
             Session session = Ensure(customer);
@@ -113,10 +135,30 @@ namespace HairSalon
             ServiceTool tool,
             float worldTime)
         {
+            return BeginTimedAction(customer, action, tool, worldTime, false);
+        }
+
+        public bool BeginBackgroundTimedAction(
+            CustomerModel customer,
+            ServiceActionType action,
+            ServiceTool tool,
+            float worldTime)
+        {
+            return BeginTimedAction(customer, action, tool, worldTime, true);
+        }
+
+        private bool BeginTimedAction(
+            CustomerModel customer,
+            ServiceActionType action,
+            ServiceTool tool,
+            float worldTime,
+            bool preserveOnFocus)
+        {
             Session session = Ensure(customer);
             session.State.Relocate(customer.Station);
             session.State.SynchronizeExternalMetrics(customer.Satisfaction, customer.Patience);
             session.Interaction.Focus(customer.Id, customer.Station);
+            session.PreserveActiveActionOnFocus = preserveOnFocus;
             session.Interaction.BeginAction(action, tool,
                 session.State.Physical.PhysicalStateRevision, worldTime);
             return true;
@@ -187,7 +229,10 @@ namespace HairSalon
             Session session = Ensure(customer);
             ActionToken token = session.Interaction.ActiveActionToken;
             if (token == null)
+            {
+                session.PreserveActiveActionOnFocus = false;
                 return new ApplyActionResult(ApplyStatus.InvalidToken, DiagnosticCode.InvalidToken);
+            }
             CustomerPhysicalStateSnapshot prePhysical = session.State.Physical.CreateSnapshot();
             var request = new ActionRequest(token, customer.Id, customer.Station,
                 token.ActionType, token.Tool, Math.Max(0f, elapsedTime), interrupted);
@@ -204,6 +249,7 @@ namespace HairSalon
                 Project(customer);
                 ProcessFoamBurstRecovery(customer, session, result, prePhysical);
             }
+            session.PreserveActiveActionOnFocus = false;
             return applied;
         }
 
@@ -270,6 +316,7 @@ namespace HairSalon
         {
             Session session = Ensure(customer);
             session.Interaction.ClearInteractionContext(reason);
+            session.PreserveActiveActionOnFocus = false;
             Project(customer);
         }
 
@@ -525,10 +572,11 @@ namespace HairSalon
 
         private static void SynchronizeOrder(CustomerModel customer, Session session)
         {
-            session.State.ReplaceOrder(CreateOrder(customer));
+            session.State.ReplaceOrder(CreateOrder(customer, !session.UsesContinuousServiceExecution));
         }
 
-        private static OrderDefinition CreateOrder(CustomerModel customer)
+        private static OrderDefinition CreateOrder(
+            CustomerModel customer, bool includeManualTowelTransitionRequirements = true)
         {
             var services = new List<RequiredService>();
             var milestones = new List<ServiceMilestoneDefinition>();
@@ -541,7 +589,7 @@ namespace HairSalon
                 AddRequired(milestones, MilestoneId.WetHairApplied);
                 AddRequired(milestones, MilestoneId.Shampooed);
                 AddRequired(milestones, MilestoneId.RinseClean);
-                if (hasLaterService)
+                if (hasLaterService && includeManualTowelTransitionRequirements)
                 {
                     AddRequired(milestones, MilestoneId.CleanTowelApplied);
                     AddRequired(milestones, MilestoneId.Untoweled);

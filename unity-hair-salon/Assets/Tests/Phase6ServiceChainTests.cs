@@ -224,6 +224,25 @@ public sealed class Phase6ServiceChainTests
     }
 
     [Test]
+    public void AutoBlowAfterWash_DriesHairAndCompletesTheOrder()
+    {
+        var game = NewGame();
+        CustomerModel customer = SpawnServing(game, 13, 1, "O002", completeWashFirst: true);
+        RemoveTowel(game, customer);
+        game.SetFirstDayCompleteForDebug(true);
+        Assert.IsTrue(game.PurchaseAutoBlowStand());
+
+        Assert.IsTrue(game.StartAutoBlow(customer));
+        game.Tick(game.ServiceConfig.AutoBlowStartDuration +
+                  game.ServiceConfig.ManualBlowGoodStart + .1f);
+        Assert.AreEqual(BlowResult.Good, game.FinishAutoBlow(customer));
+
+        Assert.AreEqual(CustomerState.Finished, customer.State);
+        Assert.IsTrue(customer.ExitReady);
+        Assert.AreEqual(1, game.Payments.Drops.Count);
+    }
+
+    [Test]
     public void WashAndBlowBackgroundWorkContinuesDuringAnotherHaircut()
     {
         var game = NewGame(new CustomerPatienceConfig { DrainPerSecond = 10f });
@@ -258,7 +277,7 @@ public sealed class Phase6ServiceChainTests
     }
 
     [Test]
-    public void ReturningForAnotherStationUsesServiceDelayNotOldQueuePatience()
+    public void ReturningForAnotherStationEventuallyLeavesAfterServiceDelay()
     {
         var game = NewGame(new CustomerPatienceConfig { DrainPerSecond = 100f });
         CustomerModel customer = SpawnServing(game, 30, 0, "O003");
@@ -267,13 +286,17 @@ public sealed class Phase6ServiceChainTests
 
         game.Tick(10f);
 
-        Assert.AreEqual(CustomerState.Serving, customer.State);
-        Assert.AreEqual(0, customer.Station);
-        Assert.IsTrue(game.IsStationOccupied(0));
+        Assert.AreEqual(CustomerState.Leaving, customer.State);
+        Assert.AreEqual(-1, customer.Station);
+        Assert.IsFalse(game.IsStationOccupied(0));
         CollectionAssert.DoesNotContain(game.WaitingQueue, customer);
         Assert.Less(customer.Patience, patienceAfterService,
             "Between-step delay resumes patience pressure at the configured slower rate.");
         Assert.GreaterOrEqual(customer.ServiceDelaySeconds, 10f);
+        Assert.AreEqual(1, game.AngryLeaves);
+
+        game.Tick(SalonGameModel.LeavingSeconds + .01f);
+        Assert.AreEqual(CustomerState.Exited, customer.State);
     }
 
     [Test]

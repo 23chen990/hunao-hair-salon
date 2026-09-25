@@ -1,0 +1,167 @@
+:root {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: #e8f4ef;
+  background: #101515;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  min-height: 100dvh;
+  background: #101515;
+}
+
+.shell {
+  width: 100%;
+  height: 100dvh;
+  max-width: 560px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: 44px minmax(0, 1fr) 72px;
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  border-inline: 1px solid #273433;
+  background: #151d1c;
+}
+
+.readout,
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-inline: 12px;
+  letter-spacing: 0.04em;
+}
+
+.readout {
+  justify-content: space-between;
+  min-height: 44px;
+  color: #9eb3ae;
+  font-size: 11px;
+  border-bottom: 1px solid #2d3b38;
+}
+
+#state {
+  color: #91f2c4;
+  font-weight: 800;
+}
+
+.stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #182220;
+}
+
+#bridge {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+#bridge:focus-visible {
+  box-shadow: inset 0 0 0 3px #91f2c4;
+}
+
+.pressure {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 12px;
+  height: 8px;
+  border: 1px solid #70857f;
+  border-radius: 99px;
+  overflow: hidden;
+  pointer-events: none;
+  background: #0c1110;
+}
+
+.pressure i {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: #91f2c4;
+  transition: width 80ms linear;
+}
+
+.controls {
+  min-height: 72px;
+  justify-content: space-between;
+  border-top: 1px solid #2d3b38;
+  background: #111817;
+}
+
+.controls button {
+  flex: 1 1 auto;
+  min-width: 44px;
+  padding-inline: 9px;
+  font-size: 12px;
+}
+
+button,
+#input-state {
+  min-width: 44px;
+  min-height: 48px;
+  border-radius: 8px;
+}
+
+button {
+  padding: 0 18px;
+  border: 1px solid #6f8982;
+  color: #e8f4ef;
+  background: #25312f;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:active {
+  transform: translateY(1px);
+  background: #32433f;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+#input-state {
+  min-width: 74px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #354944;
+  color: #91f2c4;
+  font-size: 12px;
+}
+
+@media (max-height: 700px) {
+  .shell {
+    grid-template-rows: 44px minmax(0, 1fr) 60px;
+  }
+
+  .controls {
+    min-height: 60px;
+  }
+}

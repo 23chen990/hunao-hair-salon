@@ -66,6 +66,12 @@ namespace HairSalon
 
         public void Adjust(int delta) => SetCurrent(CurrentSatisfaction + delta);
 
+        public void BeginDay(int openingValue)
+        {
+            _settledCustomers.Clear();
+            SetCurrent(openingValue);
+        }
+
         public bool TrySettleCustomer(CustomerModel customer)
         {
             if (customer == null || !IsTerminal(customer.State) || !_settledCustomers.Add(customer.Id))

@@ -66,6 +66,13 @@ namespace HairSalon
     [Serializable]
     public sealed class DayConfig
     {
+        // Mobile profiles opt into these fields explicitly. Legacy configs keep their
+        // existing traffic and timing behavior when IsMobileProfile is false.
+        public bool IsMobileProfile;
+        public int MobileDayNumber = 1;
+        public int TargetOrders;
+        public int WaitingCapacity;
+        public bool AllowSpawnWhileWaitingOverload;
         public float StartingDuration = 2f;
         public float BusinessDuration = 180f;
         public float ClosingGraceDuration = 30f;
@@ -112,6 +119,32 @@ namespace HairSalon
                 if (cursor < 0f) return entry.OrderId;
             }
             return "O005";
+        }
+
+        /// <summary>
+        /// Selects an order from the profile's deterministic progression. Legacy
+        /// configs retain their weighted picker through PickOrder(float).
+        /// </summary>
+        public string PickOrderForSpawn(int spawnIndex, float normalizedProgress)
+        {
+            if (!IsMobileProfile)
+            {
+                float roll = DeterministicRoll(spawnIndex, normalizedProgress);
+                return PickOrder(roll);
+            }
+
+            return SalonMobileDayConfig.PickOrderForSpawn(this, spawnIndex, normalizedProgress);
+        }
+
+        private static float DeterministicRoll(int spawnIndex, float normalizedProgress)
+        {
+            unchecked
+            {
+                int seed = spawnIndex * 1103515245 + 12345 +
+                    (int)(Math.Max(0f, Math.Min(1f, normalizedProgress)) * 1000f);
+                seed &= 0x7fffffff;
+                return (seed % 10000) / 10000f;
+            }
         }
 
         private static bool IsImplementedOrder(string orderId)
@@ -192,6 +225,8 @@ namespace HairSalon
                         progress < _config.Rush.StartProgress + durationProgress;
             bool stationSaturated = snapshot.OccupiedStations >= snapshot.ServiceStationCount;
             bool waitingOverload = snapshot.WaitingCustomers >= Math.Max(1, _config.OverloadWaitingThreshold);
+            bool waitingAtCapacity = _config.WaitingCapacity > 0 &&
+                                     snapshot.WaitingCustomers >= _config.WaitingCapacity;
             bool angryOverload = snapshot.AngryCustomers >= 2;
             bool overloaded = waitingOverload || (stationSaturated && snapshot.WaitingCustomers >= 2) || angryOverload;
             bool underHardCap = snapshot.ActiveCustomers < Math.Max(1, _config.MaxConcurrentCustomers);
@@ -207,7 +242,8 @@ namespace HairSalon
             float baseInterval = min + (max - min) * Clamp01(intervalRoll);
             float interval = baseInterval / intensity;
             if (overloaded) interval *= Math.Max(1f, _config.OverloadSlowdownMultiplier);
-            return new TrafficDecision(underHardCap && !waitingOverload, interval, phase, rush, overloaded,
+            bool waitingGate = waitingAtCapacity || (waitingOverload && !_config.AllowSpawnWhileWaitingOverload);
+            return new TrafficDecision(underHardCap && !waitingGate, interval, phase, rush, overloaded,
                 reputationMultiplier);
         }
 
@@ -293,7 +329,8 @@ namespace HairSalon
             }
             _accidentByCustomer[customer.Id] = customer.AccidentSeverity;
 
-            if (customer.State == CustomerState.Finished && _servedCustomers.Add(customer.Id))
+            if (customer.State == CustomerState.Finished && customer.ServiceResult != CustomerServiceResult.Failed &&
+                _servedCustomers.Add(customer.Id))
             {
                 CompletedOrders++;
                 if (customer.ServiceResult == CustomerServiceResult.HappyCompletion) HappyCustomers++;
@@ -332,6 +369,11 @@ namespace HairSalon
             CurrentStars = Clamp(_config.InitialStars, _config.MinimumStars, _config.MaximumStars);
         }
 
+        public void Restore(float stars)
+        {
+            CurrentStars = Clamp(stars, _config.MinimumStars, _config.MaximumStars);
+        }
+
         public void ApplyDayResult(DayStats stats)
         {
             if (stats == null || stats.ReputationApplied) return;
@@ -362,7 +404,7 @@ namespace HairSalon
     public sealed class BusinessDayController
     {
         private readonly CustomerTrafficDirector _trafficDirector;
-
+        private int _unfinishedOrders;
         public DayConfig Config { get; }
         public DayState State { get; private set; } = DayState.PreOpen;
         public int DayNumber { get; private set; } = 1;
@@ -372,9 +414,13 @@ namespace HairSalon
             Math.Max(0f, Math.Min(1f, 1f - BusinessRemainingTime / Config.BusinessDuration));
         public DayPressurePhase CurrentPressurePhase => _trafficDirector.GetPhase(BusinessProgress);
         public bool IsPaused { get; private set; }
-        public bool CanSpawnCustomers => State == DayState.Business && BusinessRemainingTime > 0f && !IsPaused;
+        public bool CanSpawnCustomers => State == DayState.Business && BusinessRemainingTime > 0f &&
+                                         !IsPaused;
         public DayStats Stats { get; private set; }
         public ShopReputationModel Reputation { get; }
+        public DayEvaluation CurrentDayEvaluation => EvaluateDay();
+        public bool CanRetryDay => (State == DayState.Result || State == DayState.ClosedManagement) &&
+                                    EvaluateDay().CanRetry;
         public event Action<DayState> StateChanged;
 
         public BusinessDayController(DayConfig config, ShopReputationConfig reputationConfig = null)
@@ -388,7 +434,10 @@ namespace HairSalon
         public void PrepareDay(int dayNumber)
         {
             DayNumber = Math.Max(1, dayNumber);
+            if (Config.IsMobileProfile)
+                SalonMobileDayConfig.ApplyForDay(Config, DayNumber);
             Stats = new DayStats(DayNumber);
+            _unfinishedOrders = 0;
             BusinessRemainingTime = Math.Max(0f, Config.BusinessDuration);
             ClosingGraceRemainingTime = Math.Max(0f, Config.ClosingGraceDuration);
             IsPaused = false;
@@ -403,27 +452,79 @@ namespace HairSalon
 
         public void Tick(float dt, int activeCustomerCount)
         {
+            TickWithAdmissionCount(dt, activeCustomerCount, activeCustomerCount, 0);
+        }
+
+        public void Tick(float dt, int activeCustomerCount, int pendingSettlementCount)
+        {
+            TickWithAdmissionCount(dt, activeCustomerCount, activeCustomerCount, pendingSettlementCount);
+        }
+
+        /// <summary>
+        /// Advances the day with separate lifecycle and admission counts.
+        /// Finished/Leaving customers still keep the day alive until their
+        /// visible exit route completes, but they are already completed (or
+        /// already failed) and must not consume another unfinished-order slot.
+        /// </summary>
+        public void TickWithAdmissionCount(float dt, int activeUntilExitCount,
+            int unfinishedOrderCount, int pendingSettlementCount = 0)
+        {
+            _unfinishedOrders = Math.Max(0, unfinishedOrderCount);
             if (IsPaused || State == DayState.PreOpen || State == DayState.Result ||
                 State == DayState.ClosedManagement) return;
             float step = Math.Max(0f, dt);
+            int pending = Math.Max(0, pendingSettlementCount);
             if (State == DayState.Business)
             {
                 BusinessRemainingTime = Math.Max(0f, BusinessRemainingTime - step);
                 if (BusinessRemainingTime <= 0f)
                 {
-                    if (activeCustomerCount <= 0) SetState(DayState.Result);
+                    if (activeUntilExitCount <= 0 && pending <= 0) SetState(DayState.Result);
                     else SetState(DayState.ClosingGrace);
                 }
                 return;
             }
             ClosingGraceRemainingTime = Math.Max(0f, ClosingGraceRemainingTime - step);
-            if (activeCustomerCount <= 0 || ClosingGraceRemainingTime <= 0f)
+            if ((activeUntilExitCount <= 0 && pending <= 0) || ClosingGraceRemainingTime <= 0f)
                 SetState(DayState.Result);
         }
 
         public void SetPaused(bool paused) => IsPaused = paused;
         public void ForceResult() => SetState(DayState.Result);
         public void FinalizeDayReputation() => Reputation.ApplyDayResult(Stats);
+        public DayEvaluation EvaluateDay()
+        {
+            bool ended = State == DayState.Result || State == DayState.ClosedManagement;
+            return SalonMobileDayConfig.Evaluate(Config, Stats == null ? 0 : Stats.CompletedOrders, ended);
+        }
+
+        public void RestoreReputation(float stars) => Reputation.Restore(stars);
+
+        /// <summary>
+        /// Restores a persisted post-day management state without applying the
+        /// day's result again. A caller that already prepared the same day keeps
+        /// that daily state; other states are safely re-prepared first.
+        /// </summary>
+        public bool RestoreClosedManagement(int dayNumber, float reputationStars)
+        {
+            int normalizedDay = Math.Max(1, dayNumber);
+            if (State != DayState.PreOpen || DayNumber != normalizedDay)
+                PrepareDay(normalizedDay);
+            else if (Config.IsMobileProfile)
+                SalonMobileDayConfig.ApplyForDay(Config, normalizedDay);
+
+            RestoreReputation(reputationStars);
+            SetState(DayState.ClosedManagement);
+            return true;
+        }
+
+        public bool PrepareRetryDay()
+        {
+            if (!CanRetryDay) return false;
+            PrepareDay(DayNumber);
+            return true;
+        }
+
         public void OpenClosedManagement()
         {
             if (State == DayState.Result) SetState(DayState.ClosedManagement);

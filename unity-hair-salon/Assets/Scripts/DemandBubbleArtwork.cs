@@ -55,7 +55,7 @@ internal static class DemandBubbleArtwork
         rect.anchoredPosition = position;
         rect.sizeDelta = new Vector2(36f, 60f);
         var text = go.GetComponent<Text>();
-        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.font = SalonUiFactory.GetPackagedUiFont();
         text.fontSize = fontSize;
         text.fontStyle = FontStyle.Bold;
         text.alignment = TextAnchor.MiddleCenter;

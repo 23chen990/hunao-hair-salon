@@ -32,7 +32,7 @@ public sealed class ShampooInteractionRedesignTests
     }
 
     [Test]
-    public void CompletedRubbingProducesFoamImmediatelyWithoutBackgroundWait()
+    public void CompletedRubbingProducesFoamAndStartsBackgroundWashWait()
     {
         SalonGameModel game = CreateServingWashCustomer(out CustomerModel customer);
         CompleteActive(game, customer, WashAction.Shower, game.ServiceConfig.RinseDuration);
@@ -40,8 +40,15 @@ public sealed class ShampooInteractionRedesignTests
         CompleteActive(game, customer, WashAction.Shampoo, game.ServiceConfig.ShampooDuration);
 
         Assert.AreEqual(WashStage.Foamy, customer.WashStage);
-        Assert.AreEqual(BackgroundTaskState.Inactive, customer.BackgroundTask.State);
         Assert.IsTrue(customer.ShampooApplied);
+        // Phase 2 设计：洗发后立即进入后台泡沫等待，玩家可以离开，稍后必须回来冲洗。
+        // 这里锁定的是新语义，旧语义（打完泡沫即 Inactive）已被有意替换。
+        Assert.AreEqual(BackgroundTaskState.Running, customer.BackgroundTask.State);
+        Assert.IsTrue(game.IsWashFoamWaitRunning(customer));
+        Assert.IsFalse(game.IsWashFoamReadyToRinse(customer));
+
+        game.Tick(game.ServiceConfig.FoamOptimalStart + .01f);
+        Assert.IsTrue(game.IsWashFoamReadyToRinse(customer));
     }
 
     [Test]

@@ -50,6 +50,17 @@ namespace HairSalon
             Config = config ?? new SalonRewardConfig();
         }
 
+        /// <summary>
+        /// Restores the persisted balance without touching the current day's payment
+        /// drops or their collection states. Call only during initialization or a
+        /// business-day boundary; callers owning the game model enforce that boundary.
+        /// </summary>
+        public void RestoreBalance(int balance)
+        {
+            if (balance < 0) throw new ArgumentOutOfRangeException(nameof(balance));
+            Balance = balance;
+        }
+
         public PaymentDropModel CreateHaircutPayment(
             int customerId, int workstationId, HaircutServiceRating rating)
         {

@@ -50,21 +50,24 @@ public sealed class Phase5ConcurrentFlowTests
     }
 
     [Test]
-    public void FormalServiceStopsWaitingPressureForTheRestOfTheOrder()
+    public void FormalServiceResumesPatiencePressureAfterTheDelayGrace()
     {
         var game = new SalonGameModel();
         CustomerModel customer = SpawnServing(game, 13);
         customer.Patience = 20f;
         Assert.IsTrue(game.BeginActiveOperation(customer));
-        float relieved = customer.Patience;
         Assert.IsTrue(game.EndActiveOperation(customer));
 
         game.Tick(5f);
         game.Tick(100f);
 
-        Assert.AreEqual(CustomerState.Serving, customer.State);
-        Assert.AreEqual(relieved, customer.Patience, .001f);
+        Assert.AreEqual(CustomerState.Leaving, customer.State);
+        Assert.AreEqual(0f, customer.Patience, .001f);
+        Assert.AreEqual(1, game.AngryLeaves);
         Assert.IsTrue(customer.HasServiceEngaged);
+
+        game.Tick(SalonGameModel.LeavingSeconds + .01f);
+        Assert.AreEqual(CustomerState.Exited, customer.State);
     }
 
     [Test]
