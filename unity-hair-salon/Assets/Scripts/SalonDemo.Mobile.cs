@@ -49,6 +49,7 @@ public sealed partial class SalonDemo
     private Transform _mobileHaircutExpansionPadPoint;
     private GameObject _mobileHaircutExpansionPadRoot;
     private TextMesh _mobileHaircutExpansionPadLabel;
+    private Text _mobileTaskSummaryLabel;
     private GameObject _mobileExpandedRackRoot;
     private Transform _mobileExpandedRackShadowAnchor;
     private Transform _mobileCarryVisualRoot;
@@ -73,13 +74,15 @@ public sealed partial class SalonDemo
     private const int MobileSupplyPadCost = SalonProgressData.SupplyRackExpansionCost;
     private const float MobileSupplyPadSpendRate = 60f;
     private const float MobileHaircutPadSpendRate = 60f;
-    private static readonly Vector3 MobileSupplySourcePosition = new Vector3(8.35f, .2f, 1.65f);
+    private static readonly Vector3 MobileSupplySourcePosition = new Vector3(3.15f, .2f, 1.65f);
     private static readonly Vector3 MobileWashRackPosition = new Vector3(-1.25f, .2f, 5.55f);
     // In front of the expansion rack, with enough separation from the first
     // haircut station that the player can see and stand on the pad directly.
     private static readonly Vector3 MobileSupplyPadPosition = new Vector3(-4.25f, .2f, 1.1f);
     private static readonly Vector3 MobileExpandedWashRackPosition = new Vector3(-4.1f, .2f, 2.25f);
     private static readonly Vector3 MobileHaircutExpansionPadPosition = new Vector3(3.9f, .2f, -.35f);
+    private static readonly Rect MobileZoneABounds = new Rect(-10.35f, -5.15f, 15.1f, 12.45f);
+    private static readonly Rect MobileSalonBounds = new Rect(-10.35f, -5.15f, 20.7f, 12.45f);
 
     private enum MobileAction { None, Greet, Assign, Guide, Wash, RinseWash, Cut, StartDry, FinishDry }
     private struct MobileTarget
@@ -360,6 +363,20 @@ public sealed partial class SalonDemo
         UpdateMobileSupplyVisuals();
     }
 
+    private void BuildMobileExpansionBarrier(Transform root)
+    {
+        if (!_mobileMode || root == null) return;
+        _mobileExpansionBarrier = new GameObject("Zone B Construction Barrier");
+        _mobileExpansionBarrier.transform.SetParent(root, false);
+        Block("Construction Barrier", _mobileExpansionBarrier.transform,
+            new Vector3(5.0f, 1.15f, 1.65f), new Vector3(.32f, 2.3f, 8.9f), Coral);
+        Block("Construction Barrier Stripe", _mobileExpansionBarrier.transform,
+            new Vector3(4.8f, 1.35f, 1.65f), new Vector3(.08f, .18f, 8.2f), Gold);
+        Block("Construction Barrier Stripe 2", _mobileExpansionBarrier.transform,
+            new Vector3(5.2f, .9f, 1.65f), new Vector3(.08f, .18f, 8.2f), Gold);
+        _mobileExpansionBarrier.SetActive(_mobileHaircutExpansionPad == null || !_mobileHaircutExpansionPad.IsUnlocked);
+    }
+
     private void HandleMobileSupplyChanged()
     {
         UpdateMobileSupplyVisuals();
@@ -584,6 +601,7 @@ public sealed partial class SalonDemo
                         {
                             _game.SetWorkstationAvailability(2, true);
                             ApplyMobileWorkstationPresentation();
+                            if (_mobileExpansionBarrier != null) _mobileExpansionBarrier.SetActive(false);
                             BuildMobileCollisionMap();
                             ShowToast("HAIRCUT CHAIR OPEN");
                             SaveMobileCheckpoint(false);
@@ -671,6 +689,9 @@ public sealed partial class SalonDemo
                 _game.ClearFocus();
             });
         _mobileCancelGuideButton.gameObject.SetActive(false);
+        _mobileTaskSummaryLabel = UiLabel("", safeParent, 18, Cream, TextAnchor.MiddleLeft,
+            new Vector2(-150f, -205f), new Vector2(420f, 36f), new Color(.11f, .12f, .14f, .82f), new Vector2(.5f, 1f));
+        SalonUiFactory.MakeClickThrough(_mobileTaskSummaryLabel.transform.parent.gameObject);
         BuildMobileCollisionMap();
     }
 
@@ -716,8 +737,12 @@ public sealed partial class SalonDemo
             if (!found) { bounds = renderer.bounds; found = true; }
             else bounds.Encapsulate(renderer.bounds);
         }
-        _mobileFloor = Rect.MinMaxRect(bounds.min.x + bodyRadius, bounds.min.z + bodyRadius,
-            bounds.max.x - bodyRadius, bounds.max.z - bodyRadius);
+        bool expanded = _mobileHaircutExpansionPad != null && _mobileHaircutExpansionPad.IsUnlocked;
+        Rect playable = expanded ? MobileSalonBounds : MobileZoneABounds;
+        _mobileFloor = new Rect(playable.xMin + bodyRadius, playable.yMin + bodyRadius,
+            playable.width - bodyRadius * 2f, playable.height - bodyRadius * 2f);
+        if (!expanded)
+            _mobileObstacles.Add(new Rect(4.75f, -2.8f, .5f, 8.9f));
     }
 
     private SalonProgressData CaptureMobileProgress(bool settled)
@@ -874,6 +899,8 @@ public sealed partial class SalonDemo
         RestoreMobileHaircutExpansionProgress(checkpoint);
         _game.ConfigureWorkstationAvailability(_mobileHaircutExpansionPad.IsUnlocked, false, false);
         ApplyMobileWorkstationPresentation();
+        if (_mobileExpansionBarrier != null)
+            _mobileExpansionBarrier.SetActive(!_mobileHaircutExpansionPad.IsUnlocked);
         if (_mobileSupplyPad.IsUnlocked)
             BuildExpandedWashRackVisual();
         else if (_mobileExpandedRackBuilt)
@@ -924,6 +951,42 @@ public sealed partial class SalonDemo
         foreach (var pair in _selectionPlates)
             pair.Value.SetActive(target.Available && target.Station == pair.Key && target.Action != MobileAction.Greet);
         if (_mobileControls.ConsumeInteractionPressed() && target.Available) ExecuteMobileTarget(target);
+        UpdateMobileTaskSummary();
+        UpdateMobileCameraFollow();
+    }
+
+    private void UpdateMobileCameraFollow()
+    {
+        if (!_mobileMode || _simple2DMode || _camera == null || _player == null) return;
+        bool expanded = _mobileHaircutExpansionPad != null && _mobileHaircutExpansionPad.IsUnlocked;
+        Rect bounds = expanded ? MobileSalonBounds : MobileZoneABounds;
+        const float cameraSize = 6.0f;
+        float aspect = Mathf.Max(.5f, (float)Screen.width / Mathf.Max(1f, Screen.height));
+        float halfWidth = cameraSize * aspect;
+        float centerX = Mathf.Clamp(_player.position.x, bounds.xMin + halfWidth, bounds.xMax - halfWidth);
+        float centerZ = Mathf.Clamp(_player.position.z, bounds.yMin + cameraSize, bounds.yMax - cameraSize);
+        float zOffset = _overviewCameraPosition.z - 1.4f;
+        _cameraPositionTarget = new Vector3(centerX, _overviewCameraPosition.y, centerZ + zOffset);
+        _cameraSizeTarget = cameraSize;
+    }
+
+    private void UpdateMobileTaskSummary()
+    {
+        if (_mobileTaskSummaryLabel == null || _game == null) return;
+        int greet = 0, rinse = 0, blow = 0;
+        foreach (CustomerModel customer in _game.Customers)
+        {
+            if (customer == null || customer.State == CustomerState.Leaving || customer.State == CustomerState.Exited) continue;
+            if ((customer.State == CustomerState.Waiting || customer.State == CustomerState.Entering) && !customer.HasServiceEngaged) greet++;
+            if (customer.CurrentNeed == ServiceType.Wash && customer.WashStage == WashStage.Rinsed) rinse++;
+            if (customer.CurrentNeed == ServiceType.Dry && (customer.BlowStage == BlowStage.AwaitingStart || customer.BlowStage == BlowStage.SafetyStopped)) blow++;
+        }
+        var parts = new List<string>();
+        if (greet > 0) parts.Add("待接 " + greet);
+        if (rinse > 0) parts.Add("冲洗 " + rinse);
+        if (blow > 0) parts.Add("吹发 " + blow);
+        if (_mobileSupplies != null && _mobileSupplies.WashRackWashKits <= 1) parts.Add("用品 LOW");
+        _mobileTaskSummaryLabel.text = parts.Count == 0 ? string.Empty : string.Join("  ·  ", parts.ToArray());
     }
 
     private MobileTarget FindMobileTarget()

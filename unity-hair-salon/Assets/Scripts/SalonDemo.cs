@@ -67,6 +67,7 @@ public sealed partial class SalonDemo : MonoBehaviour
     private readonly Dictionary<int, Transform> _waitingUiAnchors = new Dictionary<int, Transform>();
     private readonly Dictionary<int, GameObject> _selectionPlates = new Dictionary<int, GameObject>();
     private readonly Dictionary<int, GameObject> _stationRoots = new Dictionary<int, GameObject>();
+    private GameObject _mobileExpansionBarrier;
     private SalonGameModel _game;
     private Camera _camera;
     private Canvas _hudCanvas;
@@ -424,6 +425,7 @@ public sealed partial class SalonDemo : MonoBehaviour
         BuildCashier(salon);
         BuildShelvesAndPlants(salon);
         BuildStage1SupplyProps(salon);
+        BuildMobileExpansionBarrier(salon);
         GameObject playerPrefab = Resources.Load<GameObject>("Characters/Hairdresser");
         if (playerPrefab == null)
             throw new MissingReferenceException("Hairdresser prefab is missing at Resources/Characters/Hairdresser.");
@@ -495,7 +497,8 @@ public sealed partial class SalonDemo : MonoBehaviour
         IReadOnlyList<CutStationValidationIssue> issues = CutStationValidator.ValidateManifest(manifest);
         if (issues.Count > 0)
             throw new InvalidDataException("Cut station manifest validation failed: " + issues[0]);
-        Vector3[] origins = { new Vector3(-2.1f, .2f, .2f), new Vector3(2.2f, .2f, .2f) };
+        Vector3[] origins = { new Vector3(-2.1f, .2f, .2f),
+            new Vector3(_mobileMode ? 6.2f : 2.2f, .2f, .2f) };
         CutStationOrientation[] orientations =
         {
             CutStationOrientation.BackWall,
