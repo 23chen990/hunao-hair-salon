@@ -1,116 +1,96 @@
 # R1 验收收口审查
 
-审查目标是核实 R1 现有实现和证据，只处理已确认的证据采样问题；本轮没有进入 R2，也没有新增玩法、货币、页面或运行时经济规则。
+本轮只完成 R1 验收收口，不进入 R2，不新增玩法、货币、页面、成长参数或主场景布局。产品负责人已明确刷新、开店和失败重试规则，本报告按该口径判定，不再把同一刷新问题标为 `NEEDS_PRODUCT_DECISION`。
 
-## 1. 审查版本与差异范围
+## 1. 实际版本和差异范围
 
-| 项目 | 实际值 |
-|---|---|
-| 工作分支 | `phase-0-2-gameplay-gate` |
-| 本地 HEAD | `2dcb19a110235d7e2bb5cab3fef7fe882868c160` |
-| `origin/phase-0-2-gameplay-gate` | `2dcb19a110235d7e2bb5cab3fef7fe882868c160` |
-| `origin/HEAD` | `a71e7279b5e21909a35ac4186b755c3d123d5ffa`（默认分支，不是本轮工作分支） |
-| R1 前基线 | `6b7886986978e536635842c91a4d9051549fa67e0` |
-| 被测运行时构建来源 | `2dcb19a...`；Unity 6000.5.8f1；`Builds/WebGLDemo` |
+本轮开始核对结果：工作树干净，当前分支为 `phase-0-2-gameplay-gate`，本地 HEAD 和 `origin/phase-0-2-gameplay-gate` 都是 `6df532c4b1bc800442983c751c19dc355417692e`；`origin/HEAD` 为默认分支 `a71e7279b5e21909a35ac4186b755c3d123d5ffa`，没有把默认分支当作本轮目标。
 
-基线到交付 HEAD 的 R1 差异包括 `SalonDemo.cs`、`SalonDemo.Mobile.cs`、`SalonProgressSave.cs`、`SalonProximityPurchasePadModel.cs`、R1 相关测试、`tools/check-mobile-salon.py`、`tools/check-proximity-pad.py` 以及 R1 报告。`SalonGameModel.cs`、`BusinessDaySystem.cs`、`SalonSupplyModel.cs` 没有被 R1 提交修改，本轮按调用链审查了它们的实际行为。
+WebGL 被测运行时来自 Unity 6000.5.8f1、`unity-hair-salon/Builds/WebGLDemo`，构建时运行源码为 `2dcb19a110235d7e2bb5cab3fef7fe882868c160`，构建记录为 77,673,723 bytes。本轮确认运行代码已经符合批准规则，因此没有修改 `SalonDemo`、存档格式、钱包、施工价格、容量、主场景或游戏流程；新增内容只包括回归夹具、正式入口证据脚本、证据 JSON/XML 和本报告。
 
-本轮工作树只新增两项证据修正：
+## 2. 本轮采用的批准规则
 
-- [tools/check-proximity-pad.py](../../../tools/check-proximity-pad.py) 增加失败屏快照，并把重试值改为独立的 `retry*` 字段。
-- [tests/test_check_proximity_pad.py](../../../tests/test_check_proximity_pad.py) 锁定快照必须在状态被重试覆盖后仍保留失败前的值。
+- 同一次营业中的普通保存只更新最近检查点，不覆盖这次营业的 `DayOpening`。
+- 刷新或重新打开加载最近一次完整、有效的保存，进入当天 `PreOpen`；不判定成功、不推进营业日、不补发结算奖励。
+- 再次点击开始营业时，以此刻准备状态建立新的 `DayOpening`；准备阶段已经完成的合法施工和补货状态纳入新的营业尝试。
+- 失败重试恢复本次开始营业时的 `DayOpening`，余额、`Paid`、`Unlocked`、库存和场景对象随之恢复。
+- 失败处理结束后再刷新，加载失败处理后的有效保存，不回到失败前的旧检查点。
+- 失败前刷新允许已保存进展进入下一次尝试；不实现反退出、反刷档或顾客现场续玩。
 
-原有 [R1_REPORT.md](R1_REPORT.md) 保留历史结论；本文件记录本次收口勘误和未决规则。
+## 3. 运行调用链核查
 
-## 2. 结论分类
+`SalonDemo.Mobile.cs:475-491` 的 `RestoreMobileGame` 先加载并校验最近有效存档，准备当天后回到 `PreOpen`，再把载入状态捕获为当前 `_mobileOpening`；不会推进营业日或发放结算奖励。`SalonDemo.Mobile.cs:573-596` 的 `SaveMobileCheckpoint` 捕获当前状态并保存，不写 `_mobileOpening`，所以普通营业中检查点不会覆盖本次开店基准。
 
-### CONFIRMED
+`SalonDemo.Mobile.cs:602-616` 在非恢复进入 `PreOpen` 时捕获新的 `_mobileOpening`，因此刷新后再次点击开始营业会以实际准备状态建立新基准。`SalonDemo.Mobile.cs:618-653` 在失败结果把 `_mobileOpening` 写回存档并清理本局临时状态；`SalonDemo.Mobile.cs:691-719` 的重试恢复余额、扩建付款、扩建对象、同一营业日和准备阶段，再保存失败处理后的有效状态。
 
-- 施工模型按 180 金币、60 金币/秒计时，钱包成功后才增加 `Paid`；余额不足、离圈、暂停、重复解锁和超过剩余价格的边界由模型/集成测试覆盖。
-- 补货模型是后场 12、携带上限 3、共享货架容量 6；取货、卸货和洗发消耗各只改变共享模型一次，第二货架只是同一库存的另一个卸货入口。
-- 原 `check-proximity-pad.py` 在点击“再试一次”后才读取 `failedCompleted`；旧报告中的 `failedCompleted` 和 `failedBalance` 不能证明失败瞬间状态。这是已确认的证据采样缺陷，本轮已修正。
-- 修正后的正式 Chromium 流程在失败屏记录 `0/3、target=3、balance=60、Paid=180、Unlocked=true`，点击重试后另记录 `retryCompleted=0、retryTarget=3、retryBalance=60、retryPaid=180、retryUnlocked=true`，两组数据没有互相冒充。
-- 已完成购买的货架在失败重试后仍保留；正式流程也重新确认第二货架对应的 `OPEN` 状态和共享库存回到 12/0/0 的新日开店值。
+存档的 `SalonProgressData.TryValidate/Clone` 和仓储的 primary/backup 读取保证了完整有效存档边界。营业中的 WashKit（后场/携带/共享货架）属于当天现场临时状态，进入 `PreOpen` 会按批准的准备流程重置为 12/0/0；本轮证据记录的是开店和失败回滚后的 12/0/0，不宣称未保存的顾客现场或临时携带状态跨刷新续玩。
 
-### NOT_REPRODUCED
+结论：运行代码无需修改。当前实现与批准的刷新、重新开店、失败重试和失败后刷新规则一致。
 
-- 本轮没有复现重复扣费、`Paid` 超过 180、钱包拒绝后增加 `Paid`、暂停或离圈继续累计施工时间、洗发重复消耗 WashKit、第二货架复制共享库存、重复加载留下第二组对象等问题。
-- 在本轮被测构建中没有发现浏览器控制台或失败资源请求；headless Chromium 的 `screen.orientation.lock() is not available` 是已知环境能力提示，按既有检查规则过滤。
+## 4. A：不刷新时的本局施工回滚
 
-### NOT_RUN
+证据类型：正式 WebGL 移动入口，Chromium 真实触控，目标横屏 844×390。首次合法赚取余额、部分投入并保存后刷新只是准备条件；A 分支本身从该有效 `PreOpen` 开始，点击开始营业后没有刷新，发生实际追加投入，随后自然失败并点击真实重试。
 
-- 未在真实 iOS/Android 设备上运行。
-- 没有用正式浏览器流程完整执行以下三个“同一次营业尝试内失败再重试”组合：开店未投入→部分投入→失败；开店未投入→完成购买→失败；开店已有部分投入→继续投入→失败。现有流程覆盖了它们的存档/模型边界，但不能把模型夹具当作正式入口全流程。
-- 没有实现顾客位置、订单计时器或服务动作的中途续玩验证。
+状态来自 `evidence/r1-rollback-report.json`：
 
-### BLOCKED
+| 阶段 | phase | 余额 | Paid | Unlocked | 库存（source/carried/rack） |
+|---|---|---:|---:|---|---|
+| 初始有效保存 | Business | 162 | 78 | false | 12 / 0 / 0 |
+| 本次开店 `openingA` | Business | 162 | 78 | false | 12 / 0 / 0 |
+| 实际追加投入 `changedA` | Business | 110 | 130 | false | 12 / 0 / 0 |
+| 自然失败前 `failed*` | Result | 74 | 166 | false | 12 / 0 / 0 |
+| 点击重试后 `retry*` | PreOpen | 162 | 78 | false | 12 / 0 / 0 |
 
-- 是否把“营业中安全检查点”视为刷新后新的 DayOpening，尚未有唯一明确的产品规则，阻塞这三种同局刷新后失败路径的最终判定。
+`changedA` 的余额和 `Paid` 都发生了实际变化；失败前采样保留在点击重试之前，重试后回到 `openingA`。第二货架在两组状态中均为未解锁，交互状态与 `Unlocked=false` 一致。该路径通过正式入口证明了部分投入边界；完整购买边界由第 5 节的正式 B 路径和 Unity 模型/存档夹具共同覆盖。
 
-### NEEDS_PRODUCT_DECISION
+从 Pad 走向安全位置的短暂离圈过程中，正式入口又提交了少量合法施工，所以 `failed*` 比 `changedA` 多 36 Paid、少 36 余额；这也是失败前采样的实际状态，不是重试覆盖造成的差异。
 
-现有文档同时存在两种口径：`docs/mobile-demo-delivery-2026-09-16.md` 写“中途退出则从当天开店前重新开始”，而 R1 流程文档和现有实现允许离圈后保存施工检查点，并在刷新后从该检查点进入 `PreOpen`。需要负责人只决定一条规则：刷新后是否开启新的营业尝试并以已保存检查点作为新 DayOpening。代码目前保持 R1 交付时的行为，没有擅自改动。
+## 5. B：刷新后新基准用于后续失败回滚
 
-## 3. 关键调用链与文件行号
+证据类型：正式 WebGL 移动入口，Chromium 真实触控，844×390。
 
-- 启动加载：`SalonDemo.Mobile.cs:96-120` 创建 `SalonSupplyModel` 和 `SalonProximityPurchasePadModel`，`SalonProgressSave.cs:232-327` 读取、校验并兼容旧存档。
-- 补货：`SalonDemo.Mobile.cs:357-392` 只调用 `TryPickUpWashKit`、`TryDeliverWashKit`；洗发入口 `SalonDemo.Mobile.cs:1029-1044` 在正式开始洗发后调用一次 `TryConsumeWashKit`。模型本身位于 `SalonSupplyModel.cs:20-63`。
-- 施工：`SalonDemo.Mobile.cs:394-473` → `SalonProximityPurchasePadModel.CalculatePayment` → `SalonGameModel.Payments.TrySpend` → `ApplyPayment`；成功交易才保留计时余量、更新 `SupplyRackExpansionPaid` 并在完整付款时构建货架。
-- 开店快照与安全检查点：`SalonDemo.Mobile.cs:573-596` 捕获当前可持久化状态；`598-656` 在 `PreOpen` 捕获 `_mobileOpening`，失败结果把 `_mobileOpening` 写回存档；普通保存不再覆盖 `_mobileOpening`。
-- 刷新与重试：`SalonDemo.Mobile.cs:475-499` 的 `RestoreMobileGame` 把载入检查点捕获为当前 `_mobileOpening`；`691-719` 的 `RetryMobileDay` 恢复余额、扩建付款、货架对象和 DayNumber，再回到 `PreOpen`。
-- 营业状态：`BusinessDaySystem.cs:437-498` 创建 `PreOpen/Business/Result`，`529-533` 负责普通重试；该控制器没有定义刷新是否开启新营业尝试的产品语义。
-- 证据采样：`tools/check-proximity-pad.py:127-141` 在重试输入前复制失败快照，`260-284` 分别写入 `failed*` 与 `retry*`。
+流程是：部分投入并离圈保存 → 刷新到 `PreOpen` → 再次点击开始营业 → 在新尝试中继续投入至完整解锁 → 自然失败 → 在失败屏采样 `failed*` → 点击重试。
 
-## 4. 已确认的失败回滚规则
+| 阶段 | phase | 余额 | Paid | Unlocked | 库存（source/carried/rack） |
+|---|---|---:|---:|---|---|
+| 刷新前有效保存 `savedBeforeRefresh` | Business | 70 | 170 | false | 12 / 0 / 0 |
+| 刷新恢复 `refresh` | PreOpen | 70 | 170 | false | 12 / 0 / 0 |
+| 刷新后新 `openingB` | Business | 70 | 170 | false | 12 / 0 / 0 |
+| 新尝试完成购买 `changedB` | Business | 60 | 180 | true | 12 / 0 / 0 |
+| 自然失败前 `failed*` | Result | 60 | 180 | true | 12 / 0 / 0 |
+| 点击重试后 `retry*` | PreOpen | 70 | 170 | false | 12 / 0 / 0 |
 
-失败结果触发时，运行时把 `_mobileOpening` 写回当前存档；因此在一次已经确定的营业尝试中，营业收入和施工投入应回到该次 `_mobileOpening`，而开店前已经拥有的扩建继续保留。`SupplyRackExpansionPaid` 与 `SupplyRackExpansionPurchased` 在 `SalonProgressSave.TryValidate` 中成套校验；缺少该字段的旧存档按旧布尔值兼容为 0 或完整 180。
+重试目标是刷新后重新开店时的 `openingB`（70/170/false），不是最初的旧状态，也不是失败前的 60/180/true。`changedB` 的完整购买是实际触控产生的状态变化；失败后的第二货架回到未解锁状态，和 `openingB` 一致。
 
-本轮没有把“刷新后载入的检查点”强行解释为同一次尝试的旧 DayOpening。当前实现会在 `RestoreMobileGame` 结束时以载入检查点重新捕获 `_mobileOpening`，这正是需要产品决定的规则边界。
+## 6. D：失败处理后再次刷新
 
-## 5. 路径 A/B 状态对照
+同一正式入口报告的 D 段在重试完成后立即刷新：`afterFailureRefresh` 为 `PreOpen`、余额 70、`Paid=170`、`Unlocked=false`、库存 12/0/0，与 B 的 `retry*` 完全一致。它证明刷新读取的是失败处理后的有效保存，而不是失败前的旧检查点。
 
-| 路径 | 实际证据 | 余额 | Paid / Unlocked | 共享库存 | 第二货架场景状态 | 判定 |
-|---|---|---:|---|---|---|---|
-| A：开店→营业中投入→不刷新→失败→重试 | 本轮未完整执行正式入口 | 未形成可复核值 | 未形成可复核值 | 未形成可复核值 | 未形成可复核值 | NOT_RUN |
-| B：部分投入→离圈保存→刷新→PreOpen | `partialReloadPaid=144` 与离圈保存 `paidAtExit=144`；`partialReloadBalance=96` | 96 | 144 / false | 新日临时库存 12/0/0 | 未解锁、无扩建货架 | CONFIRMED（刷新检查点） |
-| B：刷新后重新营业并走向洗发区 | `routeStartPaid=165`；该值比 144 多出的 21 是重新营业后移动经过施工点产生的新投入，不能当作刷新加载值 | 以正式状态为准 | 165 / false | 起始仍为 12/0/0 | 未解锁 | CONFIRMED（路径继续） |
-| B：完成购买→刷新→PreOpen | `reloadPaid=180`、`reloadUnlocked=true`、开店余额 60 | 60 | 180 / true | 12/0/0 | 第二货架已构建，锚点和碰撞随对象恢复 | CONFIRMED |
-| B：已购买开店→失败→重试 | `failed*` 与 `retry*` 分开记录，均为 `0/3、60、180、true、12/0/0` | 60 | 180 / true | 12/0/0 | `OPEN` 保留 | CONFIRMED |
+## 7. C：开店前已有扩建的原有回归
 
-这组证据证明了安全检查点和已购买资产保留，但没有证明“同一次营业尝试在刷新前后的失败回滚基准必须相同”。该差异留给 NEEDS_PRODUCT_DECISION。
+原有 `tools/check-proximity-pad.py` 正式入口证据继续保留：已购买扩建在开店前进入 `DayOpening`，自然失败后 `failed*` 与 `retry*` 均为余额 60、`Paid=180`、`Unlocked=true`、库存 12/0/0，第二货架保持 `OPEN`。对应 JSON 为 `evidence/proximity-pad-report-r1-acceptance.json`。
 
-## 6. 本轮修改与最小性
+补充夹具 `SalonR1CheckpointRollbackIntegrationTests` 使用真实钱包、施工 Pad、补货模型和 `ISalonProgressRepository` 的 Save→Load，覆盖完整购买失败回滚、刷新检查点成为新基准、开店前已购扩建保留三条边界。该 XML 属于模型/存档集成证据，不冒充正式入口实测：`evidence/unity-r1-checkpoint-integration.xml`，3/3 通过。
 
-已确认问题只在检查器采样时序：旧代码在重试后读取失败字段。修复只增加一个无副作用的 `capture_failure_snapshot`，在 `Result` 屏、发送“再试一次”之前复制失败字段；重试完成后另外写 `retryCompleted`、`retryTarget`、`retryBalance`、`retryPaid`、`retryUnlocked` 和 `retrySupply`。没有改 `SalonDemo`、存档格式、施工价格、扣费速度、补货容量或正式场景。
+## 8. 测试、构建和启动结果
 
-## 7. 实际执行命令、结果与限制
+- `python3 -m unittest tests/test_check_proximity_pad.py`：1/1 通过，失败快照和重试快照分开保存。
+- `python3 tools/check-r1-rollback.py`：正式 WebGL 移动入口 A/B/D 通过，`passed=true`、`errors=[]`。
+- `python3 tools/check-proximity-pad.py`：原有施工、补货、完整购买刷新和开店前已购扩建失败重试通过，`errors=[]`。
+- Unity 定向命令：`/Applications/Unity/Hub/Editor/6000.5.8f1/Unity.app/Contents/MacOS/Unity -batchmode -nographics -projectPath /Users/kker/Documents/ChatGPT/game2/unity-hair-salon -runTests -testPlatform EditMode -testFilter SalonR1CheckpointRollbackIntegrationTests -testResults /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/R1R1IntegrationTests.xml -logFile /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/R1R1IntegrationTests.log`：3/3 通过，XML `result=Passed`、`failed=0`。
+- Unity 全量 EditMode 基线：`evidence/unity-editmode-r1-acceptance.xml`，在本轮新增夹具前的运行代码/工作树 HEAD `6df532c` 上为 670/670，`result=Passed`、`failed=0`；本轮新增夹具另以定向 XML 3/3 验证。命令未与 `-quit` 同用，按 XML 判定。
+- `npm run test:assets`：17/17 通过；`BuildScript.ValidatePipeline`：17 项 Manifest/资源检查通过。
+- `python3 tools/check-ui-font.py`：367 个必需 CJK 字形、629 个打包字形。
+- `BuildScript.BuildWebGLDemo`：成功，`Builds/WebGLDemo` 77,673,723 bytes；构建标识为运行时源码 `2dcb19a` + Unity 6000.5.8f1。
+- `python3 tools/browser-check.py --mode demo`：正式 `HairSalonDemo`，844×390、DPR 1，启动和核心流程通过，console/failed requests 为 0。
+- 960×540 启动冒烟：canvas 960×540、截图非空；只代表启动检查，不代表完整经营流程。
 
-- `npm run test:assets`：17/17 通过。
-- `python3 tools/check-ui-font.py`：367 个必需字形、629 个打包字形，通过。
-- `python3 -m unittest tests/test_check_proximity_pad.py`：1/1 通过；先在旧脚本上失败，再在最小修复后通过。
-- Unity 全量 EditMode：`R1AcceptanceFullEditMode.xml`，670/670，XML `result=Passed`、`failed=0`。其中 R1 相关夹具：`SalonProgressSaveTests 10`、`SalonMobileCheckpointRegressionTests 2`、`SalonProximityPurchasePadModelTests 12`、`SalonPurchasePadRuntimeIntegrationTests 7`、`SalonSupplyModelTests 5`、`SalonSupplyVisualRegressionTests 2`。
-- `BuildScript.ValidatePipeline`：17 项 Manifest/资源检查通过。
-- `BuildScript.BuildWebGLDemo`：构建成功，日志记录 `77,673,723 bytes`；运行时来源为 `2dcb19a...`。
-- `python3 tools/browser-check.py --mode demo`：正式 `HairSalonDemo`，844×390、DPR 1，启动、核心服务流程和 A/B/C/D 视觉证据通过，console/failed requests 为 0。比例、位置、方向、阴影和安全区仍按视觉 QA 规则保留人工确认项。
-- `python3 tools/check-proximity-pad.py`：正式 WebGL 移动入口，844×390，真实 Chromium 触控，补货、部分投入刷新、完整购买刷新、已购失败重试和路线对照通过，`errors=[]`。
-- 960×540 启动冒烟：正式 `WebGLDemo` canvas 为 960×540，截图非空，console 仅有可过滤的 orientation 能力提示；这项只代表启动冒烟，不代表完整经营流程。
+关键证据可直接访问：[A/B/D 正式入口 JSON](evidence/r1-rollback-report.json)、[原有施工/已购扩建 JSON](evidence/proximity-pad-report-r1-acceptance.json)、[Unity R1 定向 XML](evidence/unity-r1-checkpoint-integration.xml)、[全量 EditMode XML](evidence/unity-editmode-r1-acceptance.xml)、[844×390 视觉 JSON](evidence/visual-qa-report-844x390.json)、[960×540 截图](evidence/startup-smoke-960x540.png)。
 
-本轮没有把 Chromium 模拟触控写成 iOS/Android 真机通过，也没有把 960×540 启动写成完整流程通过。
+## 9. 剩余范围和技术结论
 
-## 8. 证据索引
+本轮没有相关 `BLOCKED` 或 `NEEDS_PRODUCT_DECISION`。以下项目仍是 `NOT_RUN`，不改变本轮 R1 规则结论：真实 iOS/Android 设备验证；顾客位置、订单计时器和服务动作的中途续玩；失败结果存在可见离场动画时的延迟结果边界。960×540 只做启动冒烟。临时 WashKit 不属于跨刷新现场续玩存档字段，证据只保证准备阶段和失败重试后的 12/0/0 基准。
 
-- [证据包说明](evidence/README.md)
-- [施工/刷新/失败重试 JSON](evidence/proximity-pad-report-r1-acceptance.json)
-- [Unity 全量 EditMode XML](evidence/unity-editmode-r1-acceptance.xml)
-- [正式 Demo 844×390 视觉 QA JSON](evidence/visual-qa-report-844x390.json)
-- [960×540 启动冒烟截图](evidence/startup-smoke-960x540.png)
+成长价值仍保留 `VALUE_NOT_PROVEN`；本轮没有重新测量成长价值，也没有调整路线、价格、容量、客流、服务时长或主场景布局。
 
-较大的录屏和完整 Builds 目录仍按仓库规则留在本机，未强行加入 Git；本轮必要 JSON、XML 和启动截图已放入可远端访问的证据目录。
-
-## 9. 技术结论
-
-**BLOCKED**。已确认的失败快照证据问题已最小修正，相关测试、Unity 全量 EditMode、Manifest 校验、WebGL 构建和正式 Chromium 检查均通过。R1 收口仍被“刷新是否开启新营业尝试、检查点是否成为新的 DayOpening”这一唯一产品规则冲突阻塞；没有据此修改运行时行为。
-
-## 10. 合并与 R2
-
-PR #1 保持未合并。是否允许合并以及何时进入 R2 由产品负责人决定；本轮不会自动合并，也不会继续 R2 开发。第二货架的普遍玩家时间价值仍保留 `VALUE_NOT_PROVEN`，本轮没有扩大成长系统或调整路线参数。
+**技术结论：PASS（R1 验收范围）**。批准的刷新、新营业尝试、部分/完整施工变化、失败回滚、开店前扩建保留和失败后刷新规则均有对应正式入口或模型/存档证据；运行代码无需修改。PR #1 保持未合并，完成后停止，不进入 R2。
