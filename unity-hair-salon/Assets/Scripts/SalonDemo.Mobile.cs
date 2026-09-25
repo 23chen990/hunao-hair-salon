@@ -987,6 +987,8 @@ public sealed partial class SalonDemo
         if (blow > 0) parts.Add("吹发 " + blow);
         if (_mobileSupplies != null && _mobileSupplies.WashRackWashKits <= 1) parts.Add("用品 LOW");
         _mobileTaskSummaryLabel.text = parts.Count == 0 ? string.Empty : string.Join("  ·  ", parts.ToArray());
+        _mobileTaskSummaryLabel.color = parts.Count >= 3 ? new Color(1f, .48f, .36f) :
+            parts.Count == 2 ? Gold : Cream;
     }
 
     private MobileTarget FindMobileTarget()
