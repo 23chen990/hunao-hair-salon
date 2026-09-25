@@ -414,11 +414,8 @@ namespace HairSalon
             Math.Max(0f, Math.Min(1f, 1f - BusinessRemainingTime / Config.BusinessDuration));
         public DayPressurePhase CurrentPressurePhase => _trafficDirector.GetPhase(BusinessProgress);
         public bool IsPaused { get; private set; }
-        private bool MobileGoalReached => Config.IsMobileProfile && Config.TargetOrders > 0 &&
-                                          Stats.CompletedOrders >= Config.TargetOrders;
         public bool CanSpawnCustomers => State == DayState.Business && BusinessRemainingTime > 0f &&
-                                         !IsPaused && (!Config.IsMobileProfile || Config.TargetOrders <= 0 ||
-                                         Stats.CompletedOrders + _unfinishedOrders < Config.TargetOrders);
+                                         !IsPaused;
         public DayStats Stats { get; private set; }
         public ShopReputationModel Reputation { get; }
         public DayEvaluation CurrentDayEvaluation => EvaluateDay();
@@ -477,11 +474,6 @@ namespace HairSalon
                 State == DayState.ClosedManagement) return;
             float step = Math.Max(0f, dt);
             int pending = Math.Max(0, pendingSettlementCount);
-            if (MobileGoalReached && activeUntilExitCount <= 0 && pending <= 0)
-            {
-                SetState(DayState.Result);
-                return;
-            }
             if (State == DayState.Business)
             {
                 BusinessRemainingTime = Math.Max(0f, BusinessRemainingTime - step);

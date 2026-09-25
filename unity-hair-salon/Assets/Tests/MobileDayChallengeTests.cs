@@ -140,7 +140,7 @@ public sealed class MobileDayChallengeTests
     }
 
     [Test]
-    public void MobileTrafficStopsAcceptingNewCustomersAfterTheDailyGoal()
+    public void MobileTrafficKeepsAcceptingCustomersAfterTheDailyGoalUntilCapacityOrClose()
     {
         var day = new BusinessDayController(SalonMobileDayConfig.CreateForDay(1));
         day.PrepareDay(1);
@@ -148,10 +148,13 @@ public sealed class MobileDayChallengeTests
         day.Stats.CompletedOrders = day.Config.TargetOrders - 1;
         Assert.IsTrue(day.CanSpawnCustomers);
         day.Stats.CompletedOrders++;
-        Assert.IsFalse(day.CanSpawnCustomers);
+        Assert.IsTrue(day.CanSpawnCustomers);
         day.Tick(.1f, 1);
         Assert.AreEqual(DayState.Business, day.State, "Keep servicing customers already in the salon.");
         day.Tick(.1f, 0);
+        Assert.AreEqual(DayState.Business, day.State,
+            "Reaching the reference target must not end the business day early.");
+        day.Tick(day.BusinessRemainingTime, 0);
         Assert.AreEqual(DayState.Result, day.State);
         Assert.AreEqual(DayOutcome.Achieved, day.EvaluateDay().Outcome);
     }
@@ -163,14 +166,12 @@ public sealed class MobileDayChallengeTests
         day.PrepareDay(1);
         day.StartBusiness();
         day.Tick(.1f, 3);
-        Assert.IsFalse(day.CanSpawnCustomers,
-            "Three unfinished orders already cover Day 1; do not accept an impossible extra backlog.");
+        Assert.IsTrue(day.CanSpawnCustomers,
+            "The reference target must not stop admission while normal capacity allows it.");
         day.Tick(.1f, 2); // A customer left without a completed order.
         Assert.IsTrue(day.CanSpawnCustomers, "Allow a replacement for the lost order.");
         day.Stats.CompletedOrders = 1;
         day.Tick(.1f, 2);
-        Assert.IsFalse(day.CanSpawnCustomers, "Completed and unfinished orders share the daily quota.");
-        day.Tick(.1f, 1);
         Assert.IsTrue(day.CanSpawnCustomers);
     }
 
@@ -187,8 +188,23 @@ public sealed class MobileDayChallengeTests
             "A finished customer still walking to the exit must not consume the final unfinished-order slot.");
 
         day.TickWithAdmissionCount(.1f, activeUntilExitCount: 1, unfinishedOrderCount: 1);
-        Assert.IsFalse(day.CanSpawnCustomers,
-            "An actual unfinished order must still consume the final daily order slot.");
+        Assert.IsTrue(day.CanSpawnCustomers,
+            "Unfinished orders affect traffic overload, not the removed daily target gate.");
+    }
+
+    [Test]
+    public void MobileAdmissionStillRequiresBusinessTimeAndUnpausedBusinessState()
+    {
+        var day = new BusinessDayController(SalonMobileDayConfig.CreateForDay(1));
+        day.PrepareDay(1);
+        Assert.IsFalse(day.CanSpawnCustomers);
+        day.StartBusiness();
+        Assert.IsTrue(day.CanSpawnCustomers);
+        day.SetPaused(true);
+        Assert.IsFalse(day.CanSpawnCustomers);
+        day.SetPaused(false);
+        day.Tick(day.BusinessRemainingTime, 0);
+        Assert.IsFalse(day.CanSpawnCustomers);
     }
 
     [Test]

@@ -3,6 +3,7 @@ using System.Reflection;
 using HairSalon;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.UI;
 
 public sealed class SalonMobileCheckpointRegressionTests
 {
@@ -63,6 +64,41 @@ public sealed class SalonMobileCheckpointRegressionTests
         Assert.AreEqual(75, ((SalonProximityPurchasePadModel)Field("_mobileSupplyPad")).Paid);
         Assert.AreEqual(SalonProximityPurchasePadState.Building,
             ((SalonProximityPurchasePadModel)Field("_mobileSupplyPad")).State);
+    }
+
+    [Test]
+    public void LowPerformanceResultPreservesProgressAndFinalizesHistoryOnlyOnce()
+    {
+        var game = (SalonGameModel)Field("_game");
+        game.RestorePersistentState(120, false, false);
+        var pad = (SalonProximityPurchasePadModel)Field("_mobileSupplyPad");
+        Assert.IsTrue(pad.ApplyPayment(45));
+
+        var resultTitle = new GameObject("Result title").AddComponent<Text>();
+        var resultSummary = new GameObject("Result summary").AddComponent<Text>();
+        var continueButton = new GameObject("Continue").AddComponent<Button>();
+        var retryButton = new GameObject("Retry").AddComponent<Button>();
+        Set("_resultTitleLabel", resultTitle);
+        Set("_resultSummaryLabel", resultSummary);
+        Set("_resultContinueButton", continueButton);
+        Set("_mobileRetryButton", retryButton);
+
+        var day = (BusinessDayController)Field("_dayController");
+        day.Stats.CompletedOrders = 0;
+        Invoke("HandleMobileDayState", DayState.Result);
+        Invoke("HandleMobileDayState", DayState.Result);
+
+        SalonProgressData saved = _repository.Load();
+        Assert.IsNotNull(saved);
+        Assert.AreEqual(120, saved.Balance,
+            "A missed target must keep already earned balance instead of restoring the opening snapshot.");
+        Assert.AreEqual(45, saved.SupplyRackExpansionPaid,
+            "A missed target must keep paid construction progress.");
+        Assert.IsTrue(saved.DaySettled);
+        Assert.AreEqual(1, saved.CompletedDays.Count,
+            "Repeated result callbacks must not duplicate the day history.");
+        Assert.IsTrue(continueButton.gameObject.activeSelf);
+        Assert.IsFalse(retryButton.gameObject.activeSelf);
     }
 
     private object Field(string name) => typeof(SalonDemo).GetField(

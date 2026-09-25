@@ -122,6 +122,7 @@ public sealed partial class SalonDemo : MonoBehaviour
     private int _nextCustomerId;
     private float _spawnCooldown;
     private bool _deferredResultPending;
+    private bool _resultPresentationCompleted;
     private Vector3[] _playerRoute = new Vector3[0];
     private int _playerRouteIndex;
     private Vector3 _playerRouteDestination;
@@ -852,6 +853,7 @@ public sealed partial class SalonDemo : MonoBehaviour
         if (_closingLabel != null) _closingLabel.transform.parent.gameObject.SetActive(state == DayState.ClosingGrace);
         if (state == DayState.PreOpen)
         {
+            _resultPresentationCompleted = false;
             if (_dayStartLabel != null) _dayStartLabel.text = "DAY " + _dayController.DayNumber + "\n开店准备";
             if (_preOpenInfoLabel != null)
                 _preOpenInfoLabel.text = "今日准备\n" + (_game.HasAutoBlowStand
@@ -918,10 +920,14 @@ public sealed partial class SalonDemo : MonoBehaviour
     {
         if (!_deferredResultPending || HasVisibleExitJourney()) return;
         CompleteResultPresentation();
+        HandleMobileDayState(DayState.Result);
+        UpdateDayHud();
     }
 
     private void CompleteResultPresentation()
     {
+        if (_resultPresentationCompleted) return;
+        _resultPresentationCompleted = true;
         _deferredResultPending = false;
         CancelHaircutInteraction(true);
         if (_game.Customers.Count > 0) _game.ForceCloseRemainingCustomers(_dayController.Stats);

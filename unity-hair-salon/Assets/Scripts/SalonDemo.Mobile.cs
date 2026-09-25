@@ -33,6 +33,7 @@ public sealed partial class SalonDemo
     private bool _mobileActionAvailable;
     private float _mobileEvidenceAt;
     private bool _mobileRestoring;
+    private bool _mobileResultFinalizedForDay;
     private SalonSupplyModel _mobileSupplies;
     private SalonProximityPurchasePadModel _mobileSupplyPad;
     private Transform _mobileSupplyStageRoot;
@@ -585,14 +586,15 @@ public sealed partial class SalonDemo
         return data;
     }
 
-    private void SaveMobileCheckpoint(bool settled)
+    private bool SaveMobileCheckpoint(bool settled)
     {
-        if (!_mobileMode || _mobileRestoring || _mobileSaves == null) return;
+        if (!_mobileMode || _mobileRestoring || _mobileSaves == null) return false;
         _mobileProgress = CaptureMobileProgress(settled);
         bool saved = _mobileSaves.Save(_mobileProgress);
         if (!saved)
             ShowToast("本次进度无法保存，请保留当前页面");
         if (saved) _mobilePadCheckpointDirty = false;
+        return saved;
     }
 
     private void HandleMobileDayState(DayState state)
@@ -601,6 +603,7 @@ public sealed partial class SalonDemo
         _mobileControls?.ResetInput();
         if (state == DayState.PreOpen)
         {
+            _mobileResultFinalizedForDay = false;
             SalonMobileDayConfig.ApplyForDay(DaySettings, _dayController.DayNumber);
             _mobileSupplies?.ResetDay(MobileSupplySourceStock);
             _mobileSupplyTickElapsed = 0f;
@@ -617,21 +620,21 @@ public sealed partial class SalonDemo
         }
         if (state == DayState.Result)
         {
+            if (_mobileResultFinalizedForDay)
+            {
+                RefreshMobileDayPresentation();
+                return;
+            }
+            _mobileResultFinalizedForDay = true;
             EndMobileWork();
             _mobileGuidedCustomer = null;
             bool passed = _dayController.Stats.CompletedOrders >= DaySettings.TargetOrders;
-            _resultTitleLabel.text = "DAY " + _dayController.DayNumber + (passed ? "  目标达成！" : "  差一点，再试一次");
-            _resultSummaryLabel.text = "完成订单   " + _dayController.Stats.CompletedOrders + " / " + DaySettings.TargetOrders +
-                "\n\n" + (passed ? "忙碌的一天完成了，去升级设备吧！" : "优先处理快失去耐心的顾客，\n吹发运行时去接待下一位。") +
-                "\n\n订单收入   " + _dayController.Stats.OrderIncome +
-                "\n小费收入   " + _dayController.Stats.TipIncome +
-                "\n离店顾客   " + _game.AngryLeaves +
-                "\n\n" + (passed ? "进度已保存" : "重试会恢复今天开店前的资金和设备");
-            _resultContinueButton.gameObject.SetActive(passed);
-            _mobileRetryButton.gameObject.SetActive(!passed);
-            if (passed)
+            _resultTitleLabel.text = "DAY " + _dayController.DayNumber + (passed ? "  目标达成" : "  本日已结算");
+            _resultContinueButton.gameObject.SetActive(true);
+            _mobileRetryButton.gameObject.SetActive(false);
+            bool saved = false;
+            if (_mobileProgress != null)
             {
-                _mobileProgress.TutorialCompleted = true;
                 int index = _mobileProgress.CompletedDays.IndexOf(_dayController.DayNumber);
                 if (index < 0)
                 {
@@ -640,17 +643,14 @@ public sealed partial class SalonDemo
                 }
                 else _mobileProgress.BestCompletedOrders[index] = Mathf.Max(
                     _mobileProgress.BestCompletedOrders[index], _dayController.Stats.CompletedOrders);
-                SaveMobileCheckpoint(true);
+                saved = SaveMobileCheckpoint(true);
             }
-            else if (_mobileOpening != null)
-            {
-                if (_mobileSaves.Save(_mobileOpening))
-                {
-                    _mobileProgress = _mobileOpening.Clone();
-                    _mobilePadCheckpointDirty = false;
-                }
-                else ShowToast("本次失败恢复无法保存，请保留当前页面");
-            }
+            _resultSummaryLabel.text = "完成订单   " + _dayController.Stats.CompletedOrders + " / " + DaySettings.TargetOrders +
+                "\n\n" + (passed ? "忙碌的一天完成了，去升级设备吧！" : "本日营业已结束，收入和投入进度已保留。") +
+                "\n\n订单收入   " + _dayController.Stats.OrderIncome +
+                "\n小费收入   " + _dayController.Stats.TipIncome +
+                "\n离店顾客   " + _game.AngryLeaves +
+                "\n\n" + (saved ? "进度已保存" : "保存失败，请保留当前页面");
         }
         RefreshMobileDayPresentation();
     }
