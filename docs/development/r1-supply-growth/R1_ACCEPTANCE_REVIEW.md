@@ -6,7 +6,7 @@
 
 本轮开始核对结果：工作树干净，当前分支为 `phase-0-2-gameplay-gate`，本地 HEAD 和 `origin/phase-0-2-gameplay-gate` 都是 `6df532c4b1bc800442983c751c19dc355417692e`；`origin/HEAD` 为默认分支 `a71e7279b5e21909a35ac4186b755c3d123d5ffa`，没有把默认分支当作本轮目标。
 
-验收材料交付后的最终本地 HEAD 与远端目标分支为 `195f04b72e6e1bcf070789684b7b7bd5e1bbf5e5`。
+验收材料主体提交为 `195f04b72e6e1bcf070789684b7b7bd5e1bbf5e5`；最终工作树与远端 SHA 以本轮结束时的 git 核对为准。
 
 WebGL 被测运行时来自 Unity 6000.5.8f1、`unity-hair-salon/Builds/WebGLDemo`，构建时运行源码为 `2dcb19a110235d7e2bb5cab3fef7fe882868c160`，构建记录为 77,673,723 bytes。本轮确认运行代码已经符合批准规则，因此没有修改 `SalonDemo`、存档格式、钱包、施工价格、容量、主场景或游戏流程；新增内容只包括回归夹具、正式入口证据脚本、证据 JSON/XML 和本报告。
 
