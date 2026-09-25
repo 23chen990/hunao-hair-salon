@@ -4,6 +4,7 @@
 WebGL 运行时来自 Unity 6000.5.8f1、`Builds/WebGLDemo`，构建时运行源码为
 `2dcb19a110235d7e2bb5cab3fef7fe882868c160`；本轮工作区起始 HEAD 和远端分支均为
 `6df532c4b1bc800442983c751c19dc355417692e`。本轮未修改运行时代码。
+本轮交付提交后的最终 HEAD 与远端目标分支为 `e2bc7011b67800d5b27a6e7509b96ff9d5d8b436`。
 
 ## 文件索引
 
