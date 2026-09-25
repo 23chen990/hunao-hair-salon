@@ -544,7 +544,7 @@ public sealed partial class SalonDemo
             new Vector2(0f, -335f), new Vector2(350f, 76f), Teal, RetryMobileDay);
         _mobileRetryButton.gameObject.SetActive(false);
         _mobileSaveRetryButton = UiButton("重试保存", surface, new Vector2(.5f, .5f),
-            new Vector2(0f, -335f), new Vector2(350f, 76f), Teal, RetrySaveMobileCheckpoint);
+            new Vector2(0f, -245f), new Vector2(350f, 76f), Teal, RetrySaveMobileCheckpoint);
         _mobileSaveRetryButton.gameObject.SetActive(false);
     }
 
