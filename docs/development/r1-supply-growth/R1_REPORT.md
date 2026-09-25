@@ -5,8 +5,9 @@
 > 仓库：`23chen990/hunao-hair-salon`
 > 分支：`phase-0-2-gameplay-gate`
 > 审阅基线：`6b7886986978e536635842c91a4d9051549fa67e`
-> 最终 HEAD：本轮收口提交随交付消息同步记录；收口前已推送提交为 `f437e51cc62c4e26ded6fa2ddf1f6575fac2688d`，最终分支状态与远端 SHA 在交付前复核。
-> 远端状态：收口前工作区 clean；本次收口提交正常推送后将复核 `origin/phase-0-2-gameplay-gate` 与最终 HEAD 一致；PR #1 保持 `OPEN`。
+> R1 实现与证据提交：`504117f394e8639204e80cdb73dcca2d0b410a42`。
+> 最终 HEAD：本报告元数据收口提交的精确 SHA 在交付消息同步记录；工作区与 `origin/phase-0-2-gameplay-gate` 已复核一致。
+> 远端状态：`origin/phase-0-2-gameplay-gate` 已同步至 `504117f394e8639204e80cdb73dcca2d0b410a42`；工作区 clean；PR #1 保持 `OPEN`。
 
 ## 范围
 
