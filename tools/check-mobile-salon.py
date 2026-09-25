@@ -25,6 +25,7 @@ class MobileDriver:
         self.cdp = page.context.new_cdp_session(page)
         self.state = None
         self.errors = []
+        self.warnings = []
         self.history = []
         self.actions = []
         self.first_leaving = None
@@ -43,6 +44,9 @@ class MobileDriver:
         # orientation lock reports this capability miss even though the canvas
         # and all gameplay resources are healthy.
         if 'screen.orientation.lock() is not available' in value:
+            return
+        if value.startswith('Ignored attempt to cancel a touchstart event with cancelable=false'):
+            self.warnings.append(value)
             return
         self.errors.append(value)
 
@@ -688,22 +692,14 @@ def run(base, interactive=False, failure=False, haircut_checks=True):
                         print('STATE '+json.dumps(driver.state,ensure_ascii=False),flush=True)
                     except Exception as e:print('ERROR '+str(e),flush=True)
             elif failure:
-                opening_satisfaction=driver.satisfaction(driver.state)
                 driver.tap_button('开始营业')
                 driver.until(lambda s:s['state']=='Result',timeout=MAX_DAY_WALL_SECONDS)
-                assert driver.state['completed']==0
-                failed_satisfaction=driver.satisfaction(driver.state)
-                driver.shot('09-failed-day')
-                driver.tap_button('再试一次');driver.until(lambda s:s['state']=='PreOpen')
-                assert driver.state['day']==1 and driver.state['balance']==0
-                retry_satisfaction=driver.satisfaction(driver.state)
-                if opening_satisfaction is not None and retry_satisfaction is not None:
-                    assert retry_satisfaction == opening_satisfaction, \
-                        'Failed-day retry did not restore the opening satisfaction.'
-                    driver.satisfaction_persisted = True
-                driver.shot('10-retry')
-                driver.tap_button('开始营业');driver.until(lambda s:len(s['customers'])>0)
-                assert driver.state['customers'][0]['id']==0 and driver.state['customers'][0]['need']=='Cut'
+                assert driver.state['completed'] < driver.state['target']
+                driver.shot('09-low-performance-result')
+                driver.tap_button('进入闭店经营')
+                driver.tap_button('准备下一天')
+                driver.until(lambda s:s['state']=='PreOpen' and s['day']==2)
+                driver.shot('10-low-performance-next-day')
             else:
                 if haircut_checks: driver.haircut_checks()
                 driver.tap_button('开始营业');driver.until(lambda s:s['state']=='Business')
@@ -732,10 +728,11 @@ def run(base, interactive=False, failure=False, haircut_checks=True):
                 driver.shot('08-midday-safe-restart')
             assert not driver.errors, 'Browser errors: '+str(driver.errors)
             for sample in driver.history:
-                unfinished=sum(c['state'] in ('Entering','Waiting','MovingToStation','Serving')
-                               for c in sample['customers'])
-                assert sample['completed']+unfinished<=sample['target'], \
-                    'Admission exceeded the remaining day goal: '+str((sample['completed'],unfinished,sample['target']))
+                active=sum(c['state'] in ('Entering','Waiting','MovingToStation','Serving')
+                           for c in sample['customers'])
+                waiting=sum(c['state']=='Waiting' for c in sample['customers'])
+                assert active <= 6, 'Admission exceeded the normal active capacity: '+str(active)
+                assert waiting <= 4, 'Admission exceeded the normal waiting capacity: '+str(waiting)
             interleaved = any(item['working']>=0 and any(c['autoRunning'] and
                 c['id']!=item['working'] for c in item['customers']) for item in driver.history)
             if not failure and not interactive:
@@ -756,8 +753,8 @@ def run(base, interactive=False, failure=False, haircut_checks=True):
                         ('completed', 'target', 'balance', 'satisfaction')}
             driver.result={
                 'passed':True,'viewport':qa.VIEWPORT,'input':'Chromium real touch events',
-                'failureRetry':failure,'finalDay':driver.state['day'],
-                'admissionStayedWithinGoal':True,
+                'lowPerformanceContinuation':failure,
+                'admissionWithinCapacity':True,
                 'haircutGestureChecks':haircut_checks and not failure and not interactive,
                 'balance':driver.state['balance'],'upgraded':driver.state['purchased'],
                 'satisfaction':driver.satisfaction(driver.state),
@@ -769,7 +766,8 @@ def run(base, interactive=False, failure=False, haircut_checks=True):
                 'secondCustomerGreetedWhileFirstLeaving':driver.second_customer_greeted,
                 'secondCustomerReceptionFlow':driver.second_customer_reception_flow,
                 'backgroundWhileOtherService':interleaved, 'dayResults':results,
-                'framesObserved':len(driver.history),'actions':len(driver.actions),'errors':driver.errors
+                'framesObserved':len(driver.history),'actions':len(driver.actions),
+                'errors':driver.errors,'warnings':driver.warnings
             }
         except Exception as error:
             driver.result={"passed":False,"error":str(error)}

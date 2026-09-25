@@ -101,6 +101,43 @@ public sealed class SalonMobileCheckpointRegressionTests
         Assert.IsFalse(retryButton.gameObject.activeSelf);
     }
 
+    [Test]
+    public void FailedSettlementSaveCanRetryWithoutRepeatingSettlement()
+    {
+        var game = (SalonGameModel)Field("_game");
+        game.RestorePersistentState(120, false, false);
+        var pad = (SalonProximityPurchasePadModel)Field("_mobileSupplyPad");
+        Assert.IsTrue(pad.ApplyPayment(45));
+
+        var resultTitle = new GameObject("Retry result title").AddComponent<Text>();
+        var resultSummary = new GameObject("Retry result summary").AddComponent<Text>();
+        var continueButton = new GameObject("Retry continue").AddComponent<Button>();
+        var retryButton = new GameObject("Retry legacy").AddComponent<Button>();
+        var saveRetryButton = new GameObject("Save retry").AddComponent<Button>();
+        Set("_resultTitleLabel", resultTitle);
+        Set("_resultSummaryLabel", resultSummary);
+        Set("_resultContinueButton", continueButton);
+        Set("_mobileRetryButton", retryButton);
+        Set("_mobileSaveRetryButton", saveRetryButton);
+        _repository.FailNextSave = true;
+
+        Invoke("HandleMobileDayState", DayState.Result);
+        Assert.IsTrue(saveRetryButton.gameObject.activeSelf);
+        Assert.IsTrue(resultSummary.text.Contains("保存失败"));
+        Assert.AreEqual(1, _repository.SaveAttempts);
+
+        Invoke("RetrySaveMobileCheckpoint");
+
+        Assert.AreEqual(2, _repository.SaveAttempts,
+            "The retry button must perform a second persistence attempt.");
+        Assert.IsFalse(saveRetryButton.gameObject.activeSelf);
+        Assert.IsTrue(resultSummary.text.Contains("进度已保存"));
+        Assert.AreEqual(1, ((SalonProgressData)Field("_mobileProgress")).CompletedDays.Count,
+            "Retrying persistence must not repeat daily settlement history.");
+        Assert.AreEqual(120, _repository.Load().Balance);
+        Assert.AreEqual(45, _repository.Load().SupplyRackExpansionPaid);
+    }
+
     private object Field(string name) => typeof(SalonDemo).GetField(
         name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(_demo);
 
@@ -113,11 +150,19 @@ public sealed class SalonMobileCheckpointRegressionTests
     private sealed class MemoryRepository : ISalonProgressRepository
     {
         private SalonProgressData _data;
+        public bool FailNextSave;
+        public int SaveAttempts;
 
         public SalonProgressData Load() => _data == null ? null : _data.Clone();
 
         public bool Save(SalonProgressData data)
         {
+            SaveAttempts++;
+            if (FailNextSave)
+            {
+                FailNextSave = false;
+                return false;
+            }
             if (data == null || !data.TryValidate(out _)) return false;
             _data = data.Clone();
             return true;

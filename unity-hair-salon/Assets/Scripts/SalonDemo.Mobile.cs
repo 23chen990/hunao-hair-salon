@@ -27,6 +27,7 @@ public sealed partial class SalonDemo
     private Text _mobileGoalLabel;
     private GameObject _mobileGoalRoot;
     private Button _mobileRetryButton;
+    private Button _mobileSaveRetryButton;
     private Button _mobileCancelGuideButton;
     private Image _mobileProgressFill;
     private string _mobileActionLabel = "靠近顾客";
@@ -34,6 +35,7 @@ public sealed partial class SalonDemo
     private float _mobileEvidenceAt;
     private bool _mobileRestoring;
     private bool _mobileResultFinalizedForDay;
+    private bool _mobileResultSavePending;
     private SalonSupplyModel _mobileSupplies;
     private SalonProximityPurchasePadModel _mobileSupplyPad;
     private Transform _mobileSupplyStageRoot;
@@ -541,6 +543,9 @@ public sealed partial class SalonDemo
         _mobileRetryButton = UiButton("再试一次", surface, new Vector2(.5f, .5f),
             new Vector2(0f, -335f), new Vector2(350f, 76f), Teal, RetryMobileDay);
         _mobileRetryButton.gameObject.SetActive(false);
+        _mobileSaveRetryButton = UiButton("重试保存", surface, new Vector2(.5f, .5f),
+            new Vector2(0f, -335f), new Vector2(350f, 76f), Teal, RetrySaveMobileCheckpoint);
+        _mobileSaveRetryButton.gameObject.SetActive(false);
     }
 
     private void BuildMobileCollisionMap()
@@ -604,6 +609,7 @@ public sealed partial class SalonDemo
         if (state == DayState.PreOpen)
         {
             _mobileResultFinalizedForDay = false;
+            _mobileResultSavePending = false;
             SalonMobileDayConfig.ApplyForDay(DaySettings, _dayController.DayNumber);
             _mobileSupplies?.ResetDay(MobileSupplySourceStock);
             _mobileSupplyTickElapsed = 0f;
@@ -632,6 +638,7 @@ public sealed partial class SalonDemo
             _resultTitleLabel.text = "DAY " + _dayController.DayNumber + (passed ? "  目标达成" : "  本日已结算");
             _resultContinueButton.gameObject.SetActive(true);
             _mobileRetryButton.gameObject.SetActive(false);
+            if (_mobileSaveRetryButton != null) _mobileSaveRetryButton.gameObject.SetActive(false);
             bool saved = false;
             if (_mobileProgress != null)
             {
@@ -645,6 +652,9 @@ public sealed partial class SalonDemo
                     _mobileProgress.BestCompletedOrders[index], _dayController.Stats.CompletedOrders);
                 saved = SaveMobileCheckpoint(true);
             }
+            _mobileResultSavePending = !saved;
+            if (_mobileSaveRetryButton != null)
+                _mobileSaveRetryButton.gameObject.SetActive(_mobileResultSavePending);
             _resultSummaryLabel.text = "完成订单   " + _dayController.Stats.CompletedOrders + " / " + DaySettings.TargetOrders +
                 "\n\n" + (passed ? "忙碌的一天完成了，去升级设备吧！" : "本日营业已结束，收入和投入进度已保留。") +
                 "\n\n订单收入   " + _dayController.Stats.OrderIncome +
@@ -653,6 +663,17 @@ public sealed partial class SalonDemo
                 "\n\n" + (saved ? "进度已保存" : "保存失败，请保留当前页面");
         }
         RefreshMobileDayPresentation();
+    }
+
+    private void RetrySaveMobileCheckpoint()
+    {
+        if (!_mobileMode || !_mobileResultFinalizedForDay || !_mobileResultSavePending) return;
+        bool saved = SaveMobileCheckpoint(true);
+        if (!saved) return;
+        _mobileResultSavePending = false;
+        if (_mobileSaveRetryButton != null) _mobileSaveRetryButton.gameObject.SetActive(false);
+        if (_resultSummaryLabel != null)
+            _resultSummaryLabel.text = _resultSummaryLabel.text.Replace("保存失败，请保留当前页面", "进度已保存");
     }
 
     private void RefreshMobileDayPresentation()
