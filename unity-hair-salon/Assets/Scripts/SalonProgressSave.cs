@@ -16,6 +16,7 @@ namespace HairSalon
         public const int MaxDayNumber = 100000;
         public const int DefaultShopSatisfaction = 90;
         public const int SupplyRackExpansionCost = 180;
+        public const int HaircutExpansionCost = 180;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public int DayNumber = 1;
@@ -25,6 +26,8 @@ namespace HairSalon
         // the missing value as false, while the pad purchase survives reloads.
         public bool SupplyRackExpansionPurchased;
         public int SupplyRackExpansionPaid;
+        public bool HaircutExpansionPurchased;
+        public int HaircutExpansionPaid;
         public bool FirstDayComplete;
         public bool DaySettled;
         public int ShopSatisfaction = DefaultShopSatisfaction;
@@ -75,6 +78,18 @@ namespace HairSalon
                 SupplyRackExpansionPaid != SupplyRackExpansionCost)
             {
                 error = "A purchased supply rack must have the full construction payment.";
+                return false;
+            }
+
+            if (HaircutExpansionPaid < 0 || HaircutExpansionPaid > HaircutExpansionCost)
+            {
+                error = "HaircutExpansionPaid is outside the supported range.";
+                return false;
+            }
+
+            if (HaircutExpansionPurchased && HaircutExpansionPaid != HaircutExpansionCost)
+            {
+                error = "A purchased haircut station must have the full construction payment.";
                 return false;
             }
 
@@ -145,6 +160,8 @@ namespace HairSalon
                 AutoBlowPurchased = AutoBlowPurchased,
                 SupplyRackExpansionPurchased = SupplyRackExpansionPurchased,
                 SupplyRackExpansionPaid = SupplyRackExpansionPaid,
+                HaircutExpansionPurchased = HaircutExpansionPurchased,
+                HaircutExpansionPaid = HaircutExpansionPaid,
                 FirstDayComplete = FirstDayComplete,
                 DaySettled = DaySettled,
                 ShopSatisfaction = ShopSatisfaction,

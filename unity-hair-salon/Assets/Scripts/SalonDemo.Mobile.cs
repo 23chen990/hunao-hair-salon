@@ -38,6 +38,7 @@ public sealed partial class SalonDemo
     private bool _mobileResultSavePending;
     private SalonSupplyModel _mobileSupplies;
     private SalonProximityPurchasePadModel _mobileSupplyPad;
+    private SalonProximityPurchasePadModel _mobileHaircutExpansionPad;
     private Transform _mobileSupplyStageRoot;
     private Transform _mobileSupplySourcePoint;
     private Transform _mobileWashRackPoint;
@@ -45,6 +46,9 @@ public sealed partial class SalonDemo
     private Transform _mobileExpandedWashRackPoint;
     private GameObject _mobileSupplyPadRoot;
     private TextMesh _mobileSupplyPadLabel;
+    private Transform _mobileHaircutExpansionPadPoint;
+    private GameObject _mobileHaircutExpansionPadRoot;
+    private TextMesh _mobileHaircutExpansionPadLabel;
     private GameObject _mobileExpandedRackRoot;
     private Transform _mobileExpandedRackShadowAnchor;
     private Transform _mobileCarryVisualRoot;
@@ -58,18 +62,24 @@ public sealed partial class SalonDemo
     private bool _mobilePadInsufficientToastShown;
     private bool _mobilePadCheckpointDirty;
     private bool _mobileExpandedRackBuilt;
+    private float _mobileHaircutPadSpendElapsed;
+    private bool _mobileHaircutPadWasNear;
+    private bool _mobileHaircutPadInsufficientToastShown;
+    private bool _mobileHaircutPadCheckpointDirty;
     private const float MobileSupplyTickInterval = .24f;
     private const int MobileSupplySourceStock = 12;
     private const int MobileSupplyCarryCapacity = 3;
     private const int MobileSupplyRackCapacity = 6;
     private const int MobileSupplyPadCost = SalonProgressData.SupplyRackExpansionCost;
     private const float MobileSupplyPadSpendRate = 60f;
+    private const float MobileHaircutPadSpendRate = 60f;
     private static readonly Vector3 MobileSupplySourcePosition = new Vector3(8.35f, .2f, 1.65f);
     private static readonly Vector3 MobileWashRackPosition = new Vector3(-1.25f, .2f, 5.55f);
     // In front of the expansion rack, with enough separation from the first
     // haircut station that the player can see and stand on the pad directly.
     private static readonly Vector3 MobileSupplyPadPosition = new Vector3(-4.25f, .2f, 1.1f);
     private static readonly Vector3 MobileExpandedWashRackPosition = new Vector3(-4.1f, .2f, 2.25f);
+    private static readonly Vector3 MobileHaircutExpansionPadPosition = new Vector3(3.9f, .2f, -.35f);
 
     private enum MobileAction { None, Greet, Assign, Guide, Wash, RinseWash, Cut, StartDry, FinishDry }
     private struct MobileTarget
@@ -119,7 +129,10 @@ public sealed partial class SalonDemo
         _mobileSupplies.Changed += HandleMobileSupplyChanged;
         _mobileSupplyPad = new SalonProximityPurchasePadModel(
             "expansion-pad-wash-rack", MobileSupplyPadCost);
+        _mobileHaircutExpansionPad = new SalonProximityPurchasePadModel(
+            "expansion-pad-haircut-2", SalonProgressData.HaircutExpansionCost);
         RestoreMobileSupplyPadProgress(_mobileProgress);
+        RestoreMobileHaircutExpansionProgress(_mobileProgress);
     }
 
     /// <summary>
@@ -173,6 +186,7 @@ public sealed partial class SalonDemo
         _mobileWashRackPoint.SetParent(stage, false);
         _mobileWashRackPoint.position = MobileWashRackPosition + new Vector3(0f, 0f, -.95f);
         BuildMobileSupplyPurchasePad(stage);
+        BuildMobileHaircutExpansionPad(stage);
         if (_mobileSupplyPad != null && _mobileSupplyPad.IsUnlocked)
             BuildExpandedWashRackVisual();
         UpdateMobileSupplyVisuals();
@@ -219,6 +233,40 @@ public sealed partial class SalonDemo
         _mobileSupplyPadLabel.fontSize = 36;
         _mobileSupplyPadLabel.color = Cream;
         UpdateMobilePurchasePadVisual();
+        bool showPad = _mobileHaircutExpansionPad == null || _mobileHaircutExpansionPad.IsUnlocked ||
+                       _mobileProgress == null || _mobileProgress.SupplyRackExpansionPaid > 0 ||
+                       _mobileProgress.SupplyRackExpansionPurchased;
+        _mobileSupplyPadRoot.SetActive(showPad);
+    }
+
+    private void BuildMobileHaircutExpansionPad(Transform stage)
+    {
+        if (_mobileHaircutExpansionPad == null || stage == null) return;
+        _mobileHaircutExpansionPadRoot = new GameObject("Expansion Pad Haircut 2");
+        _mobileHaircutExpansionPadRoot.transform.SetParent(stage, false);
+        _mobileHaircutExpansionPadRoot.transform.localPosition = MobileHaircutExpansionPadPosition;
+        Cylinder("Haircut Expansion Pad Disc", _mobileHaircutExpansionPadRoot.transform,
+            new Vector3(0f, .04f, 0f), new Vector3(1.55f, .08f, 1.55f), Gold);
+        Block("Haircut Expansion Pad Ring Front", _mobileHaircutExpansionPadRoot.transform,
+            new Vector3(0f, .1f, -.78f), new Vector3(1.55f, .08f, .1f), Cream);
+        Block("Haircut Expansion Pad Ring Back", _mobileHaircutExpansionPadRoot.transform,
+            new Vector3(0f, .1f, .78f), new Vector3(1.55f, .08f, .1f), Cream);
+        Block("Haircut Expansion Pad Ring Left", _mobileHaircutExpansionPadRoot.transform,
+            new Vector3(-.78f, .1f, 0f), new Vector3(.1f, .08f, 1.55f), Cream);
+        Block("Haircut Expansion Pad Ring Right", _mobileHaircutExpansionPadRoot.transform,
+            new Vector3(.78f, .1f, 0f), new Vector3(.1f, .08f, 1.55f), Cream);
+        _mobileHaircutExpansionPadPoint = new GameObject("Haircut Expansion Pad Anchor").transform;
+        _mobileHaircutExpansionPadPoint.SetParent(_mobileHaircutExpansionPadRoot.transform, false);
+        var labelObject = new GameObject("Haircut Expansion Pad Label");
+        labelObject.transform.SetParent(_mobileHaircutExpansionPadRoot.transform, false);
+        labelObject.transform.localPosition = new Vector3(0f, 1.55f, 0f);
+        _mobileHaircutExpansionPadLabel = labelObject.AddComponent<TextMesh>();
+        _mobileHaircutExpansionPadLabel.alignment = TextAlignment.Center;
+        _mobileHaircutExpansionPadLabel.anchor = TextAnchor.MiddleCenter;
+        _mobileHaircutExpansionPadLabel.characterSize = .1f;
+        _mobileHaircutExpansionPadLabel.fontSize = 36;
+        _mobileHaircutExpansionPadLabel.color = Cream;
+        UpdateMobileHaircutExpansionPadVisual();
     }
 
     private void BuildExpandedWashRackVisual()
@@ -355,6 +403,23 @@ public sealed partial class SalonDemo
                 _mobileExpandedRackItems[i].SetActive(visible);
             }
         UpdateMobilePurchasePadVisual();
+        UpdateMobileHaircutExpansionPadVisual();
+    }
+
+    private void UpdateMobileHaircutExpansionPadVisual()
+    {
+        if (_mobileHaircutExpansionPadLabel == null || _mobileHaircutExpansionPad == null) return;
+        _mobileHaircutExpansionPadLabel.text = _mobileHaircutExpansionPad.IsUnlocked
+            ? "OPEN" : "BUILD " + _mobileHaircutExpansionPad.Paid + "/" + _mobileHaircutExpansionPad.Cost;
+        _mobileHaircutExpansionPadLabel.color = _mobileHaircutExpansionPad.IsUnlocked ? Teal : Cream;
+        if (_camera != null)
+        {
+            Vector3 toCamera = _mobileHaircutExpansionPadLabel.transform.position - _camera.transform.position;
+            if (toCamera.sqrMagnitude > .001f)
+                _mobileHaircutExpansionPadLabel.transform.rotation = Quaternion.LookRotation(toCamera, Vector3.up);
+        }
+        if (_mobileHaircutExpansionPadRoot != null)
+            _mobileHaircutExpansionPadRoot.SetActive(!_mobileHaircutExpansionPad.IsUnlocked);
     }
 
     private void UpdateMobileSupplyLoop(float dt)
@@ -441,6 +506,7 @@ public sealed partial class SalonDemo
                             _coinBalanceLabel.text = _game.Balance.ToString("N0");
                         if (_mobileSupplyPad.IsUnlocked)
                         {
+                            if (_mobileSupplyPadRoot != null) _mobileSupplyPadRoot.SetActive(true);
                             BuildExpandedWashRackVisual();
                             ShowToast("SUPPLY RACK OPEN");
                             SaveMobileCheckpoint(false);
@@ -475,6 +541,75 @@ public sealed partial class SalonDemo
         UpdateMobilePurchasePadVisual();
     }
 
+    private void UpdateMobileHaircutExpansionPad(float dt)
+    {
+        if (!_mobileMode || _mobileHaircutExpansionPad == null || _mobileHaircutExpansionPadPoint == null ||
+            _player == null || !CanInteractWithSalon()) return;
+        bool nearPad = FlatDistance(_player.position, _mobileHaircutExpansionPadPoint.position) <= 1.25f;
+        if (!nearPad)
+        {
+            bool shouldSave = _mobileHaircutPadWasNear && _mobileHaircutPadCheckpointDirty;
+            _mobileHaircutPadWasNear = false;
+            _mobileHaircutPadInsufficientToastShown = false;
+            _mobileHaircutPadSpendElapsed = 0f;
+            if (shouldSave) SaveMobileCheckpoint(false);
+            UpdateMobileHaircutExpansionPadVisual();
+            return;
+        }
+        if (!_mobileHaircutPadWasNear)
+        {
+            _mobileHaircutPadWasNear = true;
+            _mobileHaircutPadInsufficientToastShown = false;
+            if (!_mobileHaircutExpansionPad.IsUnlocked) ShowToast("STAND ON PAD TO BUILD HAIRCUT");
+        }
+        if (!_mobileHaircutExpansionPad.IsUnlocked)
+        {
+            _mobileHaircutPadSpendElapsed += Mathf.Max(0f, dt);
+            int amount = _mobileHaircutExpansionPad.CalculatePayment(
+                _mobileHaircutPadSpendElapsed, _game.Balance, MobileHaircutPadSpendRate);
+            if (amount > 0)
+            {
+                int balanceBeforeSpend = _game.Balance;
+                if (_game.Payments.TrySpend(amount))
+                {
+                    if (_mobileHaircutExpansionPad.ApplyPayment(amount))
+                    {
+                        _mobileHaircutPadSpendElapsed = SalonProximityPurchasePadModel.RetainUnspentPaymentTime(
+                            _mobileHaircutPadSpendElapsed, amount, MobileHaircutPadSpendRate);
+                        _mobileProgress.HaircutExpansionPaid = _mobileHaircutExpansionPad.Paid;
+                        _mobileProgress.HaircutExpansionPurchased = _mobileHaircutExpansionPad.IsUnlocked;
+                        _mobileHaircutPadCheckpointDirty = true;
+                        if (_coinBalanceLabel != null) _coinBalanceLabel.text = _game.Balance.ToString("N0");
+                        if (_mobileHaircutExpansionPad.IsUnlocked)
+                        {
+                            _game.SetWorkstationAvailability(2, true);
+                            ApplyMobileWorkstationPresentation();
+                            BuildMobileCollisionMap();
+                            ShowToast("HAIRCUT CHAIR OPEN");
+                            SaveMobileCheckpoint(false);
+                        }
+                    }
+                    else
+                    {
+                        _game.Payments.RestoreBalance(balanceBeforeSpend);
+                        _mobileHaircutPadSpendElapsed = 0f;
+                    }
+                }
+                else _mobileHaircutPadSpendElapsed = 0f;
+            }
+            else if (_game.Balance <= 0)
+            {
+                _mobileHaircutPadSpendElapsed = 0f;
+                if (!_mobileHaircutPadInsufficientToastShown)
+                {
+                    _mobileHaircutPadInsufficientToastShown = true;
+                    ShowToast("金币不足 · 先完成订单");
+                }
+            }
+        }
+        UpdateMobileHaircutExpansionPadVisual();
+    }
+
     private void RestoreMobileGame()
     {
         if (!_mobileMode) return;
@@ -499,6 +634,14 @@ public sealed partial class SalonDemo
         int paid = Mathf.Clamp(data.SupplyRackExpansionPaid, 0, MobileSupplyPadCost);
         if (data.SupplyRackExpansionPurchased) paid = MobileSupplyPadCost;
         if (paid > 0) _mobileSupplyPad.ApplyPayment(paid);
+    }
+
+    private void RestoreMobileHaircutExpansionProgress(SalonProgressData data)
+    {
+        if (_mobileHaircutExpansionPad == null || data == null) return;
+        int paid = Mathf.Clamp(data.HaircutExpansionPaid, 0, SalonProgressData.HaircutExpansionCost);
+        if (data.HaircutExpansionPurchased) paid = SalonProgressData.HaircutExpansionCost;
+        if (paid > 0) _mobileHaircutExpansionPad.ApplyPayment(paid);
     }
 
     private void BuildMobileHud(Transform safeParent)
@@ -557,6 +700,7 @@ public sealed partial class SalonDemo
                 _mobileObstacles.Add(obstacle.WorldBounds(bodyRadius));
         foreach (var station in _cutStations.Values)
         {
+            if (station == null || !station.gameObject.activeInHierarchy) continue;
             var layout = station.Layout;
             Vector2 center = new Vector2(layout.Origin.x, layout.Origin.z) + layout.Collision.Center;
             Vector2 half = layout.Collision.Size * .5f + Vector2.one * bodyRadius;
@@ -584,6 +728,8 @@ public sealed partial class SalonDemo
         data.AutoBlowPurchased = _game.HasAutoBlowStand;
         data.SupplyRackExpansionPurchased = _mobileSupplyPad != null && _mobileSupplyPad.IsUnlocked;
         data.SupplyRackExpansionPaid = _mobileSupplyPad == null ? 0 : _mobileSupplyPad.Paid;
+        data.HaircutExpansionPurchased = _mobileHaircutExpansionPad != null && _mobileHaircutExpansionPad.IsUnlocked;
+        data.HaircutExpansionPaid = _mobileHaircutExpansionPad == null ? 0 : _mobileHaircutExpansionPad.Paid;
         data.FirstDayComplete = _game.FirstDayCompleteForShop;
         data.ReputationStars = _dayController.Reputation.CurrentStars;
         data.ShopSatisfaction = _satisfaction.CurrentSatisfaction;
@@ -723,11 +869,17 @@ public sealed partial class SalonDemo
         _mobileSupplyPad = new SalonProximityPurchasePadModel(
             "expansion-pad-wash-rack", MobileSupplyPadCost);
         RestoreMobileSupplyPadProgress(checkpoint);
+        _mobileHaircutExpansionPad = new SalonProximityPurchasePadModel(
+            "expansion-pad-haircut-2", SalonProgressData.HaircutExpansionCost);
+        RestoreMobileHaircutExpansionProgress(checkpoint);
+        _game.ConfigureWorkstationAvailability(_mobileHaircutExpansionPad.IsUnlocked, false, false);
+        ApplyMobileWorkstationPresentation();
         if (_mobileSupplyPad.IsUnlocked)
             BuildExpandedWashRackVisual();
         else if (_mobileExpandedRackBuilt)
             RemoveExpandedWashRackVisual();
         UpdateMobilePurchasePadVisual();
+        UpdateMobileHaircutExpansionPadVisual();
         _mobilePadSpendElapsed = 0f;
         _mobilePadWasNear = false;
         _mobilePadInsufficientToastShown = false;
@@ -763,6 +915,7 @@ public sealed partial class SalonDemo
         _playerTarget = next;
         UpdateMobileSupplyLoop(dt);
         UpdateMobilePurchasePad(dt);
+        UpdateMobileHaircutExpansionPad(dt);
         MobileTarget target = FindMobileTarget();
         _mobileActionLabel = target.Label;
         _mobileActionAvailable = target.Available;
@@ -799,6 +952,8 @@ public sealed partial class SalonDemo
             float fallbackAnyDistance = float.PositiveInfinity;
             foreach (var pair in _playerServiceAnchors)
             {
+                if (pair.Key < 0 || pair.Key >= _game.Workstations.Count ||
+                    !_game.Workstations[pair.Key].IsUsable) continue;
                 // A free station is a physically valid hand-off even when it
                 // is the wrong service type. The model owns the consequence
                 // (confused reaction, one wrong-station penalty and a later
@@ -974,6 +1129,7 @@ public sealed partial class SalonDemo
         if (_game == null) return false;
         for (int station = 0; station < _game.Workstations.Count; station++)
         {
+            if (!_game.Workstations[station].IsUsable) continue;
             if (!SalonGameModel.IsCompatibleStation(service, _game.Workstations[station].Type)) continue;
             if (!_game.IsStationOccupied(station)) return true;
         }

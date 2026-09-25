@@ -9,6 +9,7 @@ namespace HairSalon
     public enum WorkstationType { Wash, Haircut, Perm }
     public enum WorkstationState
     {
+        Locked,
         Available,
         Reserved,
         CustomerEnRoute,
@@ -116,6 +117,7 @@ namespace HairSalon
         public int OccupiedCustomerId { get => CurrentCustomerId; set => CurrentCustomerId = value; }
         public ServiceType? CurrentService;
         public bool IsOccupied => Occupied;
+        public bool IsUsable => State != WorkstationState.Locked;
         public ServicePointModel InteractionPoint { get => ServicePoint; set => ServicePoint = value; }
 
         public static WorkstationModel Haircut(int id)
@@ -333,6 +335,28 @@ namespace HairSalon
             Workstations[0].AvailableTools.Add(SalonTool.Shampoo);
             Workstations[4].AvailableTools.Add(SalonTool.Shampoo);
             Workstations[3].AvailableTools.Add(SalonTool.PermSolution);
+        }
+
+        /// <summary>
+        /// Applies the small-shop opening gate without changing stable station IDs.
+        /// Legacy callers keep the full workstation set unless they opt into this
+        /// production mobile opening configuration.
+        /// </summary>
+        public void ConfigureWorkstationAvailability(bool secondHaircutUnlocked,
+            bool secondaryWashUnlocked, bool permUnlocked)
+        {
+            SetWorkstationAvailability(2, secondHaircutUnlocked);
+            SetWorkstationAvailability(4, secondaryWashUnlocked);
+            SetWorkstationAvailability(3, permUnlocked);
+        }
+
+        public bool SetWorkstationAvailability(int stationId, bool unlocked)
+        {
+            if (stationId < 0 || stationId >= Workstations.Count) return false;
+            WorkstationModel station = Workstations[stationId];
+            if (station.Occupied && !unlocked) return false;
+            station.State = unlocked ? WorkstationState.Available : WorkstationState.Locked;
+            return true;
         }
 
         public bool PlayerBusy
@@ -690,7 +714,8 @@ namespace HairSalon
             int assigned = 0;
             for (int station = 0; station < Workstations.Count; station++)
             {
-                if (Workstations[station].Type != WorkstationType.Haircut || IsStationOccupied(station))
+                if (!Workstations[station].IsUsable ||
+                    Workstations[station].Type != WorkstationType.Haircut || IsStationOccupied(station))
                     continue;
                 if (_waitingQueue.Count == 0) break;
                 CustomerModel head = _waitingQueue[0];
@@ -817,6 +842,7 @@ namespace HairSalon
         public bool Assign(CustomerModel customer, int station)
         {
             if (customer == null || station < 0 || station >= Workstations.Count) return false;
+            if (!Workstations[station].IsUsable) return false;
             bool isWaiting = customer.State == CustomerState.Waiting;
             bool isTransfer = customer.State == CustomerState.Serving &&
                               customer.Station >= 0 && customer.Station < Workstations.Count &&

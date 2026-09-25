@@ -1473,6 +1473,23 @@
         "DepthOffset": 0,
         "SortByWorldZ": true
       }
+    },
+    {
+      "Id": "expansion-pad-haircut-2",
+      "DisplayName": "第二剪发位施工点（程序化灰盒）",
+      "Category": "stage1-proximity-expansion",
+      "Type": "prop",
+      "ResourcePath": "builtin://prop/expansion-pad-haircut-2",
+      "Status": "review",
+      "Directions": ["free"],
+      "DefaultOrientation": "free",
+      "Pivot": {"x": 0.5, "y": 0},
+      "Footprint": {"Center": {"x": 0, "y": 0}, "Size": {"x": 2.2, "y": 2.2}},
+      "Collision": {"Center": {"x": 0, "y": 0}, "Size": {"x": 1.8, "y": 1.8}},
+      "Shadow": {"Mode": "procedural", "Enabled": true, "Size": {"x": 1.9, "y": 1.9}, "Offset": {"x": 0, "y": 0}, "Opacity": 0.16, "Softness": 0.9},
+      "InteractionAnchors": [{"Id": "stand", "Position": {"x": 0, "y": 0, "z": 0}, "Facing": {"x": 0, "y": 0, "z": 1}}],
+      "RequiredAnchors": ["stand"],
+      "Sorting": {"Layer": "Default", "Order": 1, "DepthOffset": 0, "SortByWorldZ": true}
     }
   ]
 }

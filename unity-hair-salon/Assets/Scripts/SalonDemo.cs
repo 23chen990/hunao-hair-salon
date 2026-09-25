@@ -238,6 +238,10 @@ public sealed partial class SalonDemo : MonoBehaviour
         FlowSettings.MaxCustomers = Mathf.Max(FlowSettings.WaitingCapacity, DaySettings.MaxConcurrentCustomers);
         FlowSettings.BusinessDuration = Mathf.Max(0f, DaySettings.BusinessDuration);
         _game = new SalonGameModel(RewardSettings, PatienceSettings, FlowSettings, ServiceSettings);
+        if (_mobileMode)
+            _game.ConfigureWorkstationAvailability(
+                _mobileProgress != null && _mobileProgress.HaircutExpansionPurchased,
+                false, false);
         _dayController = new BusinessDayController(DaySettings);
         _satisfaction = new ShopSatisfactionModel(SatisfactionSettings);
         _trafficDirector = new CustomerTrafficDirector(DaySettings);
@@ -415,6 +419,7 @@ public sealed partial class SalonDemo : MonoBehaviour
         BuildWashZone(salon);
         BuildHaircutZone(salon);
         BuildProcessingZone(salon);
+        ApplyMobileWorkstationPresentation();
         BuildWaitingZone(salon);
         BuildCashier(salon);
         BuildShelvesAndPlants(salon);
@@ -430,6 +435,16 @@ public sealed partial class SalonDemo : MonoBehaviour
         BuildStage1CarryVisual(_player);
         _playerTarget = _player.position;
         ConfigureSimple2DPresentation();
+    }
+
+    private void ApplyMobileWorkstationPresentation()
+    {
+        if (!_mobileMode || _game == null) return;
+        for (int stationId = 0; stationId < _game.Workstations.Count; stationId++)
+        {
+            if (!_stationRoots.TryGetValue(stationId, out GameObject root) || root == null) continue;
+            root.SetActive(_game.Workstations[stationId].IsUsable);
+        }
     }
 
     private void BuildWalls(Transform root)
@@ -1202,10 +1217,19 @@ public sealed partial class SalonDemo : MonoBehaviour
                 if (customer.Emotion == CustomerEmotion.Angry) angry++;
             }
             for (int i = 0; i < _game.Workstations.Count; i++)
-                if (_game.Workstations[i].Occupied)
+                if (_game.Workstations[i].IsUsable && _game.Workstations[i].Occupied)
                     occupied++;
         }
-        return new TrafficSnapshot(active, waiting, occupied, angry, 4);
+        int usableStations = _game == null ? 0 : CountUsableWorkstations();
+        return new TrafficSnapshot(active, waiting, occupied, angry, usableStations);
+    }
+
+    private int CountUsableWorkstations()
+    {
+        int count = 0;
+        foreach (var station in _game.Workstations)
+            if (station.IsUsable) count++;
+        return count;
     }
 
     private int CountActiveCustomers()
