@@ -150,6 +150,7 @@ namespace HairSalon
             // teach one short service followed by a two-step service.
             if (day == 1 && index == 0) return "O001";
             if (day == 1 && index == 1) return "O002";
+            if (day == 1 && index == 2) return "O003";
 
             if (day == 1)
             {

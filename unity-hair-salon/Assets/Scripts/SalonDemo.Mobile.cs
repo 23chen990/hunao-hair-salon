@@ -1423,6 +1423,18 @@ public sealed partial class SalonDemo
             Time.unscaledTime < _mobileEvidenceAt || _player == null) return;
         _mobileEvidenceAt = Time.unscaledTime + .3f;
         MobileTarget evidenceTarget = FindMobileTarget();
+        int activeCustomers = 0, waitingCustomers = 0, occupiedStations = 0, readyToRinse = 0, autoBlowRunning = 0, autoBlowReady = 0, ungreeted = 0;
+        foreach (CustomerModel customer in _game.Customers)
+        {
+            if (customer == null || customer.State == CustomerState.Leaving || customer.State == CustomerState.Exited) continue;
+            activeCustomers++;
+            if (customer.State == CustomerState.Waiting || customer.State == CustomerState.Entering) waitingCustomers++;
+            if (customer.Station >= 0 && _game.IsStationOccupied(customer.Station)) occupiedStations++;
+            if (_game.IsWashFoamReadyToRinse(customer)) readyToRinse++;
+            if (customer.AutoBlowRunning) autoBlowRunning++;
+            if (customer.AutoBlowSafetyStopped || (customer.CurrentNeed == ServiceType.Dry && customer.BackgroundTask.IdealStart > 0f)) autoBlowReady++;
+            if (!customer.HasServiceEngaged && (customer.State == CustomerState.Waiting || customer.State == CustomerState.Entering)) ungreeted++;
+        }
         var evidence = new MobileEvidence
         {
             day = _dayController.DayNumber, state = _dayController.State.ToString(),
@@ -1445,7 +1457,12 @@ public sealed partial class SalonDemo
             padPaid = _mobileSupplyPad == null ? -1 : _mobileSupplyPad.Paid,
             padUnlocked = _mobileSupplyPad != null && _mobileSupplyPad.IsUnlocked,
             cameraRight = _camera.transform.right, cameraForward = _camera.transform.forward,
-            floor = _mobileFloor, obstacles = _mobileObstacles.ToArray()
+            floor = _mobileFloor, obstacles = _mobileObstacles.ToArray(),
+            activeCustomers = activeCustomers, waitingCustomers = waitingCustomers,
+            occupiedStations = occupiedStations, readyToRinse = readyToRinse,
+            autoBlowRunning = autoBlowRunning, autoBlowReady = autoBlowReady,
+            ungreetedWaiting = ungreeted,
+            attentionDemand = ungreeted + readyToRinse + autoBlowReady + Mathf.Max(0, waitingCustomers - ungreeted)
         };
         foreach (var view in _customerViews)
         {
@@ -1496,6 +1513,7 @@ public sealed partial class SalonDemo
     [Serializable] private sealed class MobileEvidence
     {
         public int day, completed, target, balance, guided, working, targetCustomer, satisfaction;
+        public int activeCustomers, waitingCustomers, occupiedStations, readyToRinse, autoBlowRunning, autoBlowReady, ungreetedWaiting, attentionDemand;
         public int sourceWashKits, carriedWashKits, washRackWashKits, padPaid;
         public bool paused, purchased, padUnlocked, available, workingSuspended;
         public string state, action, targetTool, targetAction;
