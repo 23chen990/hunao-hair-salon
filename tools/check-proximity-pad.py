@@ -124,6 +124,23 @@ def measure_supply_cycle(driver, rack, wash_station, timeout=45, shot_name=None)
     }
 
 
+def capture_failure_snapshot(driver):
+    """Copy the state at the Result screen before any retry input is sent."""
+    state = driver.state
+    return {
+        "failedCompleted": state.get("completed"),
+        "failedTarget": state.get("target"),
+        "failedBalance": state.get("balance"),
+        "failedPaid": state.get("padPaid"),
+        "failedUnlocked": state.get("padUnlocked"),
+        "failedSupply": {
+            "sourceWashKits": state.get("sourceWashKits"),
+            "carriedWashKits": state.get("carriedWashKits"),
+            "washRackWashKits": state.get("washRackWashKits"),
+        },
+    }
+
+
 def main():
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     report = {"passed": False, "input": "Chromium real touch events", "errors": []}
@@ -246,18 +263,24 @@ def main():
                 driver.tap_button("开始营业")
                 driver.until(lambda state: state.get("state") == "Result", 260)
                 assert driver.state.get("completed", 0) < driver.state.get("target", 1)
-                purchased_failure_balance = driver.state.get("balance")
+                purchased_failure = capture_failure_snapshot(driver)
                 driver.tap_button("再试一次")
                 driver.until(lambda state: state.get("state") == "PreOpen", 60)
                 assert driver.state.get("padUnlocked") is True
                 assert driver.state.get("padPaid") == 180
                 assert driver.state.get("balance") == purchased_opening_balance
                 purchased_retry = {
-                    "failedCompleted": driver.state.get("completed"),
-                    "failedBalance": purchased_failure_balance,
+                    **purchased_failure,
+                    "retryCompleted": driver.state.get("completed"),
+                    "retryTarget": driver.state.get("target"),
                     "retryBalance": driver.state.get("balance"),
                     "retryUnlocked": driver.state.get("padUnlocked"),
                     "retryPaid": driver.state.get("padPaid"),
+                    "retrySupply": {
+                        "sourceWashKits": driver.state.get("sourceWashKits"),
+                        "carriedWashKits": driver.state.get("carriedWashKits"),
+                        "washRackWashKits": driver.state.get("washRackWashKits"),
+                    },
                 }
                 report.update(
                     {

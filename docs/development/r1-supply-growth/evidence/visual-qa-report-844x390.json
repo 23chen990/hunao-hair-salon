@@ -1,0 +1,137 @@
+{
+  "scene": "demo",
+  "viewport": {
+    "width": 844,
+    "height": 390
+  },
+  "machine": {
+    "launched": true,
+    "consoleErrors": [],
+    "screenshots": [
+      "demo-core-flow-844x390.png",
+      "demo-core-flow-debug-844x390.png",
+      "demo-ui-opening-844x390.png",
+      "demo-ui-active-service-844x390.png",
+      "wash-area-approved-reference-crop-844x390.png",
+      "wash-area-demo-before-844x390.png",
+      "wash-area-demo-after-844x390.png",
+      "wash-area-player-context-844x390.png"
+    ],
+    "coreFlowPassed": true
+  },
+  "approvedReference": "wash-area-approved-reference-crop-844x390.png",
+  "washAreaEvidence": {
+    "A_approvedReferenceCrop": "wash-area-approved-reference-crop-844x390.png",
+    "B_formalDemoBefore": "wash-area-demo-before-844x390.png",
+    "C_formalDemoAfter": "wash-area-demo-after-844x390.png",
+    "D_playerWashContext": "wash-area-player-context-844x390.png",
+    "captures": {
+      "before": {
+        "mode": "before",
+        "screenshot": "wash-area-demo-before-844x390.png",
+        "ready": "[WASH_AREA_VISUAL_READY] mode=before scene=HairSalonDemo projection=orthographic cameraChanged=False realWash=False realDecoration=False orientation=right-wall mirrored=False rotated=False negativeScale=False hiddenPlaceholderRenderers=0 collidersPreserved=True anchorsPreserved=True playerScreenHeight=0.276 stationScreenHeight=0.326 stationToPlayer=1.182\n",
+        "coreFlow": "[BROWSER_CORE_FLOW_PASS] {\"StartedBusiness\":true,\"SpawnedCustomer\":true,\"AssignedStation\":true,\"CompletedService\":true,\"CustomerFinished\":true,\"PaymentCreated\":true,\"Failure\":\"\"}\n",
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": [],
+        "failedRequests": []
+      },
+      "after": {
+        "mode": "after",
+        "screenshot": "wash-area-demo-after-844x390.png",
+        "ready": "[WASH_AREA_VISUAL_READY] mode=after scene=HairSalonDemo projection=orthographic cameraChanged=False realWash=True realDecoration=True orientation=right-wall mirrored=False rotated=False negativeScale=False hiddenPlaceholderRenderers=4 collidersPreserved=True anchorsPreserved=True playerScreenHeight=0.235 stationScreenHeight=0.298 stationToPlayer=1.267\n",
+        "coreFlow": "[BROWSER_CORE_FLOW_PASS] {\"StartedBusiness\":true,\"SpawnedCustomer\":true,\"AssignedStation\":true,\"CompletedService\":true,\"CustomerFinished\":true,\"PaymentCreated\":true,\"Failure\":\"\"}\n",
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": [],
+        "failedRequests": []
+      },
+      "context": {
+        "mode": "context",
+        "screenshot": "wash-area-player-context-844x390.png",
+        "ready": "[WASH_AREA_VISUAL_READY] mode=context scene=HairSalonDemo projection=orthographic cameraChanged=False realWash=True realDecoration=True orientation=right-wall mirrored=False rotated=False negativeScale=False hiddenPlaceholderRenderers=4 collidersPreserved=True anchorsPreserved=True playerScreenHeight=0.249 stationScreenHeight=0.316 stationToPlayer=1.268\n",
+        "coreFlow": "[BROWSER_CORE_FLOW_PASS] {\"StartedBusiness\":true,\"SpawnedCustomer\":true,\"AssignedStation\":true,\"CompletedService\":true,\"CustomerFinished\":true,\"PaymentCreated\":true,\"Failure\":\"\"}\n",
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": [],
+        "failedRequests": []
+      }
+    },
+    "integrationCoreFlow": "[BROWSER_CORE_FLOW_PASS] {\"StartedBusiness\":true,\"SpawnedCustomer\":true,\"AssignedStation\":true,\"CompletedService\":true,\"CustomerFinished\":true,\"PaymentCreated\":true,\"Failure\":\"\"}\n",
+    "integrationReady": "[WASH_AREA_VISUAL_READY] mode=after scene=HairSalonDemo projection=orthographic cameraChanged=False realWash=True realDecoration=True orientation=right-wall mirrored=False rotated=False negativeScale=False hiddenPlaceholderRenderers=4 collidersPreserved=True anchorsPreserved=True playerScreenHeight=0.235 stationScreenHeight=0.298 stationToPlayer=1.267\n",
+    "releaseDefaultChanged": false
+  },
+  "uiEvidence": {
+    "opening": "demo-ui-opening-844x390.png",
+    "activeService": "demo-ui-active-service-844x390.png",
+    "serviceReady": "[UI_SERVICE_READY] customer=99001 station=1 uiEvidence=service\n",
+    "viewport": {
+      "width": 844,
+      "height": 390
+    },
+    "errors": []
+  },
+  "checks": [
+    {
+      "category": "resources",
+      "status": "pass",
+      "issues": []
+    },
+    {
+      "category": "proportion",
+      "status": "manual-review",
+      "issues": []
+    },
+    {
+      "category": "position",
+      "status": "manual-review",
+      "issues": []
+    },
+    {
+      "category": "direction",
+      "status": "manual-review",
+      "issues": []
+    },
+    {
+      "category": "shadow",
+      "status": "manual-review",
+      "issues": []
+    },
+    {
+      "category": "occlusion-depth",
+      "status": "manual-review",
+      "issues": []
+    },
+    {
+      "category": "character-size",
+      "status": "manual-review",
+      "issues": []
+    },
+    {
+      "category": "safe-area",
+      "status": "manual-review",
+      "issues": []
+    },
+    {
+      "category": "stability",
+      "status": "manual-review",
+      "issues": []
+    }
+  ],
+  "note": "机器检查已完成；HairSalonDemo 洗发区已按 A/B/C/D 输出，视觉接近程度仍由产品负责人确认。"
+}
