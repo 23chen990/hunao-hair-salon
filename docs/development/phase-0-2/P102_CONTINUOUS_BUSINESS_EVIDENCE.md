@@ -49,3 +49,23 @@
 | `Builds/WebGLReferenceVisual/index.html` | `a1d36c4b0039850c46b6b301a125b458887473470ce04c6844cce62ae955bc73` |
 
 旧版 `check-mobile-salon.py` 仍含“接客不得超过 target”的历史断言，因此在新规则路线 A 的 5/3 状态处会报旧断言；这不是生产入口运行错误。其余真实输入状态已记录在上述路线摘要和本轮测试中。
+
+## P1-02 有限收尾
+
+- 收尾运行源码：`f26c6630b98ee8f2ce3fa51d734a0c8c142b3635`
+- 保存失败专项：第一次 Save 失败，点击“重试保存”第二次成功；结算历史、余额和施工投入只保留一份。
+- Unity EditMode：676/676，通过；XML：`Builds/P102-finish-editmode.xml`。
+- 当前 Demo 真实触摸低表现路线：`0/3 → Result → ClosedManagement → Day 2 PreOpen`，`maxWaiting=4`，`errors=[]`；报告：`Builds/P102-LowScriptCurrentBuild/report.json`。
+- 更新脚本命令：`python3 tools/check-mobile-salon.py --failure --skip-haircut-checks --evidence-dir Builds/P102-LowScriptCurrentBuild`，结果 PASS。`--failure` 现代表低表现续行路线，已不再点击旧 Retry。
+- Chromium 的 `Ignored attempt to cancel a touchstart event with cancelable=false` 作为 warning 单独记录，不吞掉其他错误；本次报告 warnings 为空。
+- 目标 C 的非零收入、部分施工、日结边界刷新恢复：NOT_RUN/BLOCKED。当前环境没有可审阅的人工画面操作录制，不能用隐藏状态脚本替代正式玩家输入。
+
+本次正式 Demo 构建的完整入口哈希：
+
+| 文件 | SHA-256 |
+| --- | --- |
+| `Builds/WebGLDemo/index.html` | `e5222a6532d3e999a21c6ded7d72344062c9fc4335f8d9e16872db4e5c88a8a0` |
+| `Builds/WebGLDemo/Build/WebGLDemo.loader.js` | `a0d2b837932a423665c30714ce0ddc21daa1ac18302180ad40e2dcadae70a7f2` |
+| `Builds/WebGLDemo/Build/WebGLDemo.framework.js` | `28171c8d35e7530226c80e2c7573bab969efde660d34f7768fe3210546d70527` |
+| `Builds/WebGLDemo/Build/WebGLDemo.wasm` | `12d3ed833cdea93248fcfed6dbf659bad3cf6157cd859439ce56d89257614bb2` |
+| `Builds/WebGLDemo/Build/WebGLDemo.data` | `69e8a00c026d51a4ce7b09d68ad08be1fb1786950a9169ac0edcbc159cf40db6` |
