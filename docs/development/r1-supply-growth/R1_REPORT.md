@@ -7,7 +7,7 @@
 > 审阅基线：`6b7886986978e536635842c91a4d9051549fa67e`
 > R1 实现与证据提交：`504117f394e8639204e80cdb73dcca2d0b410a42`。
 > 最终 HEAD：本报告元数据收口提交的精确 SHA 在交付消息同步记录；工作区与 `origin/phase-0-2-gameplay-gate` 已复核一致。
-> 远端状态：`origin/phase-0-2-gameplay-gate` 已同步至 `504117f394e8639204e80cdb73dcca2d0b410a42`；工作区 clean；PR #1 保持 `OPEN`。
+> 远端状态：R1 实现/证据提交 `504117f394e8639204e80cdb73dcca2d0b410a42` 与元数据提交 `4eb55fc0da97db049250cf99e28c4f982c2d2482` 均已推送；最终 HEAD 以交付消息复核值为准；工作区 clean；PR #1 保持 `OPEN`。
 
 ## 范围
 
