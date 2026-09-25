@@ -238,6 +238,27 @@ def main():
                 driver.until(lambda state: state.get("state") == "PreOpen", 60)
                 assert driver.state.get("padUnlocked") is True
                 assert driver.state.get("padPaid") == 180
+                purchased_opening_balance = driver.state.get("balance")
+
+                # A purchased rack is part of the immutable DayOpening. Let
+                # the next day fail without serving anyone, then use the
+                # actual retry button and verify the built rack remains.
+                driver.tap_button("开始营业")
+                driver.until(lambda state: state.get("state") == "Result", 260)
+                assert driver.state.get("completed", 0) < driver.state.get("target", 1)
+                purchased_failure_balance = driver.state.get("balance")
+                driver.tap_button("再试一次")
+                driver.until(lambda state: state.get("state") == "PreOpen", 60)
+                assert driver.state.get("padUnlocked") is True
+                assert driver.state.get("padPaid") == 180
+                assert driver.state.get("balance") == purchased_opening_balance
+                purchased_retry = {
+                    "failedCompleted": driver.state.get("completed"),
+                    "failedBalance": purchased_failure_balance,
+                    "retryBalance": driver.state.get("balance"),
+                    "retryUnlocked": driver.state.get("padUnlocked"),
+                    "retryPaid": driver.state.get("padPaid"),
+                }
                 report.update(
                     {
                         "passed": True,
@@ -250,6 +271,7 @@ def main():
                         "unlockBalance": unlock_balance,
                         "reloadUnlocked": driver.state.get("padUnlocked"),
                         "reloadPaid": driver.state.get("padPaid"),
+                        "purchasedFailureRetry": purchased_retry,
                         "routeMeasurement": {
                             "startStockBeforePurchase": stock_before_route,
                             "startStockAfterPurchase": stock_after_route,
