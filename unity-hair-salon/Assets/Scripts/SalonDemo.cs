@@ -266,6 +266,7 @@ public sealed partial class SalonDemo : MonoBehaviour
         else _dayController.PrepareDay(1);
         ResetSpawnCooldown();
         ApplyOverview(true);
+        if (_startupSelectionRequired) ShowStartupModeSelection();
         if (_phase7AcceptanceOptions != null)
             gameObject.AddComponent<Phase7RuntimeAcceptance>().Initialize(this, _phase7AcceptanceOptions);
         if (_phase3WashAcceptanceOptions != null)
@@ -671,6 +672,7 @@ public sealed partial class SalonDemo : MonoBehaviour
         BuildMobileResultControls();
         BuildShopPanel(safe.transform);
         BuildPausePanel(safe.transform);
+        BuildStartupSelectionPanel(safe.transform);
     }
 
     private void BuildOfficialTopHud(Transform parent)
@@ -874,7 +876,7 @@ public sealed partial class SalonDemo : MonoBehaviour
 
     private void HandleDayStateChanged(DayState state)
     {
-        if (_dayStartPanel != null) _dayStartPanel.SetActive(state == DayState.PreOpen);
+        if (_dayStartPanel != null) _dayStartPanel.SetActive(state == DayState.PreOpen && !IsStartupSelectionBlocking);
         if (_closingLabel != null) _closingLabel.transform.parent.gameObject.SetActive(state == DayState.ClosingGrace);
         if (state == DayState.PreOpen)
         {
@@ -927,6 +929,11 @@ public sealed partial class SalonDemo : MonoBehaviour
         }
         HandleMobileDayState(state);
         UpdateDayHud();
+        if (IsStartupSelectionBlocking)
+        {
+            if (_dayStartPanel != null) _dayStartPanel.SetActive(false);
+            if (_startupPanel != null) _startupPanel.SetActive(true);
+        }
     }
 
     private bool HasVisibleExitJourney()

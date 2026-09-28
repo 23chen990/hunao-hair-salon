@@ -121,9 +121,17 @@ public sealed partial class SalonDemo
         if (!_mobileMode)
         {
             _coopMode = false;
+            _startupSelectionRequired = false;
+            _startupSelectionComplete = true;
             return;
         }
-        _mobileSaves = new PlayerPrefsSalonProgressRepository();
+        // Explicit co-op/evidence URLs remain deterministic developer entry
+        // points. The normal player-facing URL uses the new start card.
+        _startupSelectionRequired = !_coopMode &&
+            !Application.absoluteURL.Contains("mobileEvidence=1");
+        _startupSelectionComplete = !_startupSelectionRequired;
+        _mobileSaveSlotId = SalonSaveSlots.NormalizeSlot(PlayerPrefs.GetInt(SalonSaveSlots.SelectedSlotKey, 1));
+        _mobileSaves = new PlayerPrefsSalonProgressRepository(_mobileSaveSlotId);
         _mobileProgress = _mobileSaves.Load() ?? SalonProgressData.CreateDefault();
         DaySettings = SalonMobileDayConfig.CreateForDay(_mobileProgress.DayNumber);
         FlowSettings.WaitingCapacity = SalonMobileDayConfig.WaitingCapacity;

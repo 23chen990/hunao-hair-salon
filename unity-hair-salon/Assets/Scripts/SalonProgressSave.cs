@@ -231,16 +231,32 @@ namespace HairSalon
         public const string BackupKey = "HairSalon.Progress.Backup.v1";
 
         private readonly ISalonProgressStorage _storage;
+        private readonly int _slotId;
 
         public PlayerPrefsSalonProgressRepository()
-            : this(new PlayerPrefsSalonProgressStorage())
+            : this(new PlayerPrefsSalonProgressStorage(), 1)
         {
         }
 
         public PlayerPrefsSalonProgressRepository(ISalonProgressStorage storage)
+            : this(storage, 1)
+        {
+        }
+
+        public PlayerPrefsSalonProgressRepository(int slotId)
+            : this(new PlayerPrefsSalonProgressStorage(), slotId)
+        {
+        }
+
+        public PlayerPrefsSalonProgressRepository(ISalonProgressStorage storage, int slotId)
         {
             _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            _slotId = SalonSaveSlots.NormalizeSlot(slotId);
         }
+
+        public int SlotId => _slotId;
+        public string PrimaryStorageKey => SalonSaveSlots.GetPrimaryKey(_slotId);
+        public string BackupStorageKey => SalonSaveSlots.GetBackupKey(_slotId);
 
         /// <summary>
         /// Returns the newest valid current save, or the last valid backup when
@@ -248,11 +264,11 @@ namespace HairSalon
         /// </summary>
         public SalonProgressData Load()
         {
-            SlotRead primary = ReadSlot(PrimaryKey);
+            SlotRead primary = ReadSlot(PrimaryStorageKey);
             if (primary.IsFuture) return null;
             if (primary.Data != null) return primary.Data;
 
-            SlotRead backup = ReadSlot(BackupKey);
+            SlotRead backup = ReadSlot(BackupStorageKey);
             if (backup.IsFuture) return null;
             return backup.Data;
         }
@@ -270,8 +286,8 @@ namespace HairSalon
             SalonProgressData snapshot = data.Clone();
             if (!snapshot.TryValidate(out _)) return false;
 
-            SlotRead primary = ReadSlot(PrimaryKey);
-            SlotRead backup = ReadSlot(BackupKey);
+            SlotRead primary = ReadSlot(PrimaryStorageKey);
+            SlotRead backup = ReadSlot(BackupStorageKey);
             if (primary.IsFuture || backup.IsFuture) return false;
 
             string json;
@@ -283,8 +299,8 @@ namespace HairSalon
                 // Preserve the exact last-good primary as the backup. When the
                 // primary is corrupt/missing, leave an existing backup intact.
                 if (!string.IsNullOrEmpty(primary.Raw))
-                    _storage.SetString(BackupKey, primary.Raw);
-                _storage.SetString(PrimaryKey, json);
+                    _storage.SetString(BackupStorageKey, primary.Raw);
+                _storage.SetString(PrimaryStorageKey, json);
                 _storage.Save();
                 return true;
             }
@@ -298,8 +314,8 @@ namespace HairSalon
         {
             try
             {
-                _storage.DeleteKey(PrimaryKey);
-                _storage.DeleteKey(BackupKey);
+                _storage.DeleteKey(PrimaryStorageKey);
+                _storage.DeleteKey(BackupStorageKey);
                 _storage.Save();
                 return true;
             }
