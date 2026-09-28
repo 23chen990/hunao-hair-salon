@@ -111,13 +111,18 @@ public sealed partial class SalonDemo
 
     private void ConfigureMobileGame()
     {
+        _coopMode = IsLocalCoopRequested(Application.absoluteURL, System.Environment.GetCommandLineArgs());
         // Acceptance harnesses exercise their original APIs. The playable entry always uses mobile controls.
         _mobileMode = Application.isPlaying && IsNormalGameplayMode &&
             !HairSalon.AssetPipeline.BrowserCoreFlowSmoke.IsRequested(Application.absoluteURL) &&
             !Application.absoluteURL.Contains("washCraft=detail") &&
             !Application.absoluteURL.Contains("washCraft=service");
         _simple2DMode = ShouldUseSimple2DPresentation(Application.absoluteURL);
-        if (!_mobileMode) return;
+        if (!_mobileMode)
+        {
+            _coopMode = false;
+            return;
+        }
         _mobileSaves = new PlayerPrefsSalonProgressRepository();
         _mobileProgress = _mobileSaves.Load() ?? SalonProgressData.CreateDefault();
         DaySettings = SalonMobileDayConfig.CreateForDay(_mobileProgress.DayNumber);
@@ -666,6 +671,7 @@ public sealed partial class SalonDemo
     {
         if (!_mobileMode) return;
         _mobileControls = SalonMobileControls.Create(safeParent);
+        if (_coopMode) BuildCoopControls(safeParent);
         _mobileQueue = SalonMobileQueueView.Create(safeParent);
         // Modals are built afterwards, above all touch targets.
         _mobileGoalLabel = UiLabel("", safeParent, 26, Cream, TextAnchor.MiddleCenter,
@@ -777,6 +783,7 @@ public sealed partial class SalonDemo
     {
         if (!_mobileMode) return;
         _mobileControls?.ResetInput();
+        HandleCoopDayState(state);
         if (state == DayState.PreOpen)
         {
             _mobileResultFinalizedForDay = false;
@@ -858,6 +865,7 @@ public sealed partial class SalonDemo
         bool playable = CanInteractWithSalon();
         if (_closingLabel != null) _closingLabel.transform.parent.gameObject.SetActive(false);
         _mobileControls?.SetVisible(playable);
+        RefreshCoopDayPresentation(playable);
         _mobileQueue?.SetVisible(playable);
         _mobileQueue?.Refresh(_game.Customers);
         if (_mobileGoalLabel != null)
@@ -952,7 +960,7 @@ public sealed partial class SalonDemo
             pair.Value.SetActive(target.Available && target.Station == pair.Key && target.Action != MobileAction.Greet);
         if (_mobileControls.ConsumeInteractionPressed() && target.Available) ExecuteMobileTarget(target);
         UpdateMobileTaskSummary();
-        UpdateMobileCameraFollow();
+        if (!_coopMode) UpdateMobileCameraFollow();
     }
 
     private void UpdateMobileCameraFollow()
@@ -1260,7 +1268,8 @@ public sealed partial class SalonDemo
         }
         else if (target.Action == MobileAction.RinseWash)
         {
-            if (_game.FinishWashRinse(customer))
+            bool rinsed = _coopMode ? _game.FinishWashRinse(1, customer) : _game.FinishWashRinse(customer);
+            if (rinsed)
                 ShowToast(customer.IsComplete ? "冲洗完成！" : "冲洗完成 · 继续下一项");
             else ShowToast("还没到冲洗时间");
         }
@@ -1277,8 +1286,9 @@ public sealed partial class SalonDemo
             }
             _mobileWorkingTool = customer.HaircutService == null ? SalonTool.Scissors : customer.HaircutService.CurrentRequiredTool;
             bool began = wash
-                ? _game.BeginWashFoamHold(customer)
-                : _game.BeginHaircutAction(customer, _mobileWorkingTool, HaircutSettings);
+                ? (_coopMode ? _game.BeginWashFoamHold(1, customer) : _game.BeginWashFoamHold(customer))
+                : (_coopMode ? _game.BeginHaircutAction(1, customer, _mobileWorkingTool, HaircutSettings)
+                    : _game.BeginHaircutAction(customer, _mobileWorkingTool, HaircutSettings));
             if (!began) { ShowToast("顾客尚未准备好"); return; }
             if (supplyEnabled && !_mobileSupplies.TryConsumeWashKit())
             {
@@ -1368,9 +1378,11 @@ public sealed partial class SalonDemo
     private void ResolveMobileHaircut(SalonCustomerView view)
     {
         if (view == null || view.Customer == null) { EndMobileWork(); return; }
-        HaircutResult result = _game.CompleteHaircutAction(
-            view.Customer, _mobileWorkElapsed, false);
-        _game.EndActiveOperation(view.Customer);
+        HaircutResult result = _coopMode
+            ? _game.CompleteHaircutAction(1, view.Customer, _mobileWorkElapsed, false)
+            : _game.CompleteHaircutAction(view.Customer, _mobileWorkElapsed, false);
+        if (_coopMode) _game.EndActiveOperation(1, view.Customer);
+        else _game.EndActiveOperation(view.Customer);
         view.HaircutFeedback?.Stop(result);
         view.ApplyHairStage(view.Customer.HairStage);
         view.OrderDemand?.Refresh();
@@ -1400,6 +1412,7 @@ public sealed partial class SalonDemo
         if (_mobileWorkingView != null && _mobileWorkingService == ServiceType.Cut)
             _mobileHaircutSuspended = true;
         _mobileControls?.ResetInput();
+        SuspendCoopInput();
     }
 
     private void BindMobilePauseButton(Button button)

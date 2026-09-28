@@ -173,6 +173,11 @@ namespace HairSalon
         public float ProcessingDuration;
         public float DyeCleanupGraceDurationSnapshot;
         public ActiveServiceAction ActiveServiceAction = ActiveServiceAction.None;
+        /// <summary>
+        /// Local co-op reservation for the customer currently being operated.
+        /// -1 means no player-specific reservation (legacy/single-player path).
+        /// </summary>
+        public int InteractionOwnerPlayerId = -1;
         public float ActiveServiceElapsed;
         public float ActiveServiceDuration;
         public bool TowelWrapped;
@@ -370,6 +375,21 @@ namespace HairSalon
                         return true;
                 return false;
             }
+        }
+
+        /// <summary>Returns whether one particular local player has an active operation.</summary>
+        public bool IsPlayerBusy(int playerId)
+        {
+            if (playerId <= 0) return PlayerBusy;
+            foreach (CustomerModel customer in Customers)
+            {
+                if (customer == null || customer.InteractionOwnerPlayerId != playerId) continue;
+                if (customer.AttentionState == CustomerAttentionState.ActiveOperation ||
+                    customer.ActiveServiceAction != ActiveServiceAction.None ||
+                    customer.ManualBlowHolding)
+                    return true;
+            }
+            return false;
         }
 
         public void Tick(float dt)
@@ -949,10 +969,16 @@ namespace HairSalon
 
         public bool BeginActiveOperation(CustomerModel customer)
         {
-            return BeginActiveOperation(customer, false);
+            return BeginActiveOperation(customer, false, -1);
         }
 
         private bool BeginActiveOperation(CustomerModel customer, bool allowHaircutBlockedState)
+        {
+            return BeginActiveOperation(customer, allowHaircutBlockedState, -1);
+        }
+
+        private bool BeginActiveOperation(CustomerModel customer, bool allowHaircutBlockedState,
+            int ownerPlayerId)
         {
             if (customer == null || customer.State != CustomerState.Serving) return false;
             if (customer.Station < 0 || customer.Station >= Workstations.Count ||
@@ -962,9 +988,11 @@ namespace HairSalon
                 || physical.ShampooState != ShampooState.None || physical.FoamAmount > 0f))
                 return false;
             if (customer.CurrentNeed == ServiceType.Dry && customer.BlowStage != BlowStage.AwaitingStart) return false;
-            if (customer.AttentionState == CustomerAttentionState.ActiveOperation) return true;
+            if (customer.AttentionState == CustomerAttentionState.ActiveOperation)
+                return ownerPlayerId <= 0 || customer.InteractionOwnerPlayerId == ownerPlayerId;
             EngageService(customer);
             customer.AttentionState = CustomerAttentionState.ActiveOperation;
+            customer.InteractionOwnerPlayerId = ownerPlayerId;
             SetWorkstationState(customer, WorkstationState.InService);
             return true;
         }
@@ -975,6 +1003,23 @@ namespace HairSalon
                 return false;
 
             customer.AttentionState = CustomerAttentionState.ServiceEngaged;
+            customer.InteractionOwnerPlayerId = -1;
+            return true;
+        }
+
+        /// <summary>
+        /// Releases a player-scoped operation only when the caller owns it.
+        /// Legacy EndActiveOperation(CustomerModel) remains the unrestricted
+        /// single-player cleanup path used by existing desktop/mobile flows.
+        /// </summary>
+        internal bool EndActiveOperationForPlayer(int playerId, CustomerModel customer)
+        {
+            if (playerId <= 0 || customer == null ||
+                customer.InteractionOwnerPlayerId != playerId)
+                return false;
+            if (customer.AttentionState == CustomerAttentionState.ActiveOperation)
+                customer.AttentionState = CustomerAttentionState.ServiceEngaged;
+            customer.InteractionOwnerPlayerId = -1;
             return true;
         }
 
@@ -1127,6 +1172,42 @@ namespace HairSalon
         }
 
         /// <summary>
+        /// Player-scoped wash start used by local co-op. It shares the same
+        /// domain actions as the legacy path, but only blocks this player's
+        /// active operation and reserves the customer for that player.
+        /// </summary>
+        internal bool BeginWashFoamHoldForPlayer(int playerId, CustomerModel customer)
+        {
+            if (playerId <= 0 || !CanUseWashStation(customer) || customer.CurrentNeed != ServiceType.Wash)
+                return false;
+            if (IsPlayerBusy(playerId)) return false;
+            if (customer.InteractionOwnerPlayerId > 0 && customer.InteractionOwnerPlayerId != playerId)
+                return false;
+            if (customer.ServiceExecution != null &&
+                customer.ServiceExecution.State == ServiceExecutionState.Executing) return false;
+
+            if (!_washServiceAdapter.BeginTimedAction(
+                    customer, ServiceActionType.Shower, ServiceTool.Shower, WorldElapsed)) return false;
+            ApplyActionResult wetted = _washServiceAdapter.CompleteTimedAction(
+                customer, Math.Max(0f, ServiceConfig.RinseDuration), false);
+            if (wetted.Status != ApplyStatus.Applied) return false;
+
+            if (!_washServiceAdapter.BeginTimedAction(
+                    customer, ServiceActionType.Shampoo, ServiceTool.Shampoo, WorldElapsed)) return false;
+            if (!BeginTimedAction(customer, ActiveServiceAction.Shampoo,
+                    ServiceConfig.ShampooDuration, playerId))
+            {
+                _washServiceAdapter.DiscardTimedAction(customer, ClearReason.ToolBecameInvalid);
+                return false;
+            }
+            SelectCustomer(playerId, customer);
+            PlayerContext context = GetOrCreatePlayerContext(playerId);
+            context.SelectServiceAction(customer, ActiveServiceAction.Shampoo, SalonTool.Shampoo);
+            CustomerChanged?.Invoke(customer);
+            return true;
+        }
+
+        /// <summary>
         /// 正式洗头第 2 段：回来冲洗收尾。
         /// 复用领域「冲洗」动作把泡沫清零并满足 RinseClean 里程碑，随后推进订单步数。
         /// 冲洗耗时在事故达到 Moderate 时延长，复用既有的 OverdueRinseDuration 规则。
@@ -1159,6 +1240,42 @@ namespace HairSalon
                 SetWorkstationState(customer, WorkstationState.AwaitingService);
                 CustomerChanged?.Invoke(customer);
             }
+            return true;
+        }
+
+        /// <summary>Player-scoped counterpart to FinishWashRinse.</summary>
+        internal bool FinishWashRinseForPlayer(int playerId, CustomerModel customer)
+        {
+            if (playerId <= 0 || !CanUseWashStation(customer) || customer.CurrentNeed != ServiceType.Wash)
+                return false;
+            if (customer.InteractionOwnerPlayerId > 0 && customer.InteractionOwnerPlayerId != playerId)
+                return false;
+            if (customer.ServiceExecution != null &&
+                customer.ServiceExecution.State == ServiceExecutionState.Executing) return false;
+            if (!IsWashFoamReadyToRinse(customer)) return false;
+
+            if (!_washServiceAdapter.BeginTimedAction(
+                    customer, ServiceActionType.Shower, ServiceTool.Shower, WorldElapsed)) return false;
+            float duration = customer.AccidentSeverity >= AccidentSeverity.Moderate
+                ? ServiceConfig.OverdueRinseDuration : ServiceConfig.RinseDuration;
+            ApplyActionResult rinsed = _washServiceAdapter.CompleteTimedAction(
+                customer, Math.Max(0f, duration), false);
+            if (rinsed.Status != ApplyStatus.Applied) return false;
+
+            customer.BackgroundTask.State = BackgroundTaskState.Complete;
+            customer.ServicePhase = ServiceStepPhase.Complete;
+            if (_washServiceAdapter.IsWashReadyForTransition(customer) && !customer.IsComplete)
+            {
+                customer.CompletedWashCount++;
+                CompleteCurrentStep(customer, true);
+            }
+            else
+            {
+                SetWorkstationState(customer, WorkstationState.AwaitingService);
+                CustomerChanged?.Invoke(customer);
+            }
+            GetOrCreatePlayerContext(playerId).ClearInteractionContext();
+            customer.InteractionOwnerPlayerId = -1;
             return true;
         }
 
@@ -1836,6 +1953,46 @@ namespace HairSalon
             return true;
         }
 
+        /// <summary>
+        /// Starts a haircut while reserving the customer for one local player.
+        /// The legacy overload above intentionally keeps its global busy
+        /// behavior for desktop and compatibility tests.
+        /// </summary>
+        internal bool BeginHaircutActionForPlayer(int playerId, CustomerModel customer,
+            SalonTool selectedTool, HaircutConfig config)
+        {
+            if (playerId <= 0 || customer == null || config == null ||
+                !HaircutConfig.IsHaircutTool(selectedTool) ||
+                customer.State != CustomerState.Serving || customer.Station < 0 ||
+                customer.Station >= Workstations.Count ||
+                Workstations[customer.Station].Type != WorkstationType.Haircut)
+                return false;
+            if (IsPlayerBusy(playerId)) return false;
+            if (customer.InteractionOwnerPlayerId > 0 && customer.InteractionOwnerPlayerId != playerId)
+                return false;
+            if (customer.AttentionState == CustomerAttentionState.ActiveOperation)
+                return false;
+            if (!customer.Needs.Contains(ServiceType.Cut))
+            {
+                customer.ReactionKind = CustomerReactionKind.Resistance;
+                customer.ReactionRemaining = Math.Max(customer.ReactionRemaining, 1.2f);
+                CustomerChanged?.Invoke(customer);
+            }
+            if (!_washServiceAdapter.BeginHaircutAction(customer, selectedTool, config, WorldElapsed))
+                return false;
+            if (!BeginActiveOperation(customer, true, playerId))
+            {
+                _washServiceAdapter.DiscardTimedAction(customer, ClearReason.ToolBecameInvalid);
+                return false;
+            }
+            _activeHaircutConfigs[customer.Id] = config;
+            _activeHaircutTools[customer.Id] = selectedTool;
+            SelectCustomer(playerId, customer);
+            GetOrCreatePlayerContext(playerId).SelectServiceAction(
+                customer, ActiveServiceAction.None, selectedTool);
+            return true;
+        }
+
         public HaircutResult CompleteHaircutAction(CustomerModel customer, float elapsedTime, bool interrupted)
         {
             if (customer == null || !_activeHaircutConfigs.TryGetValue(customer.Id, out HaircutConfig config)
@@ -1856,6 +2013,17 @@ namespace HairSalon
             ProjectDomainActionFeedback(customer, domain.ApplyResult, classification);
             ProjectHaircutOutcome(customer, selectedTool, result, config, domain.ActionResult);
             return result;
+        }
+
+        /// <summary>Completes a haircut only for the player who reserved it.</summary>
+        internal HaircutResult CompleteHaircutActionForPlayer(int playerId, CustomerModel customer,
+            float elapsedTime, bool interrupted)
+        {
+            if (playerId <= 0 || customer == null ||
+                customer.InteractionOwnerPlayerId != playerId ||
+                customer.AttentionState != CustomerAttentionState.ActiveOperation)
+                return HaircutResult.None;
+            return CompleteHaircutAction(customer, elapsedTime, interrupted);
         }
 
         private static HaircutResult ToLegacyHaircutResult(ActionResult result)
@@ -2088,7 +2256,8 @@ namespace HairSalon
                    customer.ActiveServiceAction == ActiveServiceAction.None;
         }
 
-        private bool BeginTimedAction(CustomerModel customer, ActiveServiceAction action, float duration)
+        private bool BeginTimedAction(CustomerModel customer, ActiveServiceAction action, float duration,
+            int ownerPlayerId = -1)
         {
             if (customer == null || customer.ActiveServiceAction != ActiveServiceAction.None) return false;
             customer.ActiveServiceAction = action;
@@ -2097,6 +2266,7 @@ namespace HairSalon
             customer.ServicePhase = ServiceStepPhase.Active;
             EngageService(customer);
             customer.AttentionState = CustomerAttentionState.ActiveOperation;
+            customer.InteractionOwnerPlayerId = ownerPlayerId;
             SetWorkstationState(customer, WorkstationState.InService);
             CustomerChanged?.Invoke(customer);
             return true;

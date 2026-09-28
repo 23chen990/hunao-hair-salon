@@ -38,6 +38,14 @@ public sealed class SalonMobileControls : MonoBehaviour
     private bool _interactionPressed;
     private bool _keyboardInteractionHeld;
     private bool _interactionAvailable = true;
+    // 0 keeps the legacy single-player keyboard layout. 1 and 2 opt into the
+    // isolated local co-op layouts after Create has built the touch surface.
+    private int _playerId;
+    private bool _coopInputConfigured;
+    private static readonly KeyCode[] PlayerOneMoveKeys =
+        { KeyCode.W, KeyCode.A, KeyCode.S, KeyCode.D };
+    private static readonly KeyCode[] PlayerTwoMoveKeys =
+        { KeyCode.UpArrow, KeyCode.LeftArrow, KeyCode.DownArrow, KeyCode.RightArrow };
 
     /// <summary>Normalized movement action, including the radial deadzone.</summary>
     public Vector2 Move => _move;
@@ -110,6 +118,37 @@ public sealed class SalonMobileControls : MonoBehaviour
         controls._canvasGroup = rootObject.GetComponent<CanvasGroup>();
         controls.BuildUi();
         return controls;
+    }
+
+    /// <summary>
+    /// Configures an already-created input surface for one local co-op player.
+    /// Keeping this separate from Create preserves the old reflection and
+    /// prefab contracts used by the single-player tests.
+    /// </summary>
+    public void ConfigureForPlayer(int playerId, bool splitScreen)
+    {
+        _playerId = playerId <= 1 ? 1 : 2;
+        _coopInputConfigured = true;
+        RectTransform root = transform as RectTransform;
+        if (splitScreen && root != null)
+        {
+            bool left = _playerId == 1;
+            root.anchorMin = new Vector2(left ? 0f : .5f, 0f);
+            root.anchorMax = new Vector2(left ? .5f : 1f, 1f);
+            root.offsetMin = Vector2.zero;
+            root.offsetMax = Vector2.zero;
+        }
+
+        // A nested canvas keeps each half's touch surface above the official
+        // HUD while still sharing the existing EventSystem and safe area.
+        Canvas canvas = GetComponent<Canvas>();
+        if (canvas == null) canvas = gameObject.AddComponent<Canvas>();
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = _playerId == 1 ? 61 : 62;
+        if (GetComponent<GraphicRaycaster>() == null)
+            gameObject.AddComponent<GraphicRaycaster>();
+        gameObject.name = "Salon Mobile Controls P" + _playerId;
+        ResetInput();
     }
 
     /// <summary>
@@ -362,13 +401,22 @@ public sealed class SalonMobileControls : MonoBehaviour
         if (_joystickOrigins.Count == 0)
             _move = keyboardMove;
 
-        _keyboardInteractionHeld = Input.GetKey(KeyCode.Space);
-        if (_keyboardInteractionHeld && Input.GetKeyDown(KeyCode.Space))
+        _keyboardInteractionHeld = ReadKeyboardInteractionHeld();
+        if (_keyboardInteractionHeld && ReadKeyboardInteractionPressed())
             _interactionPressed = true;
     }
 
-    private static Vector2 ReadKeyboardMove()
+    private Vector2 ReadKeyboardMove()
     {
+        if (_coopInputConfigured)
+        {
+            Vector2 mapped = Vector2.zero;
+            KeyCode[] keys = _playerId == 2 ? PlayerTwoMoveKeys : PlayerOneMoveKeys;
+            for (int i = 0; i < keys.Length; i++)
+                if (Input.GetKey(keys[i])) mapped += SalonCoopInputMap.ResolveKeyboardMove(_playerId, keys[i]);
+            return mapped.sqrMagnitude > 1f ? mapped.normalized : mapped;
+        }
+
         float horizontal = 0f;
         float vertical = 0f;
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) horizontal -= 1f;
@@ -377,6 +425,22 @@ public sealed class SalonMobileControls : MonoBehaviour
         if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) vertical += 1f;
         Vector2 input = new Vector2(horizontal, vertical);
         return input.sqrMagnitude > 1f ? input.normalized : input;
+    }
+
+    private bool ReadKeyboardInteractionHeld()
+    {
+        if (!_coopInputConfigured) return Input.GetKey(KeyCode.Space);
+        return _playerId == 2
+            ? Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.KeypadEnter)
+            : Input.GetKey(KeyCode.Space);
+    }
+
+    private bool ReadKeyboardInteractionPressed()
+    {
+        if (!_coopInputConfigured) return Input.GetKeyDown(KeyCode.Space);
+        return _playerId == 2
+            ? Input.GetKeyDown(KeyCode.RightControl) || Input.GetKeyDown(KeyCode.KeypadEnter)
+            : Input.GetKeyDown(KeyCode.Space);
     }
 
     private void OnEnable() => ResetInput();

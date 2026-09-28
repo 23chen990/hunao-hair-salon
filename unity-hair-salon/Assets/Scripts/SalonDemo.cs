@@ -291,6 +291,7 @@ public sealed partial class SalonDemo : MonoBehaviour
         UpdateDayHud();
         RefreshMobileDayPresentation();
         EmitMobileEvidence();
+        EmitCoopEvidence();
         if (_dayController.IsPaused || _dayController.State == DayState.PreOpen ||
             _dayController.State == DayState.ClosedManagement) return;
         if (_dayController.State == DayState.Result)
@@ -309,7 +310,12 @@ public sealed partial class SalonDemo : MonoBehaviour
         }
         _game.Tick(Time.deltaTime);
         MaintainCustomerFlow(Time.deltaTime);
-        if (_mobileMode) UpdateMobilePlay(Time.deltaTime);
+        if (_mobileMode)
+        {
+            UpdateMobilePlay(Time.deltaTime);
+            if (_coopMode) UpdateCoopPlayerTwo(Time.deltaTime);
+            if (_coopMode) UpdateCoopCameraFollow();
+        }
         else
         {
             UpdateHaircutInteraction();
@@ -435,6 +441,7 @@ public sealed partial class SalonDemo : MonoBehaviour
         _player = playerInstance.transform;
         _playerCharacter = playerInstance.GetComponent<HairdresserCharacter>();
         BuildStage1CarryVisual(_player);
+        if (_coopMode) BuildCoopPlayerTwoAvatar(salon);
         _playerTarget = _player.position;
         ConfigureSimple2DPresentation();
     }
