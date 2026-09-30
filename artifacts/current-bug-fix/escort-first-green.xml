@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="5" result="Passed" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-30 16:09:59Z" end-time="2026-09-30 16:09:59Z" duration="0.0776234">
+  <test-suite type="TestSuite" id="1000" name="胡闹理发店灰盒 Demo" fullname="胡闹理发店灰盒 Demo" runstate="Runnable" testcasecount="824" result="Passed" start-time="2026-09-30 16:09:59Z" end-time="2026-09-30 16:09:59Z" duration="0.077623" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1939" name="HairSalon.Tests.dll" fullname="/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Library/ScriptAssemblies/HairSalon.Tests.dll" runstate="Runnable" testcasecount="824" result="Passed" start-time="2026-09-30 16:09:59Z" end-time="2026-09-30 16:09:59Z" duration="0.070938" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="19695" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestFixture" id="1078" name="CustomerEscortRegressionTests" fullname="CustomerEscortRegressionTests" classname="CustomerEscortRegressionTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-30 16:09:59Z" end-time="2026-09-30 16:09:59Z" duration="0.055036" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1083" name="CustomerCanJoinLeaderAroundFurnitureInsteadOfGettingStuck" fullname="CustomerEscortRegressionTests.CustomerCanJoinLeaderAroundFurnitureInsteadOfGettingStuck" methodname="CustomerCanJoinLeaderAroundFurnitureInsteadOfGettingStuck" classname="CustomerEscortRegressionTests" runstate="Runnable" seed="1043633796" result="Passed" start-time="2026-09-30 16:09:59Z" end-time="2026-09-30 16:09:59Z" duration="0.035238" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1082" name="GettingUpFromFurnitureMovesTowardsLeaderWithoutTeleporting" fullname="CustomerEscortRegressionTests.GettingUpFromFurnitureMovesTowardsLeaderWithoutTeleporting" methodname="GettingUpFromFurnitureMovesTowardsLeaderWithoutTeleporting" classname="CustomerEscortRegressionTests" runstate="Runnable" seed="992845046" result="Passed" start-time="2026-09-30 16:09:59Z" end-time="2026-09-30 16:09:59Z" duration="0.003018" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1081" name="ReselectingCustomerDropsThePreviousEscortRoute" fullname="CustomerEscortRegressionTests.ReselectingCustomerDropsThePreviousEscortRoute" methodname="ReselectingCustomerDropsThePreviousEscortRoute" classname="CustomerEscortRegressionTests" runstate="Runnable" seed="1394054170" result="Passed" start-time="2026-09-30 16:09:59Z" end-time="2026-09-30 16:09:59Z" duration="0.000644" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1080" name="SlowWalkingAndStoppingDoNotMakeCustomerSprintInShortBursts" fullname="CustomerEscortRegressionTests.SlowWalkingAndStoppingDoNotMakeCustomerSprintInShortBursts" methodname="SlowWalkingAndStoppingDoNotMakeCustomerSprintInShortBursts" classname="CustomerEscortRegressionTests" runstate="Runnable" seed="1808482517" result="Passed" start-time="2026-09-30 16:09:59Z" end-time="2026-09-30 16:09:59Z" duration="0.004815" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1079" name="WalkingCustomerKeepsPersonalSpaceBehindLeader" fullname="CustomerEscortRegressionTests.WalkingCustomerKeepsPersonalSpaceBehindLeader" methodname="WalkingCustomerKeepsPersonalSpaceBehindLeader" classname="CustomerEscortRegressionTests" runstate="Runnable" seed="679269574" result="Passed" start-time="2026-09-30 16:09:59Z" end-time="2026-09-30 16:09:59Z" duration="0.001984" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Saving results to: /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/BugFixFocused.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

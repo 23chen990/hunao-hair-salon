@@ -1,5 +1,7 @@
 # 《胡闹理发店》Prototype 0.7 · 完整营业日闭环 V1
 
+> 本文主体是历史阶段记录。当前玩法、构建方法与验证结果请先读[仓库阅读入口](../README.md)、[项目背景](../PROJECT_CONTEXT.md)、[最新状态](../STATUS.md)和[首日节奏纠偏交付](../docs/development/pacing-rebalance/DELIVERY.md)。本文件下方的立即到账、默认后台吹发、195 项测试和旧商店规则不代表当前正式 Demo。
+
 Unity `6000.5.8f1` / C# / uGUI，16:9 横屏。本版本仍使用程序化 Low-Poly 灰盒资源，优先验证位置、状态、交互、响应与完整游戏逻辑。
 
 当前整合版本保留第六阶段五种正式订单和完整洗剪吹并发服务链，并采用 `PRE_OPEN → BUSINESS → CLOSING_GRACE → RESULT → CLOSED_MANAGEMENT → NEXT DAY PRE_OPEN` 经营闭环。营业时长、收尾时长、四段压力曲线、Rush、过载减压、并发上限和订单权重均集中在 `DayConfig`；口碑、自动吹风支架购买状态与金币余额跨 Day 保留。

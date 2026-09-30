@@ -1,0 +1,18 @@
+{
+  "overcut": {
+    "passed": true,
+    "errors": []
+  },
+  "checkout-abandon": {
+    "passed": true,
+    "errors": []
+  },
+  "wash-and-restock": {
+    "passed": true,
+    "errors": []
+  },
+  "blow-timeout": {
+    "passed": true,
+    "errors": []
+  }
+}

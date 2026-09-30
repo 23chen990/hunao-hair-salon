@@ -120,6 +120,7 @@ public sealed class Phase2BusySalonFlowTests
         SalonGameModel game = NewGame();
         CustomerModel customer = PrepareDryCustomer(game, 3031);
 
+        game.InstallAutoBlowStand();
         Assert.IsTrue(game.StartAutoBlow(customer));
         float before = customer.BackgroundTask.Elapsed;
 
@@ -186,6 +187,7 @@ public sealed class Phase2BusySalonFlowTests
 
         Assert.IsTrue(game.BeginWashFoamHold(washing));
         game.Tick(game.ServiceConfig.ShampooDuration + .01f);
+        game.InstallAutoBlowStand();
         Assert.IsTrue(game.StartAutoBlow(drying));
         game.SelectCustomer(cutting);
         Assert.IsTrue(game.BeginHaircutAction(cutting, SalonTool.Scissors, new HaircutConfig()));

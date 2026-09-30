@@ -14,6 +14,7 @@ namespace HairSalon
         Shop = ClosedManagement
     }
     public enum DayPressurePhase { OpeningLight, Normal, Busy, FinalPeak }
+    public enum TrafficWaveKind { Steady, Arrivals, Rush, Closing, Recovery }
     public enum ManagementInvestmentType { Equipment, Expansion, Upgrade, Marketing }
 
     [Serializable]
@@ -48,6 +49,21 @@ namespace HairSalon
         public float DurationSeconds = 24f;
         public float DurationProgress;
         public float IntensityMultiplier = 1.65f;
+    }
+
+    [Serializable]
+    public sealed class TrafficWave
+    {
+        public float StartProgress;
+        public float Intensity = 1f;
+        public TrafficWaveKind Kind = TrafficWaveKind.Steady;
+
+        public TrafficWave(float startProgress, float intensity, TrafficWaveKind kind)
+        {
+            StartProgress = startProgress;
+            Intensity = intensity;
+            Kind = kind;
+        }
     }
 
     [Serializable]
@@ -92,6 +108,8 @@ namespace HairSalon
         public float MinimumTrafficMultiplier = .9f;
         public float MaximumTrafficMultiplier = 1.1f;
         public float ReputationTrafficPerStar = .05f;
+        public List<TrafficWave> TrafficWaves = new List<TrafficWave>();
+        public float LastAdmissionProgress;
         public RushConfig Rush = new RushConfig();
         public List<DayOrderWeight> OrderWeights = new List<DayOrderWeight>
         {
@@ -212,6 +230,27 @@ namespace HairSalon
             return DayPressurePhase.FinalPeak;
         }
 
+        public TrafficWaveKind GetWaveKind(float progress)
+        {
+            if (_config.TrafficWaves == null || _config.TrafficWaves.Count == 0)
+                return TrafficWaveKind.Steady;
+            return GetWave(progress).Kind;
+        }
+
+        public string GetWaveLabel(float progress) => GetWaveLabel(GetWaveKind(progress));
+
+        public static string GetWaveLabel(TrafficWaveKind kind)
+        {
+            switch (kind)
+            {
+                case TrafficWaveKind.Arrivals: return "上客";
+                case TrafficWaveKind.Recovery: return "喘息";
+                case TrafficWaveKind.Rush: return "高峰";
+                case TrafficWaveKind.Closing: return "收尾";
+                default: return "平稳";
+            }
+        }
+
         public TrafficDecision Evaluate(float progress, TrafficSnapshot snapshot, float intervalRoll = .5f,
             float reputationStars = 3f)
         {
@@ -230,10 +269,18 @@ namespace HairSalon
             bool angryOverload = snapshot.AngryCustomers >= 2;
             bool overloaded = waitingOverload || (stationSaturated && snapshot.WaitingCustomers >= 2) || angryOverload;
             bool underHardCap = snapshot.ActiveCustomers < Math.Max(1, _config.MaxConcurrentCustomers);
+            bool hasWaves = _config.TrafficWaves != null && _config.TrafficWaves.Count > 0;
+            TrafficWave wave = hasWaves ? GetWave(progress) : null;
+            if (wave != null && wave.Kind == TrafficWaveKind.Recovery && snapshot.ActiveCustomers > 0)
+                return new TrafficDecision(false, Math.Max(1f, _config.MaxSpawnInterval), phase, false, overloaded, 1f);
+            if (hasWaves && _config.LastAdmissionProgress > 0f &&
+                progress >= _config.LastAdmissionProgress)
+                return new TrafficDecision(false, 0f, phase, false, overloaded, 1f);
             float reputationMultiplier = 1f + (Math.Max(1f, Math.Min(5f, reputationStars)) - 3f) *
                 _config.ReputationTrafficPerStar;
             reputationMultiplier = Math.Max(_config.MinimumTrafficMultiplier,
                 Math.Min(_config.MaximumTrafficMultiplier, reputationMultiplier));
+            if (wave != null) phaseIntensity = wave.Kind == TrafficWaveKind.Recovery ? 1f : wave.Intensity;
             float intensity = Math.Max(.05f, _config.BaseSpawnIntensity) * Math.Max(.05f, phaseIntensity) *
                               Math.Max(.05f, reputationMultiplier);
             if (rush) intensity *= Math.Max(1f, _config.Rush.IntensityMultiplier);
@@ -246,6 +293,20 @@ namespace HairSalon
             return new TrafficDecision(underHardCap && !waitingGate, interval, phase, rush, overloaded,
                 reputationMultiplier);
         }
+
+        private TrafficWave GetWave(float progress)
+        {
+            TrafficWave selected = _config.TrafficWaves[0];
+            float value = Clamp01(progress);
+            for (int i = 0; i < _config.TrafficWaves.Count; i++)
+            {
+                TrafficWave candidate = _config.TrafficWaves[i];
+                if (candidate.StartProgress <= value && candidate.StartProgress >= selected.StartProgress)
+                    selected = candidate;
+            }
+            return selected;
+        }
+
 
         private static float Clamp01(float value) => Math.Max(0f, Math.Min(1f, value));
     }
@@ -270,6 +331,7 @@ namespace HairSalon
         public int AbandonedBeforeService;
         public int UnservedAtClose;
         public int IncompleteAtClose;
+        public int CheckoutAbandoned;
         public int OrderIncome;
         public int TipIncome;
         public int OperatingRewardIncome;
@@ -383,7 +445,8 @@ namespace HairSalon
                         stats.VeryUnhappyCustomers * _config.VeryUnhappyDelta +
                         stats.UnservedAtClose * _config.UnservedAtCloseDelta +
                         stats.IncompleteAtClose * _config.IncompleteAtCloseDelta +
-                        stats.AbandonedBeforeService * _config.AbandonedDelta;
+                        stats.AbandonedBeforeService * _config.AbandonedDelta -
+                        stats.CheckoutAbandoned * .05f;
             float delta = Math.Max(-Math.Max(0f, _config.MaxDailyLoss),
                 Math.Min(Math.Max(0f, _config.MaxDailyGain), raw));
             stats.ReputationBefore = CurrentStars;
@@ -413,9 +476,13 @@ namespace HairSalon
         public float BusinessProgress => Config.BusinessDuration <= 0f ? 1f :
             Math.Max(0f, Math.Min(1f, 1f - BusinessRemainingTime / Config.BusinessDuration));
         public DayPressurePhase CurrentPressurePhase => _trafficDirector.GetPhase(BusinessProgress);
+        public TrafficWaveKind CurrentTrafficWave => _trafficDirector.GetWaveKind(BusinessProgress);
+        public string CurrentTrafficWaveLabel => _trafficDirector.GetWaveLabel(BusinessProgress);
         public bool IsPaused { get; private set; }
         public bool CanSpawnCustomers => State == DayState.Business && BusinessRemainingTime > 0f &&
                                          !IsPaused;
+        public TrafficWaveKind GetWaveKind(float progress) => _trafficDirector.GetWaveKind(progress);
+        public string GetWaveLabel(float progress) => _trafficDirector.GetWaveLabel(progress);
         public DayStats Stats { get; private set; }
         public ShopReputationModel Reputation { get; }
         public DayEvaluation CurrentDayEvaluation => EvaluateDay();
@@ -477,6 +544,15 @@ namespace HairSalon
             if (State == DayState.Business)
             {
                 BusinessRemainingTime = Math.Max(0f, BusinessRemainingTime - step);
+                // Once no more orders can be admitted, an empty mobile shop
+                // has nothing left to manage. Do not make players watch an
+                // empty countdown; still wait for checkout and visible exits.
+                if (Config.IsMobileProfile && Config.LastAdmissionProgress > 0f &&
+                    BusinessProgress >= Config.LastAdmissionProgress && activeUntilExitCount <= 0 && pending <= 0)
+                {
+                    SetState(DayState.Result);
+                    return;
+                }
                 if (BusinessRemainingTime <= 0f)
                 {
                     if (activeUntilExitCount <= 0 && pending <= 0) SetState(DayState.Result);

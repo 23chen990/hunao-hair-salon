@@ -1,0 +1,115 @@
+{
+  "passed": true,
+  "follow": {
+    "passed": true,
+    "stops": [
+      {
+        "maxMovingGap": 1.2226802545193833,
+        "stoppedGap": 1.0577936295529686,
+        "drift": 0.0
+      },
+      {
+        "maxMovingGap": 1.4014750622951178,
+        "stoppedGap": 1.057520922658106,
+        "drift": 0.0
+      },
+      {
+        "maxMovingGap": 1.372927243916391,
+        "stoppedGap": 1.05766506407079,
+        "drift": 0.0
+      }
+    ],
+    "cancelAndReselect": true,
+    "errors": []
+  },
+  "days": [
+    {
+      "day": 1,
+      "completed": 7,
+      "target": 3,
+      "balance": 610,
+      "checkoutAbandoned": 0
+    },
+    {
+      "day": 2,
+      "completed": 5,
+      "target": 4,
+      "balance": 297,
+      "checkoutAbandoned": 0
+    }
+  ],
+  "manualDry": {
+    "passed": true,
+    "day": 1,
+    "hasAutoStand": false,
+    "manualWhileHeld": true,
+    "heldElapsed": 1.1740001440048218,
+    "releaseAndResume": true
+  },
+  "washAssign": [
+    {
+      "side": "front",
+      "action": "安排洗发",
+      "available": true,
+      "player": {
+        "x": -7.56305456161499,
+        "y": 0.05000000074505806,
+        "z": 2.656320333480835
+      }
+    },
+    {
+      "side": "right",
+      "action": "安排洗发",
+      "available": true,
+      "player": {
+        "x": -5.781224727630615,
+        "y": 0.05000000074505806,
+        "z": 3.4660263061523438
+      }
+    },
+    {
+      "side": "left",
+      "action": "安排洗发",
+      "available": true,
+      "player": {
+        "x": -8.64042854309082,
+        "y": 0.05000000074505806,
+        "z": 3.646851062774658
+      }
+    }
+  ],
+  "washService": [
+    {
+      "side": "front",
+      "action": "洗发",
+      "available": true,
+      "player": {
+        "x": -7.516323566436768,
+        "y": 0.05000000074505806,
+        "z": 2.6670033931732178
+      }
+    },
+    {
+      "side": "right",
+      "action": "洗发",
+      "available": true,
+      "player": {
+        "x": -5.790343284606934,
+        "y": 0.05000000074505806,
+        "z": 3.6925978660583496
+      }
+    },
+    {
+      "side": "left",
+      "action": "洗发",
+      "available": true,
+      "player": {
+        "x": -8.61731243133545,
+        "y": 0.05000000074505806,
+        "z": 3.6458981037139893
+      }
+    }
+  ],
+  "progressPersisted": true,
+  "errors": []
+}

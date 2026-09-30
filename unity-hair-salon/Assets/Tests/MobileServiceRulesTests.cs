@@ -54,6 +54,7 @@ public sealed class MobileServiceRulesTests
         CompleteMobileHaircut(game, customer);
         Assert.AreEqual(ServiceType.Dry, customer.CurrentNeed);
 
+        game.InstallAutoBlowStand();
         Assert.IsTrue(game.StartAutoBlow(customer));
         game.Tick(customer.BackgroundTask.IdealStart + .1f);
         BlowResult result = game.FinishAutoBlow(customer);
@@ -130,30 +131,31 @@ public sealed class MobileServiceRulesTests
     }
 
     [Test]
-    public void BaseAutoBlowIsAvailableBeforeTheEquipmentPurchase()
+    public void AutomaticBlowRequiresTheStandButManualBlowRemainsAvailable()
     {
         SalonGameModel game = NewGame();
         CustomerModel customer = PrepareDryCustomer(game, 1003);
 
-        Assert.IsFalse(game.HasAutoBlowStand,
-            "The purchased stand remains a separate growth flag from the base service.");
-        PropertyInfo autoBlowAvailable = typeof(SalonGameModel).GetProperty(
-            "AutoBlowAvailable", BindingFlags.Instance | BindingFlags.Public);
-        Assert.IsNotNull(autoBlowAvailable,
-            "The first playable day must expose a basic automatic blow-dry entry point.");
-        Assert.IsTrue((bool)autoBlowAvailable.GetValue(game),
-            "The first playable day must expose a basic automatic blow-dry entry point.");
-        Assert.IsTrue(game.StartAutoBlow(customer));
-        Assert.IsTrue(customer.AutoBlowRunning);
-        Assert.AreEqual(BlowStage.AutoRunning, customer.BlowStage);
+        Assert.IsFalse(game.HasAutoBlowStand);
+        Assert.IsFalse(game.AutoBlowAvailable);
+        Assert.IsFalse(game.StartAutoBlow(customer),
+            "An unbuilt stand cannot start unattended blow-drying.");
+        Assert.IsFalse(customer.AutoBlowRunning);
+        Assert.IsTrue(game.StartManualBlow(customer),
+            "The handheld dryer must still work before the stand is built.");
+        Assert.IsTrue(customer.ManualBlowHolding);
+        game.TickManualBlow(customer, game.ServiceConfig.ManualBlowGoodStart + .1f);
+        Assert.AreEqual(BlowResult.Good, game.EndManualBlowHold(customer));
+        Assert.AreEqual(CustomerState.Finished, customer.State);
     }
 
     [Test]
-    public void PurchasedStandShortensStartWindowAndWidensLateRecoveryWindow()
+    public void PurchasedStandEnablesBackgroundBlowWithALateRecoveryWindow()
     {
         SalonGameModel baseGame = NewGame();
         CustomerModel baseCustomer = PrepareDryCustomer(baseGame, 1004);
-        Assert.IsTrue(baseGame.StartAutoBlow(baseCustomer));
+        Assert.IsFalse(baseGame.StartAutoBlow(baseCustomer));
+        Assert.IsTrue(baseGame.StartManualBlow(baseCustomer));
 
         SalonGameModel upgradedGame = NewGame();
         upgradedGame.SetFirstDayCompleteForDebug(true);
@@ -161,12 +163,11 @@ public sealed class MobileServiceRulesTests
         CustomerModel upgradedCustomer = PrepareDryCustomer(upgradedGame, 1005);
         Assert.IsTrue(upgradedGame.StartAutoBlow(upgradedCustomer));
 
-        Assert.Less(upgradedCustomer.BackgroundTask.IdealStart,
-            baseCustomer.BackgroundTask.IdealStart);
-        Assert.GreaterOrEqual(upgradedCustomer.BackgroundTask.IdealEnd,
-            baseCustomer.BackgroundTask.IdealEnd);
+        Assert.Greater(upgradedCustomer.BackgroundTask.IdealStart, 0f);
+        Assert.Greater(upgradedCustomer.BackgroundTask.IdealEnd,
+            upgradedCustomer.BackgroundTask.IdealStart);
         Assert.GreaterOrEqual(upgradedCustomer.BackgroundTask.DangerAt,
-            baseCustomer.BackgroundTask.DangerAt);
+            upgradedCustomer.BackgroundTask.IdealEnd);
     }
 
     [Test]
@@ -174,6 +175,7 @@ public sealed class MobileServiceRulesTests
     {
         SalonGameModel game = NewGame();
         CustomerModel customer = PrepareDryCustomer(game, 1006);
+        game.InstallAutoBlowStand();
         Assert.IsTrue(game.StartAutoBlow(customer));
 
         game.Tick(customer.BackgroundTask.IdealEnd + .5f);
@@ -196,6 +198,7 @@ public sealed class MobileServiceRulesTests
         CustomerModel background = PrepareDryCustomer(game, 1008);
         CustomerModel foreground = SpawnServing(game, 1009, new[] { ServiceType.Cut }, 2);
 
+        game.InstallAutoBlowStand();
         Assert.IsTrue(game.StartAutoBlow(background));
         game.SelectCustomer(foreground);
         Assert.IsTrue(game.ApplyHaircutResult(foreground, SalonTool.Scissors,

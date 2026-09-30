@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="5" result="Failed(Child)" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-30 10:32:46Z" end-time="2026-09-30 10:32:46Z" duration="0.088682">
+  <test-suite type="TestSuite" id="1000" name="胡闹理发店灰盒 Demo" fullname="胡闹理发店灰盒 Demo" runstate="Runnable" testcasecount="809" result="Failed" site="Child" start-time="2026-09-30 10:32:46Z" end-time="2026-09-30 10:32:46Z" duration="0.088682" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1923" name="HairSalon.Tests.dll" fullname="/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Library/ScriptAssemblies/HairSalon.Tests.dll" runstate="Runnable" testcasecount="809" result="Failed" site="Child" start-time="2026-09-30 10:32:46Z" end-time="2026-09-30 10:32:46Z" duration="0.072289" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="20996" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestFixture" id="1060" name="CoreReworkAcceptanceTests" fullname="CoreReworkAcceptanceTests" classname="CoreReworkAcceptanceTests" runstate="Runnable" testcasecount="5" result="Failed" site="Child" start-time="2026-09-30 10:32:46Z" end-time="2026-09-30 10:32:46Z" duration="0.063188" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1063" name="FoamAndDryBothBecomeReadyAtEightSeconds" fullname="CoreReworkAcceptanceTests.FoamAndDryBothBecomeReadyAtEightSeconds" methodname="FoamAndDryBothBecomeReadyAtEightSeconds" classname="CoreReworkAcceptanceTests" runstate="Runnable" seed="733435800" result="Failed" start-time="2026-09-30 10:32:46Z" end-time="2026-09-30 10:32:46Z" duration="0.015106" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Expected: 8.0d +/- 0.0099999997764825821d
+  But was:  4.0d
+]]></message>
+            <stack-trace><![CDATA[at CoreReworkAcceptanceTests.FoamAndDryBothBecomeReadyAtEightSeconds () [0x0000f] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CoreReworkAcceptanceTests.cs:42
+]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1064" name="MobilePaymentWaitsForCheckout" fullname="CoreReworkAcceptanceTests.MobilePaymentWaitsForCheckout" methodname="MobilePaymentWaitsForCheckout" classname="CoreReworkAcceptanceTests" runstate="Runnable" seed="1246424365" result="Failed" start-time="2026-09-30 10:32:46Z" end-time="2026-09-30 10:32:46Z" duration="0.004619" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Expected: 100
+  But was:  460
+]]></message>
+            <stack-trace><![CDATA[at CoreReworkAcceptanceTests.MobilePaymentWaitsForCheckout () [0x000a5] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CoreReworkAcceptanceTests.cs:65
+]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1061" name="NewShopStartsWithOneHundredCoinsAndDryerFirst" fullname="CoreReworkAcceptanceTests.NewShopStartsWithOneHundredCoinsAndDryerFirst" methodname="NewShopStartsWithOneHundredCoinsAndDryerFirst" classname="CoreReworkAcceptanceTests" runstate="Runnable" seed="1248135339" result="Failed" start-time="2026-09-30 10:32:46Z" end-time="2026-09-30 10:32:46Z" duration="0.000324" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Expected: 100
+  But was:  0
+]]></message>
+            <stack-trace><![CDATA[at CoreReworkAcceptanceTests.NewShopStartsWithOneHundredCoinsAndDryerFirst () [0x00000] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CoreReworkAcceptanceTests.cs:12
+]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1062" name="OpeningHasThreeArrivalsWithinTwentySeconds" fullname="CoreReworkAcceptanceTests.OpeningHasThreeArrivalsWithinTwentySeconds" methodname="OpeningHasThreeArrivalsWithinTwentySeconds" classname="CoreReworkAcceptanceTests" runstate="Runnable" seed="1093679444" result="Failed" start-time="2026-09-30 10:32:46Z" end-time="2026-09-30 10:32:46Z" duration="0.002571" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Expected: greater than or equal to 3
+  But was:  1
+]]></message>
+            <stack-trace><![CDATA[at CoreReworkAcceptanceTests.OpeningHasThreeArrivalsWithinTwentySeconds () [0x00074] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CoreReworkAcceptanceTests.cs:34
+]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1065" name="ServiceProgressDoesNotShowPatiencePercentage" fullname="CoreReworkAcceptanceTests.ServiceProgressDoesNotShowPatiencePercentage" methodname="ServiceProgressDoesNotShowPatiencePercentage" classname="CoreReworkAcceptanceTests" runstate="Runnable" seed="816230167" result="Failed" start-time="2026-09-30 10:32:46Z" end-time="2026-09-30 10:32:46Z" duration="0.032153" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Expected string length 0 but was 3. Strings differ at index 0.
+  Expected: <string.Empty>
+  But was:  "78%"
+  -----------^
+]]></message>
+            <stack-trace><![CDATA[at CoreReworkAcceptanceTests.ServiceProgressDoesNotShowPatiencePercentage () [0x0005b] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CoreReworkAcceptanceTests.cs:83
+]]></stack-trace>
+          </failure>
+          <output><![CDATA[Saving results to: /Users/kker/Documents/ChatGPT/game2/artifacts/core-rework/continuation-red.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

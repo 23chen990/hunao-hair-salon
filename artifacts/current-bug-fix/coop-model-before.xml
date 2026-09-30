@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="2" result="Failed(Child)" total="2" passed="0" failed="2" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-30 16:22:33Z" end-time="2026-09-30 16:22:33Z" duration="0.0527113">
+  <test-suite type="TestSuite" id="1000" name="胡闹理发店灰盒 Demo" fullname="胡闹理发店灰盒 Demo" runstate="Runnable" testcasecount="830" result="Failed" site="Child" start-time="2026-09-30 16:22:33Z" end-time="2026-09-30 16:22:33Z" duration="0.052711" total="2" passed="0" failed="2" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1946" name="HairSalon.Tests.dll" fullname="/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Library/ScriptAssemblies/HairSalon.Tests.dll" runstate="Runnable" testcasecount="830" result="Failed" site="Child" start-time="2026-09-30 16:22:33Z" end-time="2026-09-30 16:22:33Z" duration="0.046526" total="2" passed="0" failed="2" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="25156" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestFixture" id="1060" name="CoopManualBlowModelTests" fullname="CoopManualBlowModelTests" classname="CoopManualBlowModelTests" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2026-09-30 16:22:33Z" end-time="2026-09-30 16:22:33Z" duration="0.033754" total="2" passed="0" failed="2" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1062" name="PlayerScopedManualBlowPreventsStealingAndAllowsTwoCustomersInParallel" fullname="CoopManualBlowModelTests.PlayerScopedManualBlowPreventsStealingAndAllowsTwoCustomersInParallel" methodname="PlayerScopedManualBlowPreventsStealingAndAllowsTwoCustomersInParallel" classname="CoopManualBlowModelTests" runstate="Runnable" seed="1921225975" result="Failed" start-time="2026-09-30 16:22:33Z" end-time="2026-09-30 16:22:33Z" duration="0.025365" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Missing player-scoped manual blow method: StartManualBlowForPlayer
+  Expected: not null
+  But was:  null
+]]></message>
+            <stack-trace><![CDATA[at CoopManualBlowModelTests.FindMethod (System.Object target, System.String name) [0x0000e] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CoopManualBlowModelTests.cs:91
+at CoopManualBlowModelTests.InvokeBool (System.Object target, System.String name, System.Object[] args) [0x00000] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CoopManualBlowModelTests.cs:72
+at CoopManualBlowModelTests.PlayerScopedManualBlowPreventsStealingAndAllowsTwoCustomersInParallel () [0x00025] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CoopManualBlowModelTests.cs:38
+]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1061" name="PlayerTwoCanStartTickAndFinishManualBlowWithoutStand" fullname="CoopManualBlowModelTests.PlayerTwoCanStartTickAndFinishManualBlowWithoutStand" methodname="PlayerTwoCanStartTickAndFinishManualBlowWithoutStand" classname="CoopManualBlowModelTests" runstate="Runnable" seed="399227003" result="Failed" start-time="2026-09-30 16:22:33Z" end-time="2026-09-30 16:22:33Z" duration="0.000495" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Missing player-scoped manual blow method: StartManualBlowForPlayer
+  Expected: not null
+  But was:  null
+]]></message>
+            <stack-trace><![CDATA[at CoopManualBlowModelTests.FindMethod (System.Object target, System.String name) [0x0000e] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CoopManualBlowModelTests.cs:91
+at CoopManualBlowModelTests.InvokeBool (System.Object target, System.String name, System.Object[] args) [0x00000] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CoopManualBlowModelTests.cs:72
+at CoopManualBlowModelTests.PlayerTwoCanStartTickAndFinishManualBlowWithoutStand () [0x00023] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CoopManualBlowModelTests.cs:17
+]]></stack-trace>
+          </failure>
+          <output><![CDATA[Saving results to: /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/BugFixFocused.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

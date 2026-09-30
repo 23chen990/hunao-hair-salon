@@ -1,0 +1,198 @@
+{
+  "timestamp": "2026-10-01T01:03:00.968623+08:00",
+  "viewport": {
+    "width": 844,
+    "height": 390
+  },
+  "passed": true,
+  "scope": "顾客跟随、需求气泡、自动架解锁门槛和洗发位接近范围",
+  "visualBaseline": "Existing gameplay artwork retained; issue-specific before/after comparison, not approval of candidate artwork.",
+  "checks": {
+    "editMode": {
+      "passed": 830,
+      "total": 830
+    },
+    "nodeAssetPipeline": {
+      "passed": 17,
+      "total": 17
+    },
+    "touchDriver": {
+      "passed": 13,
+      "total": 13
+    },
+    "builds": [
+      "WebGLDemo",
+      "WebGLAssetLab",
+      "WebGLCandidate",
+      "WebGLReferenceVisual"
+    ],
+    "browserScenes": {
+      "demo": {
+        "loaded": true,
+        "errors": []
+      },
+      "assetLab": {
+        "loaded": true,
+        "errors": []
+      },
+      "candidate": {
+        "loaded": true,
+        "errors": []
+      },
+      "reference": {
+        "loaded": true,
+        "errors": []
+      }
+    },
+    "realTouch": {
+      "passed": true,
+      "follow": {
+        "passed": true,
+        "stops": [
+          {
+            "maxMovingGap": 1.2226802545193833,
+            "stoppedGap": 1.0577936295529686,
+            "drift": 0.0
+          },
+          {
+            "maxMovingGap": 1.4014750622951178,
+            "stoppedGap": 1.057520922658106,
+            "drift": 0.0
+          },
+          {
+            "maxMovingGap": 1.372927243916391,
+            "stoppedGap": 1.05766506407079,
+            "drift": 0.0
+          }
+        ],
+        "cancelAndReselect": true,
+        "errors": []
+      },
+      "days": [
+        {
+          "day": 1,
+          "completed": 7,
+          "target": 3,
+          "balance": 610,
+          "checkoutAbandoned": 0
+        },
+        {
+          "day": 2,
+          "completed": 5,
+          "target": 4,
+          "balance": 297,
+          "checkoutAbandoned": 0
+        }
+      ],
+      "manualDry": {
+        "passed": true,
+        "day": 1,
+        "hasAutoStand": false,
+        "manualWhileHeld": true,
+        "heldElapsed": 1.1740001440048218,
+        "releaseAndResume": true
+      },
+      "washAssign": [
+        {
+          "side": "front",
+          "action": "安排洗发",
+          "available": true,
+          "player": {
+            "x": -7.56305456161499,
+            "y": 0.05000000074505806,
+            "z": 2.656320333480835
+          }
+        },
+        {
+          "side": "right",
+          "action": "安排洗发",
+          "available": true,
+          "player": {
+            "x": -5.781224727630615,
+            "y": 0.05000000074505806,
+            "z": 3.4660263061523438
+          }
+        },
+        {
+          "side": "left",
+          "action": "安排洗发",
+          "available": true,
+          "player": {
+            "x": -8.64042854309082,
+            "y": 0.05000000074505806,
+            "z": 3.646851062774658
+          }
+        }
+      ],
+      "washService": [
+        {
+          "side": "front",
+          "action": "洗发",
+          "available": true,
+          "player": {
+            "x": -7.516323566436768,
+            "y": 0.05000000074505806,
+            "z": 2.6670033931732178
+          }
+        },
+        {
+          "side": "right",
+          "action": "洗发",
+          "available": true,
+          "player": {
+            "x": -5.790343284606934,
+            "y": 0.05000000074505806,
+            "z": 3.6925978660583496
+          }
+        },
+        {
+          "side": "left",
+          "action": "洗发",
+          "available": true,
+          "player": {
+            "x": -8.61731243133545,
+            "y": 0.05000000074505806,
+            "z": 3.6458981037139893
+          }
+        }
+      ],
+      "progressPersisted": true,
+      "errors": []
+    }
+  },
+  "resolvedIssues": [
+    {
+      "severity": "P1",
+      "issue": "接待后乱走、取消后复用旧路线",
+      "evidence": "browser/02-follow-turn-2.png"
+    },
+    {
+      "severity": "P1",
+      "issue": "首日未建自动架仍自动吹发",
+      "evidence": "browser/manual-dry-ready.png"
+    },
+    {
+      "severity": "P1",
+      "issue": "洗发位只能从左侧操作",
+      "evidence": "browser/wash-Wash-right.png"
+    },
+    {
+      "severity": "P2",
+      "issue": "选中需求气泡被 HUD 或模型遮住",
+      "evidence": "browser/wash-Wash-right.png"
+    },
+    {
+      "severity": "P1",
+      "issue": "P2 手持吹发与归属兼容",
+      "evidence": "editmode-final.xml"
+    },
+    {
+      "severity": "P2",
+      "issue": "候选场景误用新档锁定设备模式",
+      "evidence": "pipeline-browser.json"
+    }
+  ],
+  "limitations": [
+    "真实触摸检查使用 Chromium 844×390 横屏模拟；未宣称真机 iOS/Android 通过。"
+  ]
+}

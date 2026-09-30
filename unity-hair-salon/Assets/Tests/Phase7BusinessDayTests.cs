@@ -171,7 +171,8 @@ public sealed class Phase7BusinessDayTests
 
         Assert.AreEqual(1, stats.UnservedAtClose);
         Assert.AreEqual(1, stats.IncompleteAtClose);
-        Assert.AreEqual(CustomerServiceResult.Failed, unserved.ServiceResult);
+        Assert.AreEqual(CustomerServiceResult.None, unserved.ServiceResult,
+            "Normal closing still records an unserved guest without inventing a failed service.");
         Assert.AreEqual(CustomerServiceResult.SevereUnhappyCompletion, incomplete.ServiceResult);
         Assert.AreEqual(0, game.Customers.Count);
     }

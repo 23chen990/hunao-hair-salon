@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using HairSalon;
+using HairSalon.AssetPipeline;
+using HairSalon.ServiceArchitecture;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -93,6 +95,98 @@ public sealed class MobileGameplayRuntimeTests
         Assert.AreEqual(1, _day.Stats.CompletedOrders);
     }
 
+    [Test]
+    public void UnbuiltStandUsesHeldManualDryingOnTheMobileActionButton()
+    {
+        CustomerModel customer = _game.Spawn(44, new[] { ServiceType.Wash, ServiceType.Dry });
+        _game.Tick(SalonGameModel.EnteringSeconds + .01f);
+        Assert.IsTrue(_game.Assign(customer, 0));
+        _game.Tick(SalonGameModel.MovingToStationSeconds + .01f);
+        Assert.IsTrue(_game.BeginServiceExecution(customer, ServiceExecutionType.Wash));
+        _game.Tick(_game.ServiceConfig.WashServiceDuration + .01f);
+        Assert.AreEqual(ServiceType.Dry, customer.CurrentNeed);
+        Assert.IsTrue(_game.Assign(customer, 1));
+        _game.Tick(SalonGameModel.MovingToStationSeconds + .01f);
+        var view = Child("Dry customer").AddComponent<SalonCustomerView>();
+        view.Customer = customer;
+        typeof(SalonCustomerView).GetProperty("IsAtMovementDestination").SetValue(view, true);
+        ((List<SalonCustomerView>)Field("_customerViews")).Add(view);
+        Transform anchor = Child("Dry anchor").transform;
+        ((Dictionary<int, Transform>)Field("_playerServiceAnchors"))[1] = anchor;
+        Assert.IsFalse(_game.HasAutoBlowStand);
+
+        object target = Invoke("FindMobileTarget");
+        Assert.AreEqual("StartDry", target.GetType().GetField("Action").GetValue(target).ToString());
+        Assert.IsTrue((bool)target.GetType().GetField("Available").GetValue(target));
+        Invoke("UpdateMobilePlay", 0f);
+        Pointer(true);
+        Invoke("UpdateMobilePlay", 0f);
+        Assert.IsTrue(customer.ManualBlowHolding,
+            "The first button press should start the handheld dryer.");
+        Assert.IsTrue(_controls.InteractionHeld, "The same pointer should remain held for manual drying.");
+        Invoke("UpdateMobilePlay", _game.ServiceConfig.ManualBlowGoodStart + .1f);
+        Assert.IsTrue(customer.ManualBlowHolding);
+        Assert.IsFalse(customer.AutoBlowRunning);
+        Assert.AreEqual(CustomerState.Serving, customer.State);
+
+        Release();
+        Assert.AreEqual(CustomerState.Finished, customer.State);
+        Assert.AreEqual(BlowResult.Good, customer.LastBlowResult);
+        Assert.AreEqual(1, _game.Payments.Drops.Count);
+    }
+
+    [Test]
+    public void WashBedCanBeSelectedFromItsFrontAndRightApproaches()
+    {
+        var station = Child("Wash station footprint");
+        var obstacle = Child("Wash collision").AddComponent<SalonFurnitureObstacle>();
+        obstacle.transform.SetParent(station.transform, false);
+        obstacle.transform.position = SalonDemo.PrimaryWashBedPosition;
+        obstacle.Initialize(AssetManifestLoader.LoadFromResources().Find("furniture-wash-station"));
+        ((Dictionary<int, GameObject>)Field("_stationRoots"))[0] = station;
+        Transform serviceAnchor = Child("Wash service anchor").transform;
+        serviceAnchor.position = SalonDemo.WashPlayerAnchorPosition;
+        ((Dictionary<int, Transform>)Field("_playerServiceAnchors"))[0] = serviceAnchor;
+
+        CustomerModel customer = _game.Spawn(45, new[] { ServiceType.Wash });
+        _game.Tick(SalonGameModel.EnteringSeconds + .01f);
+        Set("_mobileGuidedCustomer", customer);
+        Transform player = (Transform)Field("_player");
+        foreach (Vector3 approach in new[] {
+            new Vector3(-7.2f, 0f, 2.45f),
+            new Vector3(-5.65f, 0f, 4.1f) })
+        {
+            player.position = approach;
+            object target = Invoke("FindMobileTarget");
+            Assert.AreEqual("Assign", target.GetType().GetField("Action").GetValue(target).ToString());
+            Assert.IsTrue((bool)target.GetType().GetField("Available").GetValue(target),
+                "A guided customer should be assignable from the wash bed's front or right edge.");
+        }
+
+        Set("_mobileGuidedCustomer", null);
+        Assert.IsTrue(_game.Assign(customer, 0));
+        _game.Tick(SalonGameModel.MovingToStationSeconds + .01f);
+        var view = Child("Washing customer").AddComponent<SalonCustomerView>();
+        view.Customer = customer;
+        view.transform.position = SalonDemo.WashCustomerAnchorPosition;
+        typeof(SalonCustomerView).GetProperty("IsAtMovementDestination").SetValue(view, true);
+        ((List<SalonCustomerView>)Field("_customerViews")).Add(view);
+        foreach (Vector3 approach in new[] {
+            new Vector3(-7.2f, 0f, 2.45f),
+            new Vector3(-5.65f, 0f, 4.1f) })
+        {
+            player.position = approach;
+            object target = Invoke("FindMobileTarget");
+            Assert.AreEqual("Wash", target.GetType().GetField("Action").GetValue(target).ToString());
+            Assert.IsTrue((bool)target.GetType().GetField("Available").GetValue(target),
+                "The same reachable edges should let the stylist wash a seated customer.");
+        }
+        player.position = new Vector3(-7.2f, 0f, 1.35f);
+        object farTarget = Invoke("FindMobileTarget");
+        Assert.IsFalse((bool)farTarget.GetType().GetField("Available").GetValue(farTarget),
+            "A point well outside the wash footprint must remain out of range.");
+    }
+
     [TestCase(false)]
     [TestCase(true)]
     public void PausingAHaircutRequiresFreshInputAndDoesNotResolveAPhantomRelease(bool backgrounded)
@@ -146,6 +240,7 @@ public sealed class MobileGameplayRuntimeTests
     {
         CustomerModel drying = Seated(1, 1, ServiceType.Dry);
         Seated(2, 2, ServiceType.Cut, new Vector3(5f, 0f, 0f));
+        _game.InstallAutoBlowStand();
         Assert.IsTrue(_game.StartAutoBlow(drying));
         _game.Tick(drying.BackgroundTask.IdealStart + .1f);
         CustomerModel waiting = _game.Spawn(3, new[] { ServiceType.Cut });
@@ -180,7 +275,7 @@ public sealed class MobileGameplayRuntimeTests
     }
 
     [Test]
-    public void TransferTargetIsDisabledWhenAllCompatibleStationsAreOccupied()
+    public void WrongStationCustomerCanLeaveWhenEveryCompatibleStationIsOccupied()
     {
         CustomerModel transfer = Seated(1, 0, ServiceType.Dry);
         Seated(2, 1, ServiceType.Cut, new Vector3(2f, 0f, 0f));
@@ -189,8 +284,112 @@ public sealed class MobileGameplayRuntimeTests
 
         object target = Invoke("FindMobileTarget");
         Assert.AreSame(transfer, target.GetType().GetField("Customer").GetValue(target));
-        Assert.IsFalse((bool)target.GetType().GetField("Available").GetValue(target));
-        Assert.AreEqual("等待空闲工位", target.GetType().GetField("Label").GetValue(target));
+        Assert.IsTrue((bool)target.GetType().GetField("Available").GetValue(target));
+        Assert.AreEqual("Recall", target.GetType().GetField("Action").GetValue(target).ToString());
+        Assert.AreEqual("请离工位", target.GetType().GetField("Label").GetValue(target));
+        int wrongStations = transfer.WrongStationCount;
+        Invoke("ExecuteMobileTarget", target);
+        Assert.AreEqual(CustomerState.Waiting, transfer.State);
+        Assert.AreEqual(-1, transfer.Station);
+        Assert.IsFalse(_game.IsStationOccupied(0));
+        Assert.AreEqual(wrongStations, transfer.WrongStationCount,
+            "Standing up must not charge the wrong-station penalty again.");
+    }
+
+    [Test]
+    public void CrossedStationsCanBeClearedAndSwappedWithoutAnotherPenalty()
+    {
+        Assert.IsTrue(_game.SetWorkstationAvailability(2, false));
+        Assert.IsTrue(_game.SetWorkstationAvailability(3, false));
+        Assert.IsTrue(_game.SetWorkstationAvailability(4, false));
+        CustomerModel washOnHaircut = Seated(1, 1, ServiceType.Wash, new Vector3(2f, 0f, 0f));
+        CustomerModel cutOnWash = Seated(2, 0, ServiceType.Cut);
+        Assert.AreEqual(1, washOnHaircut.WrongStationCount);
+        Assert.AreEqual(1, cutOnWash.WrongStationCount);
+        Assert.IsFalse(_game.Assign(washOnHaircut, 0));
+        Assert.IsFalse(_game.Assign(cutOnWash, 1));
+
+        Transform player = (Transform)Field("_player");
+        player.position = Vector3.zero;
+        object recall = Invoke("FindMobileTarget");
+        Assert.AreSame(cutOnWash, recall.GetType().GetField("Customer").GetValue(recall));
+        Assert.AreEqual("请离工位", recall.GetType().GetField("Label").GetValue(recall));
+        Invoke("ExecuteMobileTarget", recall);
+        Assert.AreEqual(CustomerState.Waiting, cutOnWash.State);
+        Assert.IsFalse(_game.IsStationOccupied(0));
+        Assert.AreEqual(1, cutOnWash.WrongStationCount);
+
+        player.position = new Vector3(2f, 0f, 0f);
+        object transfer = Invoke("FindMobileTarget");
+        Assert.AreSame(washOnHaircut, transfer.GetType().GetField("Customer").GetValue(transfer));
+        Assert.AreEqual("转移顾客", transfer.GetType().GetField("Label").GetValue(transfer));
+        Invoke("ExecuteMobileTarget", transfer);
+
+        player.position = Vector3.zero;
+        object seatWash = Invoke("FindMobileTarget");
+        Assert.AreSame(washOnHaircut, seatWash.GetType().GetField("Customer").GetValue(seatWash));
+        Assert.AreEqual("Assign", seatWash.GetType().GetField("Action").GetValue(seatWash).ToString());
+        Assert.AreEqual(0, seatWash.GetType().GetField("Station").GetValue(seatWash));
+        Invoke("ExecuteMobileTarget", seatWash);
+        Assert.AreEqual(0, washOnHaircut.Station);
+        Assert.AreEqual(1, washOnHaircut.WrongStationCount);
+        Assert.IsFalse(_game.IsStationOccupied(1));
+
+        player.position = new Vector3(2f, 0f, 0f);
+        object seatCut = Invoke("FindMobileTarget");
+        Assert.AreSame(cutOnWash, seatCut.GetType().GetField("Customer").GetValue(seatCut));
+        Assert.AreEqual("Assign", seatCut.GetType().GetField("Action").GetValue(seatCut).ToString());
+        Assert.AreEqual(1, seatCut.GetType().GetField("Station").GetValue(seatCut));
+        Invoke("ExecuteMobileTarget", seatCut);
+        Assert.AreEqual(1, cutOnWash.Station);
+        Assert.AreEqual(1, cutOnWash.WrongStationCount);
+        Assert.AreEqual(CustomerState.MovingToStation, cutOnWash.State);
+    }
+
+    [Test]
+    public void RinsedCustomerCanLeaveTheWashBedWhenTheNextChairIsTaken()
+    {
+        Assert.IsTrue(_game.SetWorkstationAvailability(2, false));
+        Assert.IsTrue(_game.SetWorkstationAvailability(4, false));
+        Seated(2, 1, ServiceType.Cut, new Vector3(3f, 0f, 0f));
+        CustomerModel washed = _game.Spawn(8, new[] { ServiceType.Wash, ServiceType.Dry });
+        _game.Tick(SalonGameModel.EnteringSeconds + .01f);
+        Assert.IsTrue(_game.Assign(washed, 0));
+        _game.Tick(SalonGameModel.MovingToStationSeconds + .01f);
+        var view = Child("Rinsed customer").AddComponent<SalonCustomerView>();
+        view.Customer = washed;
+        typeof(SalonCustomerView).GetProperty("IsAtMovementDestination").SetValue(view, true);
+        ((List<SalonCustomerView>)Field("_customerViews")).Add(view);
+        ((Transform)Field("_player")).position = Vector3.zero;
+
+        Assert.IsTrue(_game.BeginWashFoamHold(washed));
+        _game.Tick(_game.ServiceConfig.ShampooDuration + .01f);
+        Assert.IsFalse(_game.CanRecallFromStation(washed),
+            "A customer still working up foam cannot be pulled off the bed.");
+        _game.Tick(_game.ServiceConfig.FoamOptimalStart + .01f);
+        Assert.IsTrue(_game.FinishWashRinse(washed));
+        Assert.AreEqual(ServiceType.Dry, washed.CurrentNeed);
+        Assert.IsTrue(_game.CanRecallFromStation(washed),
+            "After the rinse, waiting for a busy blow-dry chair must not glue them to the wash bed.");
+
+        object target = Invoke("FindMobileTarget");
+        Assert.AreSame(washed, target.GetType().GetField("Customer").GetValue(target));
+        Assert.AreEqual("请离工位", target.GetType().GetField("Label").GetValue(target));
+        Invoke("ExecuteMobileTarget", target);
+        Assert.AreEqual(CustomerState.Waiting, washed.State);
+        Assert.IsFalse(_game.IsStationOccupied(0));
+        Assert.AreEqual(0, washed.WrongStationCount);
+    }
+
+    [Test]
+    public void ActiveHaircutCannotBeRemovedFromItsStation()
+    {
+        CustomerModel cutting = Seated(1, 1, ServiceType.Cut);
+        Assert.IsTrue(_game.BeginHaircutAction(cutting, SalonTool.Scissors, _demo.HaircutSettings));
+        Assert.IsFalse(_game.CanRecallFromStation(cutting));
+        Assert.IsFalse(_game.RecallFromStation(cutting));
+        Assert.AreEqual(1, cutting.Station);
+        Assert.AreEqual(CustomerState.Serving, cutting.State);
     }
 
     [Test]
@@ -220,14 +419,18 @@ public sealed class MobileGameplayRuntimeTests
     }
 
     [Test]
-    public void CompletedOrderSettlesIncomeImmediatelyWithoutACoinPile()
+    public void CompletedOrderOnlySettlesWhenCashierIsAttended()
     {
-        int startingBalance = _game.Balance;
+        int balance = _game.Balance;
         PaymentDropModel drop = _game.Payments.CreateFinalPayment(77, 1, 300, 60);
         Invoke("HandlePaymentCreated", drop);
-
+        Assert.AreEqual(PaymentDropState.Pending, drop.State);
+        Assert.AreEqual(balance, _game.Balance);
+        var checkout = (SalonCheckoutModel)Field("_mobileCheckout");
+        checkout.MarkArrived(77);
+        checkout.Tick(.4f, true);
         Assert.AreEqual(PaymentDropState.Collected, drop.State);
-        Assert.AreEqual(startingBalance + 360, _game.Balance);
+        Assert.AreEqual(balance + 360, _game.Balance);
         Assert.AreEqual(300, _day.Stats.OrderIncome);
         Assert.AreEqual(60, _day.Stats.TipIncome);
     }
@@ -250,6 +453,7 @@ public sealed class MobileGameplayRuntimeTests
 
         Assert.IsTrue(_game.Assign(customer, 1));
         _game.Tick(SalonGameModel.MovingToStationSeconds + .01f);
+        _game.InstallAutoBlowStand();
         Assert.IsTrue(_game.StartAutoBlow(customer));
         _game.Tick(customer.BackgroundTask.IdealStart + .01f);
         Assert.AreEqual(BlowResult.Good, _game.FinishAutoBlow(customer));

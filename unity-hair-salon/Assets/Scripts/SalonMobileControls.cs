@@ -30,6 +30,7 @@ public sealed class SalonMobileControls : MonoBehaviour
     private JoystickPointerSurface _joystickSurface;
     private InteractionPointerSurface _interactionSurface;
     private Button _interactionButton;
+    private Text _joystickLabel;
     private Text _interactionLabel;
     private Text _hintLabel;
     private CanvasGroup _canvasGroup;
@@ -137,6 +138,7 @@ public sealed class SalonMobileControls : MonoBehaviour
             root.anchorMax = new Vector2(left ? .5f : 1f, 1f);
             root.offsetMin = Vector2.zero;
             root.offsetMax = Vector2.zero;
+            ApplySplitLayout();
         }
 
         // A nested canvas keeps each half's touch surface above the official
@@ -149,6 +151,23 @@ public sealed class SalonMobileControls : MonoBehaviour
             gameObject.AddComponent<GraphicRaycaster>();
         gameObject.name = "Salon Mobile Controls P" + _playerId;
         ResetInput();
+    }
+
+    /// <summary>
+    /// Shortens only the split-screen action surface so the existing lower
+    /// corner anchors and pointer geometry stay familiar while the waiting
+    /// area remains visible above it.
+    /// </summary>
+    private void ApplySplitLayout()
+    {
+        if (_interactionRect != null)
+            _interactionRect.sizeDelta = new Vector2(_interactionRect.sizeDelta.x, 132f);
+
+        RectTransform hintRect = _hintLabel == null
+            ? null
+            : _hintLabel.transform.parent as RectTransform;
+        if (hintRect != null)
+            hintRect.sizeDelta = new Vector2(hintRect.sizeDelta.x, 72f);
     }
 
     /// <summary>
@@ -196,7 +215,12 @@ public sealed class SalonMobileControls : MonoBehaviour
         if (_interactionButton != null)
             _interactionButton.interactable = available;
         if (_interactionLabel != null)
+        {
             _interactionLabel.text = string.IsNullOrEmpty(label) ? "操作" : label;
+            // Keep an unavailable action legible while the disabled button
+            // tint explains that it cannot be pressed yet.
+            _interactionLabel.color = available ? Color.white : Cream;
+        }
 
         if (!available)
         {
@@ -250,7 +274,10 @@ public sealed class SalonMobileControls : MonoBehaviour
         _joystickRect.anchorMax = Vector2.zero;
         _joystickRect.pivot = Vector2.zero;
         _joystickRect.anchoredPosition = new Vector2(100f, 92f);
-        _joystickRect.sizeDelta = new Vector2(300f, 300f);
+        // Keep the hit surface comfortably above the 44px mobile target at
+        // the 844x390 acceptance viewport. The extra room also makes the
+        // radial knob easier to read without changing the world layout.
+        _joystickRect.sizeDelta = new Vector2(320f, 320f);
 
         Image backing = joystickObject.GetComponent<Image>();
         backing.sprite = SalonUiFactory.GetCircleSprite();
@@ -288,11 +315,29 @@ public sealed class SalonMobileControls : MonoBehaviour
         _joystickKnobRect = knobRect;
         knobRect.anchorMin = knobRect.anchorMax = new Vector2(.5f, .5f);
         knobRect.anchoredPosition = Vector2.zero;
-        knobRect.sizeDelta = new Vector2(112f, 112f);
+        knobRect.sizeDelta = new Vector2(124f, 124f);
         Image knob = knobObject.GetComponent<Image>();
         knob.sprite = SalonUiFactory.GetCircleSprite();
         knob.color = Teal;
         knob.raycastTarget = false;
+
+        GameObject labelObject = new GameObject(
+            "MobileJoystickLabel",
+            typeof(RectTransform),
+            typeof(CanvasRenderer),
+            typeof(Text));
+        labelObject.transform.SetParent(joystickObject.transform, false);
+        RectTransform labelRect = labelObject.GetComponent<RectTransform>();
+        labelRect.anchorMin = labelRect.anchorMax = new Vector2(.5f, .5f);
+        labelRect.pivot = new Vector2(.5f, .5f);
+        labelRect.anchoredPosition = new Vector2(0f, 112f);
+        labelRect.sizeDelta = new Vector2(150f, 42f);
+        _joystickLabel = labelObject.GetComponent<Text>();
+        ConfigureLabel(_joystickLabel, "移动", 30, new Color(1f, .9f, .74f, .96f),
+            TextAnchor.MiddleCenter);
+        Shadow joystickShadow = labelObject.AddComponent<Shadow>();
+        joystickShadow.effectColor = new Color(0f, 0f, 0f, .55f);
+        joystickShadow.effectDistance = new Vector2(2f, -2f);
     }
 
     private void CreateInteractionButton(RectTransform root)
@@ -307,7 +352,7 @@ public sealed class SalonMobileControls : MonoBehaviour
         _interactionRect.anchorMax = new Vector2(1f, 0f);
         _interactionRect.pivot = new Vector2(1f, 0f);
         _interactionRect.anchoredPosition = new Vector2(-100f, 104f);
-        _interactionRect.sizeDelta = new Vector2(320f, 184f);
+        _interactionRect.sizeDelta = new Vector2(360f, 200f);
 
         // Keep this component ahead of Button's Selectable pointer handlers so
         // pointer IDs are tracked by our action surface as well as by uGUI.
@@ -343,7 +388,10 @@ public sealed class SalonMobileControls : MonoBehaviour
         labelRect.offsetMin = new Vector2(14f, 8f);
         labelRect.offsetMax = new Vector2(-14f, -8f);
         _interactionLabel = labelObject.GetComponent<Text>();
-        ConfigureLabel(_interactionLabel, "操作", 34, Color.white, TextAnchor.MiddleCenter);
+        ConfigureLabel(_interactionLabel, "操作", 48, Color.white, TextAnchor.MiddleCenter);
+        Shadow actionShadow = labelObject.AddComponent<Shadow>();
+        actionShadow.effectColor = new Color(0f, .08f, .08f, .65f);
+        actionShadow.effectDistance = new Vector2(2f, -2f);
     }
 
     private void CreateHint(RectTransform root)
@@ -357,8 +405,8 @@ public sealed class SalonMobileControls : MonoBehaviour
         RectTransform hintRect = hintObject.GetComponent<RectTransform>();
         hintRect.anchorMin = hintRect.anchorMax = new Vector2(.5f, 0f);
         hintRect.pivot = new Vector2(.5f, 0f);
-        hintRect.anchoredPosition = new Vector2(0f, 22f);
-        hintRect.sizeDelta = new Vector2(650f, 54f);
+        hintRect.anchoredPosition = new Vector2(0f, 18f);
+        hintRect.sizeDelta = new Vector2(760f, 76f);
         Image backing = hintObject.GetComponent<Image>();
         backing.sprite = SalonUiFactory.GetRoundedPanelSprite();
         backing.type = Image.Type.Sliced;
@@ -377,7 +425,7 @@ public sealed class SalonMobileControls : MonoBehaviour
         textRect.offsetMin = new Vector2(16f, 4f);
         textRect.offsetMax = new Vector2(-16f, -4f);
         _hintLabel = textObject.GetComponent<Text>();
-        ConfigureLabel(_hintLabel, string.Empty, 23, Cream, TextAnchor.MiddleCenter);
+        ConfigureLabel(_hintLabel, string.Empty, 32, Cream, TextAnchor.MiddleCenter);
     }
 
     private static void ConfigureLabel(Text label, string text, int size, Color color, TextAnchor alignment)
@@ -390,7 +438,7 @@ public sealed class SalonMobileControls : MonoBehaviour
         label.color = color;
         label.alignment = alignment;
         label.resizeTextForBestFit = true;
-        label.resizeTextMinSize = Mathf.Max(12, size / 2);
+        label.resizeTextMinSize = Mathf.Max(20, size * 2 / 3);
         label.resizeTextMaxSize = size;
         label.raycastTarget = false;
     }

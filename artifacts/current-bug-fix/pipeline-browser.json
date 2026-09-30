@@ -1,0 +1,425 @@
+{
+  "viewport": {
+    "width": 844,
+    "height": 390
+  },
+  "assetLab": {
+    "loaded": true,
+    "sourcePreviews": [
+      {
+        "assetId": "furniture-magazine-rack-wood",
+        "screenshot": "source-preview-furniture-magazine-rack-wood-100pct-844x390.png",
+        "scale": "1 texture pixel : 1 evidence pixel",
+        "sourceSize": [
+          1211,
+          1299
+        ],
+        "sourcePath": "/Users/kker/Downloads/本页生成元素_自然阴影_整理/像素风木质杂志架与柔和阴影.png"
+      },
+      {
+        "assetId": "furniture-wash-station-vintage-right-wall",
+        "screenshot": "source-preview-furniture-wash-station-vintage-right-wall-100pct-844x390.png",
+        "scale": "1 texture pixel : 1 evidence pixel",
+        "sourceSize": [
+          1254,
+          1254
+        ],
+        "sourcePath": "/Users/kker/Downloads/本页生成元素_自然阴影_整理/等距视角复古洗发椅工作站.png"
+      }
+    ],
+    "screenshots": [
+      "source-preview-furniture-magazine-rack-wood-100pct-844x390.png",
+      "source-preview-furniture-wash-station-vintage-right-wall-100pct-844x390.png",
+      "asset-lab-furniture-magazine-rack-wood-inspect-844x390.png",
+      "asset-lab-furniture-magazine-rack-wood-inspect-debug-844x390.png",
+      "asset-lab-furniture-magazine-rack-wood-context-844x390.png",
+      "asset-lab-furniture-magazine-rack-wood-pixel-100pct-844x390.png",
+      "asset-lab-furniture-wash-station-vintage-right-wall-inspect-844x390.png",
+      "asset-lab-furniture-wash-station-vintage-right-wall-inspect-debug-844x390.png",
+      "asset-lab-furniture-wash-station-vintage-right-wall-context-844x390.png",
+      "asset-lab-furniture-wash-station-vintage-right-wall-pixel-100pct-844x390.png"
+    ],
+    "captures": [
+      {
+        "assetId": "furniture-magazine-rack-wood",
+        "view": "inspect",
+        "diagnostics": "preview",
+        "ui": false,
+        "contextScale": null,
+        "screenshot": "asset-lab-furniture-magazine-rack-wood-inspect-844x390.png",
+        "ready": "[ASSET_LAB_READY] id=furniture-magazine-rack-wood direction=free status=candidate realArtwork=True view=inspect contextScale=1.000 runtimeTexture=1211x1299 worldSize=2.614x2.804\n",
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": []
+      },
+      {
+        "assetId": "furniture-magazine-rack-wood",
+        "view": "inspect",
+        "diagnostics": "all",
+        "ui": false,
+        "contextScale": null,
+        "screenshot": "asset-lab-furniture-magazine-rack-wood-inspect-debug-844x390.png",
+        "ready": "[ASSET_LAB_READY] id=furniture-magazine-rack-wood direction=free status=candidate realArtwork=True view=inspect contextScale=1.000 runtimeTexture=1211x1299 worldSize=2.614x2.804\n",
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": []
+      },
+      {
+        "assetId": "furniture-magazine-rack-wood",
+        "view": "context",
+        "diagnostics": "preview",
+        "ui": false,
+        "contextScale": null,
+        "screenshot": "asset-lab-furniture-magazine-rack-wood-context-844x390.png",
+        "ready": "[ASSET_LAB_READY] id=furniture-magazine-rack-wood direction=free status=candidate realArtwork=True view=context contextScale=1.000 runtimeTexture=1211x1299 worldSize=2.614x2.804\n",
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": []
+      },
+      {
+        "assetId": "furniture-magazine-rack-wood",
+        "view": "pixel",
+        "diagnostics": "preview",
+        "ui": false,
+        "contextScale": null,
+        "screenshot": "asset-lab-furniture-magazine-rack-wood-pixel-100pct-844x390.png",
+        "ready": "[ASSET_LAB_READY] id=furniture-magazine-rack-wood direction=free status=candidate realArtwork=True view=pixel contextScale=1.000 runtimeTexture=1211x1299 worldSize=2.614x2.804\n",
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": []
+      },
+      {
+        "assetId": "furniture-wash-station-vintage-right-wall",
+        "view": "inspect",
+        "diagnostics": "preview",
+        "ui": false,
+        "contextScale": null,
+        "screenshot": "asset-lab-furniture-wash-station-vintage-right-wall-inspect-844x390.png",
+        "ready": "[ASSET_LAB_READY] id=furniture-wash-station-vintage-right-wall direction=right-wall status=NEEDS-REVIEW realArtwork=True view=inspect contextScale=1.000 runtimeTexture=1254x1254 worldSize=4.578x4.578\n",
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": []
+      },
+      {
+        "assetId": "furniture-wash-station-vintage-right-wall",
+        "view": "inspect",
+        "diagnostics": "all",
+        "ui": false,
+        "contextScale": null,
+        "screenshot": "asset-lab-furniture-wash-station-vintage-right-wall-inspect-debug-844x390.png",
+        "ready": "[ASSET_LAB_READY] id=furniture-wash-station-vintage-right-wall direction=right-wall status=NEEDS-REVIEW realArtwork=True view=inspect contextScale=1.000 runtimeTexture=1254x1254 worldSize=4.578x4.578\n",
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": []
+      },
+      {
+        "assetId": "furniture-wash-station-vintage-right-wall",
+        "view": "context",
+        "diagnostics": "preview",
+        "ui": false,
+        "contextScale": null,
+        "screenshot": "asset-lab-furniture-wash-station-vintage-right-wall-context-844x390.png",
+        "ready": "[ASSET_LAB_READY] id=furniture-wash-station-vintage-right-wall direction=right-wall status=NEEDS-REVIEW realArtwork=True view=context contextScale=1.000 runtimeTexture=1254x1254 worldSize=4.578x4.578\n",
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": []
+      },
+      {
+        "assetId": "furniture-wash-station-vintage-right-wall",
+        "view": "pixel",
+        "diagnostics": "preview",
+        "ui": false,
+        "contextScale": null,
+        "screenshot": "asset-lab-furniture-wash-station-vintage-right-wall-pixel-100pct-844x390.png",
+        "ready": "[ASSET_LAB_READY] id=furniture-wash-station-vintage-right-wall direction=right-wall status=NEEDS-REVIEW realArtwork=True view=pixel contextScale=1.000 runtimeTexture=1254x1254 worldSize=4.578x4.578\n",
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": []
+      }
+    ],
+    "contextScaleComparison": null,
+    "errors": []
+  },
+  "demo": {
+    "loaded": true,
+    "coreFlowPassed": true,
+    "screenshot": "demo-core-flow-844x390.png",
+    "errors": [],
+    "uiEvidence": {
+      "opening": "demo-ui-opening-844x390.png",
+      "activeService": "demo-ui-active-service-844x390.png",
+      "serviceReady": "[UI_SERVICE_READY] customer=99001 station=1 uiEvidence=service\n",
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "errors": []
+    },
+    "debugModeVisible": true,
+    "debugScreenshot": "demo-core-flow-debug-844x390.png",
+    "washAreaEvidence": {
+      "A_approvedReferenceCrop": "wash-area-approved-reference-crop-844x390.png",
+      "B_formalDemoBefore": "wash-area-demo-before-844x390.png",
+      "C_formalDemoAfter": "wash-area-demo-after-844x390.png",
+      "D_playerWashContext": "wash-area-player-context-844x390.png",
+      "captures": {
+        "before": {
+          "mode": "before",
+          "screenshot": "wash-area-demo-before-844x390.png",
+          "ready": "[WASH_AREA_VISUAL_READY] mode=before scene=HairSalonDemo projection=orthographic cameraChanged=False realWash=False realDecoration=False orientation=right-wall mirrored=False rotated=False negativeScale=False hiddenPlaceholderRenderers=0 collidersPreserved=True anchorsPreserved=True playerScreenHeight=0.275 stationScreenHeight=0.324 stationToPlayer=1.179\n",
+          "coreFlow": "[BROWSER_CORE_FLOW_PASS] {\"StartedBusiness\":true,\"SpawnedCustomer\":true,\"AssignedStation\":true,\"CompletedService\":true,\"CustomerFinished\":true,\"PaymentCreated\":true,\"Failure\":\"\"}\n",
+          "canvas": {
+            "width": 844,
+            "height": 390,
+            "clientWidth": 844,
+            "clientHeight": 390,
+            "devicePixelRatio": 1
+          },
+          "errors": [],
+          "failedRequests": []
+        },
+        "after": {
+          "mode": "after",
+          "screenshot": "wash-area-demo-after-844x390.png",
+          "ready": "[WASH_AREA_VISUAL_READY] mode=after scene=HairSalonDemo projection=orthographic cameraChanged=False realWash=True realDecoration=True orientation=right-wall mirrored=False rotated=False negativeScale=False hiddenPlaceholderRenderers=4 collidersPreserved=True anchorsPreserved=True playerScreenHeight=0.232 stationScreenHeight=0.293 stationToPlayer=1.260\n",
+          "coreFlow": "[BROWSER_CORE_FLOW_PASS] {\"StartedBusiness\":true,\"SpawnedCustomer\":true,\"AssignedStation\":true,\"CompletedService\":true,\"CustomerFinished\":true,\"PaymentCreated\":true,\"Failure\":\"\"}\n",
+          "canvas": {
+            "width": 844,
+            "height": 390,
+            "clientWidth": 844,
+            "clientHeight": 390,
+            "devicePixelRatio": 1
+          },
+          "errors": [],
+          "failedRequests": []
+        },
+        "context": {
+          "mode": "context",
+          "screenshot": "wash-area-player-context-844x390.png",
+          "ready": "[WASH_AREA_VISUAL_READY] mode=context scene=HairSalonDemo projection=orthographic cameraChanged=False realWash=True realDecoration=True orientation=right-wall mirrored=False rotated=False negativeScale=False hiddenPlaceholderRenderers=4 collidersPreserved=True anchorsPreserved=True playerScreenHeight=0.243 stationScreenHeight=0.307 stationToPlayer=1.261\n",
+          "coreFlow": "[BROWSER_CORE_FLOW_PASS] {\"StartedBusiness\":true,\"SpawnedCustomer\":true,\"AssignedStation\":true,\"CompletedService\":true,\"CustomerFinished\":true,\"PaymentCreated\":true,\"Failure\":\"\"}\n",
+          "canvas": {
+            "width": 844,
+            "height": 390,
+            "clientWidth": 844,
+            "clientHeight": 390,
+            "devicePixelRatio": 1
+          },
+          "errors": [],
+          "failedRequests": []
+        }
+      },
+      "integrationCoreFlow": "[BROWSER_CORE_FLOW_PASS] {\"StartedBusiness\":true,\"SpawnedCustomer\":true,\"AssignedStation\":true,\"CompletedService\":true,\"CustomerFinished\":true,\"PaymentCreated\":true,\"Failure\":\"\"}\n",
+      "integrationReady": "[WASH_AREA_VISUAL_READY] mode=after scene=HairSalonDemo projection=orthographic cameraChanged=False realWash=True realDecoration=True orientation=right-wall mirrored=False rotated=False negativeScale=False hiddenPlaceholderRenderers=4 collidersPreserved=True anchorsPreserved=True playerScreenHeight=0.232 stationScreenHeight=0.293 stationToPlayer=1.260\n",
+      "releaseDefaultChanged": false
+    }
+  },
+  "candidate": {
+    "loaded": true,
+    "coreFlowPassed": true,
+    "runs": [
+      {
+        "debug": false,
+        "screenshots": [
+          "candidate-alignment-844x390.png",
+          "candidate-service-active-844x390.png",
+          "candidate-complete-844x390.png"
+        ],
+        "alignment": "[CANDIDATE_ALIGNMENT_READY] customer=88201 station=0 orientation=right-wall\n",
+        "activeService": "[CANDIDATE_SERVICE_ACTIVE] action=Shampoo customer=88201\n",
+        "completion": "[CANDIDATE_FLOW_PASS] customerState=Leaving complete=True payment=1\n",
+        "errors": [],
+        "failedRequests": []
+      },
+      {
+        "debug": true,
+        "screenshots": [
+          "candidate-debug-alignment-844x390.png",
+          "candidate-debug-service-active-844x390.png",
+          "candidate-debug-complete-844x390.png"
+        ],
+        "alignment": "[CANDIDATE_ALIGNMENT_READY] customer=88201 station=0 orientation=right-wall\n",
+        "activeService": "[CANDIDATE_SERVICE_ACTIVE] action=Shampoo customer=88201\n",
+        "completion": "[CANDIDATE_FLOW_PASS] customerState=Leaving complete=True payment=1\n",
+        "errors": [],
+        "failedRequests": []
+      }
+    ],
+    "screenshots": [
+      "candidate-overview-844x390.png",
+      "candidate-alignment-844x390.png",
+      "candidate-service-active-844x390.png",
+      "candidate-complete-844x390.png",
+      "candidate-debug-alignment-844x390.png",
+      "candidate-debug-service-active-844x390.png",
+      "candidate-debug-complete-844x390.png"
+    ],
+    "errors": []
+  },
+  "reference": {
+    "loaded": true,
+    "approvedReference": "/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Docs/VisualReferences/salon-overview-visual-reference.png",
+    "screenshots": [
+      "reference-visual-approved-reference-original.png",
+      "reference-visual-old-round2-2-844x390.png",
+      "reference-visual-new-calibrated-844x390.png",
+      "reference-visual-overlay-calibration-844x390.png",
+      "reference-visual-side-by-side-approved-vs-runtime.png",
+      "reference-visual-low-density-844x390.png",
+      "reference-visual-debug-844x390.png",
+      "old-context-vs-reference-visual-context.png"
+    ],
+    "calibrationEvidence": {
+      "A_approvedReference": "reference-visual-approved-reference-original.png",
+      "B_oldReferenceScene": "reference-visual-old-round2-2-844x390.png",
+      "C_newReferenceScene": "reference-visual-new-calibrated-844x390.png",
+      "D_overlay": "reference-visual-overlay-calibration-844x390.png"
+    },
+    "captures": {
+      "new": {
+        "screenshot": "reference-visual-new-calibrated-844x390.png",
+        "ready": "[REFERENCE_VISUAL_READY] reference=Docs/VisualReferences/salon-overview-visual-reference.png camera=orthographic yaw=42.0 pitch=28.0 ortho=5.40 viewport=844x390 washStatus=NEEDS-REVIEW density=target-density\n",
+        "calibration": "[OVERLAY_CALIBRATION_READY] overlay=False overlayOpacity=0.50 sideBySide=False density=target-density screenMetrics={\"playerScreenHeightRatio\":0.34765446186065676,\"washToPlayerHeightRatio\":1.2192848920822144,\"washFootprintToVisibleFloorRatio\":0.04374999925494194,\"roomScreenWidthRatio\":0.9158775210380554,\"roomScreenHeightRatio\":0.9112135767936707,\"visibleTileColumns\":56,\"densityState\":\"target-density\"}\n",
+        "screenMetrics": {
+          "playerScreenHeightRatio": 0.34765446186065674,
+          "washToPlayerHeightRatio": 1.2192848920822144,
+          "washFootprintToVisibleFloorRatio": 0.04374999925494194,
+          "roomScreenWidthRatio": 0.9158775210380554,
+          "roomScreenHeightRatio": 0.9112135767936707,
+          "visibleTileColumns": 56,
+          "densityState": "target-density"
+        },
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": [],
+        "failedRequests": []
+      },
+      "overlay": {
+        "screenshot": "reference-visual-overlay-calibration-844x390.png",
+        "ready": "[REFERENCE_VISUAL_READY] reference=Docs/VisualReferences/salon-overview-visual-reference.png camera=orthographic yaw=42.0 pitch=28.0 ortho=5.40 viewport=844x390 washStatus=NEEDS-REVIEW density=target-density\n",
+        "calibration": "[OVERLAY_CALIBRATION_READY] overlay=True overlayOpacity=0.50 sideBySide=False density=target-density screenMetrics={\"playerScreenHeightRatio\":0.34765446186065676,\"washToPlayerHeightRatio\":1.2192848920822144,\"washFootprintToVisibleFloorRatio\":0.04374999925494194,\"roomScreenWidthRatio\":0.9158775210380554,\"roomScreenHeightRatio\":0.9112135767936707,\"visibleTileColumns\":56,\"densityState\":\"target-density\"}\n",
+        "screenMetrics": {
+          "playerScreenHeightRatio": 0.34765446186065674,
+          "washToPlayerHeightRatio": 1.2192848920822144,
+          "washFootprintToVisibleFloorRatio": 0.04374999925494194,
+          "roomScreenWidthRatio": 0.9158775210380554,
+          "roomScreenHeightRatio": 0.9112135767936707,
+          "visibleTileColumns": 56,
+          "densityState": "target-density"
+        },
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": [],
+        "failedRequests": []
+      },
+      "lowDensity": {
+        "screenshot": "reference-visual-low-density-844x390.png",
+        "ready": "[REFERENCE_VISUAL_READY] reference=Docs/VisualReferences/salon-overview-visual-reference.png camera=orthographic yaw=42.0 pitch=28.0 ortho=5.40 viewport=844x390 washStatus=NEEDS-REVIEW density=low-density\n",
+        "calibration": "[OVERLAY_CALIBRATION_READY] overlay=False overlayOpacity=0.50 sideBySide=False density=low-density screenMetrics={\"playerScreenHeightRatio\":0.34765446186065676,\"washToPlayerHeightRatio\":1.2192848920822144,\"washFootprintToVisibleFloorRatio\":0.04374999925494194,\"roomScreenWidthRatio\":0.9158775210380554,\"roomScreenHeightRatio\":0.9112135767936707,\"visibleTileColumns\":56,\"densityState\":\"low-density\"}\n",
+        "screenMetrics": {
+          "playerScreenHeightRatio": 0.34765446186065674,
+          "washToPlayerHeightRatio": 1.2192848920822144,
+          "washFootprintToVisibleFloorRatio": 0.04374999925494194,
+          "roomScreenWidthRatio": 0.9158775210380554,
+          "roomScreenHeightRatio": 0.9112135767936707,
+          "visibleTileColumns": 56,
+          "densityState": "low-density"
+        },
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": [],
+        "failedRequests": []
+      },
+      "debug": {
+        "screenshot": "reference-visual-debug-844x390.png",
+        "ready": "[REFERENCE_VISUAL_READY] reference=Docs/VisualReferences/salon-overview-visual-reference.png camera=orthographic yaw=42.0 pitch=28.0 ortho=5.40 viewport=844x390 washStatus=NEEDS-REVIEW density=target-density\n",
+        "calibration": "[OVERLAY_CALIBRATION_READY] overlay=False overlayOpacity=0.50 sideBySide=False density=target-density screenMetrics={\"playerScreenHeightRatio\":0.34765446186065676,\"washToPlayerHeightRatio\":1.2192848920822144,\"washFootprintToVisibleFloorRatio\":0.04374999925494194,\"roomScreenWidthRatio\":0.9158775210380554,\"roomScreenHeightRatio\":0.9112135767936707,\"visibleTileColumns\":56,\"densityState\":\"target-density\"}\n",
+        "screenMetrics": {
+          "playerScreenHeightRatio": 0.34765446186065674,
+          "washToPlayerHeightRatio": 1.2192848920822144,
+          "washFootprintToVisibleFloorRatio": 0.04374999925494194,
+          "roomScreenWidthRatio": 0.9158775210380554,
+          "roomScreenHeightRatio": 0.9112135767936707,
+          "visibleTileColumns": 56,
+          "densityState": "target-density"
+        },
+        "canvas": {
+          "width": 844,
+          "height": 390,
+          "clientWidth": 844,
+          "clientHeight": 390,
+          "devicePixelRatio": 1
+        },
+        "errors": [],
+        "failedRequests": []
+      }
+    },
+    "screenMetrics": {
+      "playerScreenHeightRatio": 0.34765446186065674,
+      "washToPlayerHeightRatio": 1.2192848920822144,
+      "washFootprintToVisibleFloorRatio": 0.04374999925494194,
+      "roomScreenWidthRatio": 0.9158775210380554,
+      "roomScreenHeightRatio": 0.9112135767936707,
+      "visibleTileColumns": 56,
+      "densityState": "target-density"
+    },
+    "oldVsReferenceContext": "old-context-vs-reference-visual-context.png",
+    "errors": []
+  },
+  "timestamp": "2026-10-01T00:54:40+0800"
+}

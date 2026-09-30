@@ -63,16 +63,24 @@ namespace HairSalon.AssetPipeline
             }
             _owner.RuntimeAttachCustomerView(customer);
             _owner.RuntimeDay.Stats.RecordSpawn(customer);
-            yield return new WaitForSecondsRealtime(SalonGameModel.EnteringSeconds + .15f);
+            // WebGL loading or other open browser checks can stall rendering;
+            // elapsed wall time alone does not mean the game has ticked arrival.
+            yield return WaitForState(customer, CustomerState.Waiting);
 
             int station = FindFreeHaircutStation();
             report.AssignedStation = station >= 0 && _owner.RuntimeGame.Assign(customer, station);
             if (!report.AssignedStation)
             {
-                Fail(report, "haircut station assignment failed");
+                Fail(report, "haircut station assignment failed: state=" + customer.State +
+                    " station=" + station + " day=" + _owner.RuntimeDay.State);
                 yield break;
             }
-            yield return new WaitForSecondsRealtime(SalonGameModel.MovingToStationSeconds + .15f);
+            yield return WaitForState(customer, CustomerState.Serving);
+            if (customer.State != CustomerState.Serving)
+            {
+                Fail(report, "customer did not arrive at haircut station: " + customer.State);
+                yield break;
+            }
 
             if (_captureServiceUi)
             {
@@ -102,10 +110,18 @@ namespace HairSalon.AssetPipeline
             => Debug.Log((report.Passed ? "[BROWSER_CORE_FLOW_PASS] " : "[BROWSER_CORE_FLOW_FAIL] ") +
                          JsonUtility.ToJson(report));
 
+        private static IEnumerator WaitForState(CustomerModel customer, CustomerState state)
+        {
+            float deadline = Time.realtimeSinceStartup + 10f;
+            while (customer.State != state && Time.realtimeSinceStartup < deadline)
+                yield return null;
+        }
+
         private int FindFreeHaircutStation()
         {
             for (int i = 0; i < _owner.RuntimeGame.Workstations.Count; i++)
                 if (_owner.RuntimeGame.Workstations[i].Type == WorkstationType.Haircut &&
+                    _owner.RuntimeGame.Workstations[i].IsUsable &&
                     !_owner.RuntimeGame.IsStationOccupied(i)) return i;
             return -1;
         }

@@ -1,0 +1,902 @@
+{
+  "passed": true,
+  "input": "Chromium real touch events; fresh browser context",
+  "build": "/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/WebGLDemo",
+  "daysRequested": 2,
+  "days": [
+    {
+      "day": 1,
+      "frameCount": 584,
+      "completed": 6,
+      "target": 3,
+      "balance": 670,
+      "lost": {
+        "failedCustomerIds": [],
+        "failedCount": 0,
+        "checkoutAbandoned": 0
+      },
+      "mastery": {
+        "paidCustomers": 6,
+        "paidDryOrders": 2,
+        "paidWashOrders": 1
+      },
+      "pacingTelemetry": {
+        "activeWorkCustomers": 0,
+        "softCustomerLimit": 2,
+        "capacityPracticeUntilPaid": 0,
+        "restRemaining": 0.0,
+        "batchArrivals": 0,
+        "pacingReason": "ready"
+      },
+      "purchaseTimes": {
+        "BlowDryer": {
+          "timeSeconds": 46.97,
+          "cost": 600,
+          "paid": 600
+        },
+        "WashStation": {
+          "timeSeconds": 140.87,
+          "cost": 1200,
+          "paid": 1200
+        }
+      },
+      "orderMix": {
+        "Cut": 5,
+        "Wash": 1
+      },
+      "customerFirstSeen": [
+        {
+          "id": 0,
+          "timeSeconds": 0.17,
+          "state": "Entering",
+          "need": "Cut",
+          "step": 0,
+          "serviceCount": 1,
+          "complete": false,
+          "paidCustomers": 0,
+          "paidDryOrders": 0,
+          "paidWashOrders": 0
+        },
+        {
+          "id": 1,
+          "timeSeconds": 20.57,
+          "state": "Entering",
+          "need": "Cut",
+          "step": 0,
+          "serviceCount": 1,
+          "complete": false,
+          "paidCustomers": 1,
+          "paidDryOrders": 0,
+          "paidWashOrders": 0
+        },
+        {
+          "id": 2,
+          "timeSeconds": 45.1,
+          "state": "Entering",
+          "need": "Cut",
+          "step": 0,
+          "serviceCount": 1,
+          "complete": false,
+          "paidCustomers": 2,
+          "paidDryOrders": 0,
+          "paidWashOrders": 0
+        },
+        {
+          "id": 3,
+          "timeSeconds": 72.47,
+          "state": "Entering",
+          "need": "Cut",
+          "step": 0,
+          "serviceCount": 2,
+          "complete": false,
+          "paidCustomers": 3,
+          "paidDryOrders": 0,
+          "paidWashOrders": 0
+        },
+        {
+          "id": 4,
+          "timeSeconds": 101.91,
+          "state": "Entering",
+          "need": "Cut",
+          "step": 0,
+          "serviceCount": 2,
+          "complete": false,
+          "paidCustomers": 4,
+          "paidDryOrders": 1,
+          "paidWashOrders": 0
+        },
+        {
+          "id": 5,
+          "timeSeconds": 142.47,
+          "state": "Entering",
+          "need": "Wash",
+          "step": 0,
+          "serviceCount": 2,
+          "complete": false,
+          "paidCustomers": 5,
+          "paidDryOrders": 2,
+          "paidWashOrders": 0
+        }
+      ],
+      "multiStepOrders": [],
+      "effectiveActiveCustomers": {
+        "max": 1,
+        "average": 0.77
+      },
+      "activeWorkCustomers": {
+        "max": 1,
+        "average": 0.77
+      },
+      "idleAndBreather": {
+        "trackedSeconds": 179.83,
+        "idleSeconds": 34.93,
+        "idleRatio": 0.1942,
+        "breatherSeconds": 43.76,
+        "breatherRatio": 0.2433,
+        "restWindows": [
+          {
+            "startSeconds": 12.0,
+            "endSeconds": 19.67,
+            "durationSeconds": 7.67
+          },
+          {
+            "startSeconds": 36.7,
+            "endSeconds": 44.5,
+            "durationSeconds": 7.8
+          },
+          {
+            "startSeconds": 60.73,
+            "endSeconds": 68.47,
+            "durationSeconds": 7.73
+          },
+          {
+            "startSeconds": 93.51,
+            "endSeconds": 100.97,
+            "durationSeconds": 7.47
+          },
+          {
+            "startSeconds": 126.7,
+            "endSeconds": 134.27,
+            "durationSeconds": 7.57
+          },
+          {
+            "startSeconds": 174.47,
+            "endSeconds": 180.0,
+            "durationSeconds": 5.53
+          }
+        ],
+        "totalRestWindowSeconds": 43.77,
+        "maxRestWindowSeconds": 7.8,
+        "emptyRestWindows": [
+          {
+            "startSeconds": 12.0,
+            "endSeconds": 13.27,
+            "durationSeconds": 1.27
+          },
+          {
+            "startSeconds": 16.9,
+            "endSeconds": 19.67,
+            "durationSeconds": 2.77
+          },
+          {
+            "startSeconds": 36.7,
+            "endSeconds": 37.9,
+            "durationSeconds": 1.2
+          },
+          {
+            "startSeconds": 41.5,
+            "endSeconds": 44.5,
+            "durationSeconds": 3.0
+          },
+          {
+            "startSeconds": 60.73,
+            "endSeconds": 61.97,
+            "durationSeconds": 1.23
+          },
+          {
+            "startSeconds": 65.8,
+            "endSeconds": 68.47,
+            "durationSeconds": 2.67
+          },
+          {
+            "startSeconds": 93.51,
+            "endSeconds": 94.51,
+            "durationSeconds": 1.0
+          },
+          {
+            "startSeconds": 98.41,
+            "endSeconds": 100.97,
+            "durationSeconds": 2.57
+          },
+          {
+            "startSeconds": 126.7,
+            "endSeconds": 127.94,
+            "durationSeconds": 1.23
+          },
+          {
+            "startSeconds": 131.37,
+            "endSeconds": 134.27,
+            "durationSeconds": 2.9
+          },
+          {
+            "startSeconds": 174.47,
+            "endSeconds": 175.71,
+            "durationSeconds": 1.23
+          },
+          {
+            "startSeconds": 179.54,
+            "endSeconds": 180.0,
+            "durationSeconds": 0.46
+          }
+        ]
+      },
+      "washWaiting": {
+        "orders": [
+          {
+            "customerId": 5,
+            "waitSeconds": 8.57,
+            "served": true
+          }
+        ],
+        "servedCount": 1,
+        "maxSeconds": 8.57,
+        "averageSeconds": 8.57
+      },
+      "haircutIdleWithDemandSeconds": 46.75,
+      "violations": {
+        "firstTwoLimit": [],
+        "newArrivalWhileCheckoutBacklogged": [],
+        "newArrivalDuringRest": [],
+        "newWashArrivalWithoutStock": []
+      },
+      "saveRefresh": {
+        "checkpoint": {
+          "balance": 670,
+          "washRackWashKits": 5,
+          "paidCustomers": 6,
+          "paidDryOrders": 2,
+          "paidWashOrders": 1
+        },
+        "refresh": {
+          "balance": 670,
+          "washRackWashKits": 5,
+          "paidCustomers": 6,
+          "paidDryOrders": 2,
+          "paidWashOrders": 1
+        },
+        "passed": true
+      }
+    },
+    {
+      "day": 2,
+      "frameCount": 573,
+      "completed": 6,
+      "target": 4,
+      "balance": 938,
+      "lost": {
+        "failedCustomerIds": [],
+        "failedCount": 0,
+        "checkoutAbandoned": 0
+      },
+      "mastery": {
+        "paidCustomers": 12,
+        "paidDryOrders": 3,
+        "paidWashOrders": 3
+      },
+      "pacingTelemetry": {
+        "activeWorkCustomers": 0,
+        "softCustomerLimit": 3,
+        "capacityPracticeUntilPaid": 0,
+        "restRemaining": 0.0,
+        "batchArrivals": 0,
+        "pacingReason": "finish-batch"
+      },
+      "purchaseTimes": {
+        "BlowDryer": {
+          "timeSeconds": 0.23,
+          "cost": 600,
+          "paid": 600
+        },
+        "WashStation": {
+          "timeSeconds": 0.23,
+          "cost": 1200,
+          "paid": 1200
+        },
+        "HaircutChair": {
+          "timeSeconds": 116.26,
+          "cost": 2000,
+          "paid": 2000
+        }
+      },
+      "orderMix": {
+        "Cut": 4,
+        "Wash": 2
+      },
+      "customerFirstSeen": [
+        {
+          "id": 0,
+          "timeSeconds": 0.23,
+          "state": "Entering",
+          "need": "Cut",
+          "step": 0,
+          "serviceCount": 1,
+          "complete": false,
+          "paidCustomers": 6,
+          "paidDryOrders": 2,
+          "paidWashOrders": 1
+        },
+        {
+          "id": 1,
+          "timeSeconds": 20.17,
+          "state": "Entering",
+          "need": "Wash",
+          "step": 0,
+          "serviceCount": 2,
+          "complete": false,
+          "paidCustomers": 7,
+          "paidDryOrders": 2,
+          "paidWashOrders": 1
+        },
+        {
+          "id": 2,
+          "timeSeconds": 31.97,
+          "state": "Entering",
+          "need": "Cut",
+          "step": 0,
+          "serviceCount": 1,
+          "complete": false,
+          "paidCustomers": 7,
+          "paidDryOrders": 2,
+          "paidWashOrders": 1
+        },
+        {
+          "id": 3,
+          "timeSeconds": 79.57,
+          "state": "Entering",
+          "need": "Cut",
+          "step": 0,
+          "serviceCount": 2,
+          "complete": false,
+          "paidCustomers": 9,
+          "paidDryOrders": 2,
+          "paidWashOrders": 2
+        },
+        {
+          "id": 4,
+          "timeSeconds": 93.26,
+          "state": "Entering",
+          "need": "Wash",
+          "step": 0,
+          "serviceCount": 2,
+          "complete": false,
+          "paidCustomers": 9,
+          "paidDryOrders": 2,
+          "paidWashOrders": 2
+        },
+        {
+          "id": 5,
+          "timeSeconds": 125.43,
+          "state": "Entering",
+          "need": "Cut",
+          "step": 0,
+          "serviceCount": 1,
+          "complete": false,
+          "paidCustomers": 10,
+          "paidDryOrders": 3,
+          "paidWashOrders": 2
+        }
+      ],
+      "multiStepOrders": [],
+      "effectiveActiveCustomers": {
+        "max": 2,
+        "average": 1.25
+      },
+      "activeWorkCustomers": {
+        "max": 2,
+        "average": 1.25
+      },
+      "idleAndBreather": {
+        "trackedSeconds": 179.63,
+        "idleSeconds": 14.77,
+        "idleRatio": 0.0822,
+        "breatherSeconds": 23.0,
+        "breatherRatio": 0.128,
+        "restWindows": [
+          {
+            "startSeconds": 12.0,
+            "endSeconds": 19.57,
+            "durationSeconds": 7.57
+          },
+          {
+            "startSeconds": 70.9,
+            "endSeconds": 78.57,
+            "durationSeconds": 7.67
+          },
+          {
+            "startSeconds": 170.53,
+            "endSeconds": 178.3,
+            "durationSeconds": 7.77
+          }
+        ],
+        "totalRestWindowSeconds": 23.01,
+        "maxRestWindowSeconds": 7.77,
+        "emptyRestWindows": [
+          {
+            "startSeconds": 12.0,
+            "endSeconds": 13.2,
+            "durationSeconds": 1.2
+          },
+          {
+            "startSeconds": 16.87,
+            "endSeconds": 19.57,
+            "durationSeconds": 2.7
+          },
+          {
+            "startSeconds": 70.9,
+            "endSeconds": 72.23,
+            "durationSeconds": 1.33
+          },
+          {
+            "startSeconds": 75.9,
+            "endSeconds": 78.57,
+            "durationSeconds": 2.67
+          },
+          {
+            "startSeconds": 170.53,
+            "endSeconds": 171.76,
+            "durationSeconds": 1.23
+          },
+          {
+            "startSeconds": 175.5,
+            "endSeconds": 178.3,
+            "durationSeconds": 2.8
+          }
+        ]
+      },
+      "washWaiting": {
+        "orders": [
+          {
+            "customerId": 1,
+            "waitSeconds": 9.4,
+            "served": true
+          },
+          {
+            "customerId": 4,
+            "waitSeconds": 32.17,
+            "served": true
+          }
+        ],
+        "servedCount": 2,
+        "maxSeconds": 32.17,
+        "averageSeconds": 20.79
+      },
+      "haircutIdleWithDemandSeconds": 41.47,
+      "violations": {
+        "firstTwoLimit": [],
+        "newArrivalWhileCheckoutBacklogged": [],
+        "newArrivalDuringRest": [],
+        "newWashArrivalWithoutStock": []
+      },
+      "saveRefresh": {
+        "checkpoint": {
+          "balance": 938,
+          "washRackWashKits": 3,
+          "paidCustomers": 12,
+          "paidDryOrders": 3,
+          "paidWashOrders": 3
+        },
+        "refresh": {
+          "balance": 938,
+          "washRackWashKits": 3,
+          "paidCustomers": 12,
+          "paidDryOrders": 3,
+          "paidWashOrders": 3
+        },
+        "passed": true
+      }
+    }
+  ],
+  "screenshotsDirectory": "/Users/kker/Documents/ChatGPT/game2/artifacts/pacing-rebalance/browser",
+  "opening": {
+    "balance": 100,
+    "day": 1,
+    "usableStations": [
+      1
+    ],
+    "visiblePads": [
+      "BlowDryer"
+    ]
+  },
+  "driverErrors": [],
+  "warnings": [],
+  "context": {
+    "targetViewport": {
+      "width": 844,
+      "height": 390
+    },
+    "canvas": {
+      "width": 844,
+      "height": 390,
+      "cssWidth": 844,
+      "cssHeight": 390,
+      "left": 0,
+      "top": 0
+    },
+    "devicePixelRatio": 1,
+    "console": {
+      "count": 3697,
+      "errors": [
+        {
+          "kind": "console",
+          "type": "warning",
+          "text": "Manual synchronization of Unity Application.persistentDataPath via JS_FileSystem_Sync() is deprecated and will be later removed in a future Unity version. The persistent data directory will be automatically synchronized instead on file modification. Pass config.autoSyncPersistentDataPath = true; to configuration in createUnityInstance() to opt in to the new behavior."
+        },
+        {
+          "kind": "console",
+          "type": "error",
+          "text": "NotSupportedError: screen.orientation.lock() is not available on this device."
+        },
+        {
+          "kind": "console",
+          "type": "error",
+          "text": "NotSupportedError: screen.orientation.lock() is not available on this device."
+        },
+        {
+          "kind": "console",
+          "type": "warning",
+          "text": "Manual synchronization of Unity Application.persistentDataPath via JS_FileSystem_Sync() is deprecated and will be later removed in a future Unity version. The persistent data directory will be automatically synchronized instead on file modification. Pass config.autoSyncPersistentDataPath = true; to configuration in createUnityInstance() to opt in to the new behavior."
+        },
+        {
+          "kind": "console",
+          "type": "error",
+          "text": "NotSupportedError: screen.orientation.lock() is not available on this device."
+        }
+      ],
+      "samples": [
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[MOBILE_CUSTOMERS] {\"customers\":[]}\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[MOBILE_STATE] {\"paidCustomers\":12,\"paidDryOrders\":3,\"paidWashOrders\":3,\"activeWorkCustomers\":0,\"softCustomerLimit\":3,\"batchArrivals\":0,\"capacityPracticeUntilPaid\":0,\"restRemaining\":0.0,\"pacingReason\":\"finish-batch\",\"checkoutWaiting\":0,\"checkoutAbandoned\":0,\"cashier\":{\"x\":3.549999713897705,\"y\":0.05000000074505806,\"z\":-3.6000001430511476},\"supplyIntroduced\":false,\"day\":2,\"completed\":6,\"target\":4,\"balance\":938,\"guided\":-1,\"working\":-1,\"targetCustomer\":-1,\"satisfaction\":100,\"activeCustomers\":0,\"waitingCustomers\":0,\"occupiedStations\":0,\"readyToRinse\":0,\"autoBlowRunning\":0,\"autoBlowReady\":0,\"ungreetedWaiting\":0,\"attentionDemand\":0,\"sourceWashKits\":12,\"carriedWashKits\":0,\"washRackWashKits\":3,\"padPaid\":0,\"haircutPadPaid\":2000,\"annexPadPaid\":0,\"waitingCapacity\":4,\"maxCustomers\":3,\"paused\":false,\"purchased\":false,\"padUnlocked\":false,\"haircutPadUnlocked\":true,\"annexPadUnlocked\":false,\"annexPadVisible\":false,\"available\":false,\"workingSuspended\":false,\"coop\":false,\"waitingSeats\":false,\"extraSeats\":false,\"state\":\"Result\",\"action\":\"靠近顾客\",\"targetTool\":\"\",\"targetAction\":\"None\",\"wave\":\"收尾\",\"progress\":1.0,\"workingElapsed\":0.0,\"cameraSize\":6.0,\"reputation\":3.1999998092651369,\"reputationBefore\":3.0999999046325685,\"player\":{\"x\":2.889606237411499,\"y\":0.05000000074505806,\"z\":-3.276076078414917},\"cameraRight\":{\"x\":0.8944271802902222,\"y\":0.0,\"z\":-0.4472135901451111},\"cameraForward\":{\"x\":0.3627343773841858,\"y\":-0.5849092602729797,\"z\":0.7254687547683716},\"cameraPosition\":{\"x\":-12.103067398071289,\"y\":19.06174659729004,\"z\":-23.704933166503908},\"annexPad\":{\"x\":9.100000381469727,\"y\":0.20000000298023225,\"z\":3.9000000953674318},\"annexPadScreen\":{\"x\":637.127197265625,\"y\":347.40252685546877,\"z\":38.75000762939453},\"playerScreen\":{\"x\":560.8982543945313,\"y\":168.63941955566407,\"z\":31.379005432128908},\"playerHeadScreen\":{\"x\":560.8982543945313,\"y\":221.36083984375,\"z\":30.209186553955079},\"playerTwoScreen\":{\"x\":0.0,\"y\":0.0,\"z\":0.0},\"playerTwoHeadScreen\":{\"x\":0.0,\"y\":0.0,\"z\":0.0},\"joystick\":{\"x\":0.0,\"y\":0.0},\"interaction\":{\"x\":0.0,\"y\":0.0},\"pads\":[{\"id\":\"BlowDryer\",\"padId\":\"expansion-pad-blow-dryer\",\"openDay\":1,\"cost\":600,\"paid\":600,\"unlocked\":true,\"visible\":false,\"position\":{\"x\":-3.799999952316284,\"y\":0.20000000298023225,\"z\":0.3499999940395355},\"screen\":{\"x\":313.7358703613281,\"y\":177.37591552734376,\"z\":31.49532127380371}},{\"id\":\"WashStation\",\"padId\":\"expansion-pad-wash-station\",\"openDay\":1,\"cost\":1200,\"paid\":1200,\"unlocked\":true,\"visible\":false,\"position\":{\"x\":-8.75,\"y\":0.0,\"z\":4.049999713897705},\"screen\":{\"x\":116.06749725341797,\"y\":192.93202209472657,\"z\":32.50100326538086}},{\"id\":\"HaircutChair\",\"padId\":\"expansion-pad-haircut-2\",\"openDay\":1,\"cost\":2000,\"paid\":2000,\"unlocked\":true,\"visible\":false,\"position\":{\"x\":3.9000000953674318,\"y\":0.20000000298023225,\"z\":-0.3499999940395355},\"screen\":{\"x\":547.7403564453125,\"y\":230.9342803955078,\"z\":33.780548095703128}},{\"id\":\"WaitingSeats\",\"padId\":\"expansion-pad-waiting-seats\",\"openDay\":1,\"cost\":2400,\"paid\":0,\"unlocked\":false,\"visible\":true,\"position\":{\"x\":-3.3499999046325685,\"y\":0.20000000298023225,\"z\":-4.199999809265137},\"screen\":{\"x\":392.9485778808594,\"y\":103.83940887451172,\"z\":28.357669830322267}},{\"id\":\"BlowStand\",\"padId\":\"expansion-pad-blow-stand\",\"openDay\":1,\"cost\":3000,\"paid\":0,\"unlocked\":false,\"visible\":false,\"position\":{\"x\":-3.799999952316284,\"y\":0.20000000298023225,\"z\":0.3499999940395355},\"screen\":{\"x\":313.7358703613281,\"y\":177.37591552734376,\"z\":31.49532127380371}},{\"id\":\"WashAnnex\",\"padId\":\"expansion-pad-wash-annex\",\"openDay\":1,\"cost\":3600,\"paid\":0,\"unlocked\":false,\"visible\":false,\"position\":{\"x\":9.100000381469727,\"y\":0.20000000298023225,\"z\":3.9000000953674318},\"screen\":{\"x\":637.127197265625,\"y\":347.40252685546877,\"z\":38.75000762939453}},{\"id\":\"ExtraSeats\",\"padId\":\"expansion-pad-extra-seats\",\"openDay\":1,\"cost\":4200,\"paid\":0,\"unlocked\":false,\"visible\":false,\"position\":{\"x\":-3.3499999046325685,\"y\":0.20000000298023225,\"z\":-4.199999809265137},\"screen\":{\"x\":392.9485778808594,\"y\":103.83940887451172,\"z\":28.357669830322267}}],\"stations\":[{\"id\":0,\"position\":{\"x\":-8.75,\"y\":0.0,\"z\":4.049999713897705},\"type\":\"Wash\",\"occupied\":false,\"usable\":true},{\"id\":4,\"position\":{\"x\":11.649999618530274,\"y\":0.0,\"z\":4.049999713897705},\"type\":\"Wash\",\"occupied\":false,\"usable\":false},{\"id\":1,\"position\":{\"x\":-2.0999999046325685,\"y\":0.20000000298023225,\"z\":-1.1999999284744263},\"type\":\"Haircut\",\"occupied\":false,\"usable\":true},{\"id\":2,\"position\":{\"x\":4.799999713897705,\"y\":0.20000000298023225,\"z\":0.20000000298023225},\"type\":\"Haircut\",\"occupied\":false,\"usable\":true},{\"id\":3,\"position\":{\"x\":5.449999809265137,\"y\":0.20000000298023225,\"z\":3.700000047683716},\"type\":\"Perm\",\"occupied\":false,\"usable\":false}],\"buttons\":[{\"label\":\"进入闭店经营\",\"available\":true,\"position\":{\"x\":422.0,\"y\":61.52934265136719}},{\"label\":\"Settings\",\"available\":true,\"position\":{\"x\":819.2979736328125,\"y\":362.110595703125}}]}\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[MOBILE_LAYOUT] {\"floor\":{\"serializedVersion\":\"2\",\"x\":-10.200000762939454,\"y\":-5.0,\"width\":20.400001525878908,\"height\":12.149999618530274},\"obstacles\":[{\"serializedVersion\":\"2\",\"x\":-5.650000095367432,\"y\":6.275000095367432,\"width\":3.3000001907348635,\"height\":0.9499998092651367},{\"serializedVersion\":\"2\",\"x\":6.349999904632568,\"y\":6.275000095367432,\"width\":3.299999713897705,\"height\":0.9499998092651367},{\"serializedVersion\":\"2\",\"x\":-1.649999976158142,\"y\":6.275000095367432,\"width\":3.299999952316284,\"height\":0.9499998092651367},{\"serializedVersion\":\"2\",\"x\":3.9749999046325685,\"y\":-5.525000095367432,\"width\":1.0500001907348633,\"height\":1.0500001907348633},{\"serializedVersion\":\"2\",\"x\":8.875,\"y\":-1.4249999523162842,\"width\":1.0499992370605469,\"height\":1.0499999523162842},{\"serializedVersion\":\"2\",\"x\":-9.649999618530274,\"y\":6.275000095367432,\"width\":3.299999713897705,\"height\":0.9499998092651367},{\"serializedVersion\":\"2\",\"x\":-8.449999809265137,\"y\":3.124999761581421,\"width\":2.5,\"height\":3.3499996662139894},{\"serializedVersion\":\"2\",\"x\":-9.924999237060547,\"y\":5.174999713897705,\"width\":1.0499992370605469,\"height\":1.0500001907348633},{\"serializedVersion\":\"2\",\"x\":2.3499999046325685,\"y\":6.275000095367432,\"width\":3.3000001907348635,\"height\":0.9499998092651367},{\"serializedVersion\":\"2\",\"x\":-10.024999618530274,\"y\":-2.9250001907348635,\"width\":1.0499992370605469,\"height\":1.0500000715255738},{\"serializedVersion\":\"2\",\"x\":4.399999618530273,\"y\":-5.150000095367432,\"width\":5.600000381469727,\"height\":2.5},{\"serializedVersion\":\"2\",\"x\":-3.1499998569488527,\"y\":-0.31000006198883059,\"width\":2.0999999046325685,\"height\":1.380000114440918},{\"serializedVersion\":\"2\",\"x\":5.689999580383301,\"y\":-0.8499999642372131,\"width\":1.380000114440918,\"height\":2.0999999046325685}]}\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[MOBILE_CUSTOMERS] {\"customers\":[]}\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[MOBILE_STATE] {\"paidCustomers\":12,\"paidDryOrders\":3,\"paidWashOrders\":3,\"activeWorkCustomers\":0,\"softCustomerLimit\":3,\"batchArrivals\":0,\"capacityPracticeUntilPaid\":0,\"restRemaining\":0.0,\"pacingReason\":\"finish-batch\",\"checkoutWaiting\":0,\"checkoutAbandoned\":0,\"cashier\":{\"x\":3.549999713897705,\"y\":0.05000000074505806,\"z\":-3.6000001430511476},\"supplyIntroduced\":false,\"day\":2,\"completed\":6,\"target\":4,\"balance\":938,\"guided\":-1,\"working\":-1,\"targetCustomer\":-1,\"satisfaction\":100,\"activeCustomers\":0,\"waitingCustomers\":0,\"occupiedStations\":0,\"readyToRinse\":0,\"autoBlowRunning\":0,\"autoBlowReady\":0,\"ungreetedWaiting\":0,\"attentionDemand\":0,\"sourceWashKits\":12,\"carriedWashKits\":0,\"washRackWashKits\":3,\"padPaid\":0,\"haircutPadPaid\":2000,\"annexPadPaid\":0,\"waitingCapacity\":4,\"maxCustomers\":3,\"paused\":false,\"purchased\":false,\"padUnlocked\":false,\"haircutPadUnlocked\":true,\"annexPadUnlocked\":false,\"annexPadVisible\":false,\"available\":false,\"workingSuspended\":false,\"coop\":false,\"waitingSeats\":false,\"extraSeats\":false,\"state\":\"ClosedManagement\",\"action\":\"靠近顾客\",\"targetTool\":\"\",\"targetAction\":\"None\",\"wave\":\"收尾\",\"progress\":1.0,\"workingElapsed\":0.0,\"cameraSize\":6.0,\"reputation\":3.1999998092651369,\"reputationBefore\":3.0999999046325685,\"player\":{\"x\":2.889606237411499,\"y\":0.05000000074505806,\"z\":-3.276076078414917},\"cameraRight\":{\"x\":0.8944271802902222,\"y\":0.0,\"z\":-0.4472135901451111},\"cameraForward\":{\"x\":0.3627343773841858,\"y\":-0.5849092602729797,\"z\":0.7254687547683716},\"cameraPosition\":{\"x\":-12.103067398071289,\"y\":19.06174659729004,\"z\":-23.704933166503908},\"annexPad\":{\"x\":9.100000381469727,\"y\":0.20000000298023225,\"z\":3.9000000953674318},\"annexPadScreen\":{\"x\":637.127197265625,\"y\":347.40252685546877,\"z\":38.75000762939453},\"playerScreen\":{\"x\":560.8982543945313,\"y\":168.63941955566407,\"z\":31.379005432128908},\"playerHeadScreen\":{\"x\":560.8982543945313,\"y\":221.36083984375,\"z\":30.209186553955079},\"playerTwoScreen\":{\"x\":0.0,\"y\":0.0,\"z\":0.0},\"playerTwoHeadScreen\":{\"x\":0.0,\"y\":0.0,\"z\":0.0},\"joystick\":{\"x\":0.0,\"y\":0.0},\"interaction\":{\"x\":0.0,\"y\":0.0},\"pads\":[{\"id\":\"BlowDryer\",\"padId\":\"expansion-pad-blow-dryer\",\"openDay\":1,\"cost\":600,\"paid\":600,\"unlocked\":true,\"visible\":false,\"position\":{\"x\":-3.799999952316284,\"y\":0.20000000298023225,\"z\":0.3499999940395355},\"screen\":{\"x\":313.7358703613281,\"y\":177.37591552734376,\"z\":31.49532127380371}},{\"id\":\"WashStation\",\"padId\":\"expansion-pad-wash-station\",\"openDay\":1,\"cost\":1200,\"paid\":1200,\"unlocked\":true,\"visible\":false,\"position\":{\"x\":-8.75,\"y\":0.0,\"z\":4.049999713897705},\"screen\":{\"x\":116.06749725341797,\"y\":192.93202209472657,\"z\":32.50100326538086}},{\"id\":\"HaircutChair\",\"padId\":\"expansion-pad-haircut-2\",\"openDay\":1,\"cost\":2000,\"paid\":2000,\"unlocked\":true,\"visible\":false,\"position\":{\"x\":3.9000000953674318,\"y\":0.20000000298023225,\"z\":-0.3499999940395355},\"screen\":{\"x\":547.7403564453125,\"y\":230.9342803955078,\"z\":33.780548095703128}},{\"id\":\"WaitingSeats\",\"padId\":\"expansion-pad-waiting-seats\",\"openDay\":1,\"cost\":2400,\"paid\":0,\"unlocked\":false,\"visible\":true,\"position\":{\"x\":-3.3499999046325685,\"y\":0.20000000298023225,\"z\":-4.199999809265137},\"screen\":{\"x\":392.9485778808594,\"y\":103.83940887451172,\"z\":28.357669830322267}},{\"id\":\"BlowStand\",\"padId\":\"expansion-pad-blow-stand\",\"openDay\":1,\"cost\":3000,\"paid\":0,\"unlocked\":false,\"visible\":false,\"position\":{\"x\":-3.799999952316284,\"y\":0.20000000298023225,\"z\":0.3499999940395355},\"screen\":{\"x\":313.7358703613281,\"y\":177.37591552734376,\"z\":31.49532127380371}},{\"id\":\"WashAnnex\",\"padId\":\"expansion-pad-wash-annex\",\"openDay\":1,\"cost\":3600,\"paid\":0,\"unlocked\":false,\"visible\":false,\"position\":{\"x\":9.100000381469727,\"y\":0.20000000298023225,\"z\":3.9000000953674318},\"screen\":{\"x\":637.127197265625,\"y\":347.40252685546877,\"z\":38.75000762939453}},{\"id\":\"ExtraSeats\",\"padId\":\"expansion-pad-extra-seats\",\"openDay\":1,\"cost\":4200,\"paid\":0,\"unlocked\":false,\"visible\":false,\"position\":{\"x\":-3.3499999046325685,\"y\":0.20000000298023225,\"z\":-4.199999809265137},\"screen\":{\"x\":392.9485778808594,\"y\":103.83940887451172,\"z\":28.357669830322267}}],\"stations\":[{\"id\":0,\"position\":{\"x\":-8.75,\"y\":0.0,\"z\":4.049999713897705},\"type\":\"Wash\",\"occupied\":false,\"usable\":true},{\"id\":4,\"position\":{\"x\":11.649999618530274,\"y\":0.0,\"z\":4.049999713897705},\"type\":\"Wash\",\"occupied\":false,\"usable\":false},{\"id\":1,\"position\":{\"x\":-2.0999999046325685,\"y\":0.20000000298023225,\"z\":-1.1999999284744263},\"type\":\"Haircut\",\"occupied\":false,\"usable\":true},{\"id\":2,\"position\":{\"x\":4.799999713897705,\"y\":0.20000000298023225,\"z\":0.20000000298023225},\"type\":\"Haircut\",\"occupied\":false,\"usable\":true},{\"id\":3,\"position\":{\"x\":5.449999809265137,\"y\":0.20000000298023225,\"z\":3.700000047683716},\"type\":\"Perm\",\"occupied\":false,\"usable\":false}],\"buttons\":[{\"label\":\"准备下一天\",\"available\":true,\"position\":{\"x\":422.0,\"y\":73.48193359375}},{\"label\":\"Settings\",\"available\":true,\"position\":{\"x\":819.2979736328125,\"y\":362.110595703125}}]}\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[UnityCache] 'http://127.0.0.1:61437/Build/WebGLDemo.data' successfully revalidated and served from the browser cache"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[UnityMemory] Configuration Parameters - Can be set up in boot.config\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-bucket-allocator-granularity=16\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-bucket-allocator-bucket-count=8\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-bucket-allocator-block-size=4194304\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-bucket-allocator-block-count=1\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-main-allocator-block-size=16777216\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-thread-allocator-block-size=16777216\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-main-allocator-mimalloc-enabled=0\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-gfx-main-allocator-block-size=16777216\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-gfx-thread-allocator-block-size=16777216\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-cache-allocator-block-size=4194304\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-typetree-allocator-block-size=2097152\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-profiler-bucket-allocator-granularity=16\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-profiler-bucket-allocator-bucket-count=8\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-profiler-bucket-allocator-block-size=4194304\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-profiler-bucket-allocator-block-count=1\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-profiler-allocator-block-size=16777216\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-profiler-editor-allocator-block-size=1048576\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-temp-allocator-size-main=4194304\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-job-temp-allocator-block-size=2097152\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-job-temp-allocator-block-size-background=1048576\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-job-temp-allocator-reduction-small-platforms=262144\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-temp-allocator-size-background-worker=32768\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-allocator-temp-initial-block-size-main=262144\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-allocator-temp-initial-block-size-worker=262144\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "    \"memorysetup-temp-allocator-size-audio-worker=65536\"\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "CodeReloadManager initialized\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "Found NO interfaces on host .\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[Physics::Module] Initialized fallback backend.\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[Physics::Module] Id: 0xdecafbad\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "Loading player data from data.unity3d\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "Initialize engine version: 6000.5.8f1 (5cb7df797b7d)\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "Creating WebGL 2.0 context."
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "Renderer: WebKit WebGL\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "Vendor:   WebKit\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "Version:  OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium))\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "GLES:     3\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": " EXT_clip_control EXT_color_buffer_float EXT_color_buffer_half_float EXT_conservative_depth EXT_depth_clamp EXT_disjoint_timer_query_webgl2 EXT_float_blend EXT_polygon_offset_clamp EXT_texture_compression_bptc EXT_texture_compression_rgtc EXT_texture_filter_anisotropic EXT_texture_norm16 KHR_parallel_shader_compile NV_shader_noperspective_interpolation OES_texture_float_linear WEBGL_blend_func_extended WEBGL_clip_cull_distance WEBGL_compressed_texture_astc WEBGL_compressed_texture_etc WEBGL_compressed_texture_etc1 WEBGL_compressed_texture_s3tc WEBGL_compressed_texture_s3tc_srgb WEBGL_debug_renderer_info WEBGL_debug_shaders WEBGL_lose_context WEBGL_multi_draw WEBGL_polygon_mode GL_EXT_clip_control GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_conservative_depth GL_EXT_depth_clamp GL_EXT_disjoint_timer_query_webgl2 GL_EXT_float_blend GL_EXT_polygon_offset_clamp GL_EXT_texture_compression_bptc GL_EXT_texture_compression_rgtc GL_EXT_texture_filter_anisotropic GL_EXT_texture_norm16 GL_KHR_parall\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "el_shader_compile GL_NV_shader_noperspective_interpolation GL_OES_texture_float_linear GL_WEBGL_blend_func_extended GL_WEBGL_clip_cull_distance GL_WEBGL_compressed_texture_astc GL_WEBGL_compressed_texture_etc GL_WEBGL_compressed_texture_etc1 GL_WEBGL_compressed_texture_s3tc GL_WEBGL_compressed_texture_s3tc_srgb GL_WEBGL_debug_renderer_info GL_WEBGL_debug_shaders GL_WEBGL_lose_context GL_WEBGL_multi_draw GL_WEBGL_polygon_mode\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "OPENGL LOG: Creating OpenGL ES 3.0 graphics device ; Context level  <OpenGL ES 3.0> ; Context handle 1\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[Physics::Module] Selected backend.\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[Physics::Module] Name: PhysX\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[Physics::Module] Id: 0xf2b8ea05\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[Physics::Module] SDK Version: 4.1.2\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[Physics::Module] Integration Version: 1.0.0\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[Physics::Module] Threading Mode: Single-Threaded\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "Input Manager initialize...\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "UnloadTime: 0.099999 ms\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "Audio context resumed after 0.023 seconds."
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[WASH_CRAFT_READY] scene=HairSalonDemo stations=2 authoredModels=True collidersPreserved=True anchorsPreserved=True\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[MOBILE_LAYOUT] {\"floor\":{\"serializedVersion\":\"2\",\"x\":-10.200000762939454,\"y\":-5.0,\"width\":20.400001525878908,\"height\":12.149999618530274},\"obstacles\":[{\"serializedVersion\":\"2\",\"x\":2.3499999046325685,\"y\":6.275000095367432,\"width\":3.3000001907348635,\"height\":0.9499998092651367},{\"serializedVersion\":\"2\",\"x\":6.349999904632568,\"y\":6.275000095367432,\"width\":3.299999713897705,\"height\":0.9499998092651367},{\"serializedVersion\":\"2\",\"x\":8.875,\"y\":-1.4249999523162842,\"width\":1.0499992370605469,\"height\":1.0499999523162842},{\"serializedVersion\":\"2\",\"x\":3.9749999046325685,\"y\":-5.525000095367432,\"width\":1.0500001907348633,\"height\":1.0500001907348633},{\"serializedVersion\":\"2\",\"x\":-1.649999976158142,\"y\":6.275000095367432,\"width\":3.299999952316284,\"height\":0.9499998092651367},{\"serializedVersion\":\"2\",\"x\":-9.924999237060547,\"y\":5.174999713897705,\"width\":1.0499992370605469,\"height\":1.0500001907348633},{\"serializedVersion\":\"2\",\"x\":-5.650000095367432,\"y\":6.275000095367432,\"width\":3.3000001907348635,\"height\":0.9499998092651367},{\"serializedVersion\":\"2\",\"x\":-9.649999618530274,\"y\":6.275000095367432,\"width\":3.299999713897705,\"height\":0.9499998092651367},{\"serializedVersion\":\"2\",\"x\":4.399999618530273,\"y\":-5.150000095367432,\"width\":5.600000381469727,\"height\":2.5},{\"serializedVersion\":\"2\",\"x\":-10.024999618530274,\"y\":-2.9250001907348635,\"width\":1.0499992370605469,\"height\":1.0500000715255738},{\"serializedVersion\":\"2\",\"x\":-8.449999809265137,\"y\":3.124999761581421,\"width\":2.5,\"height\":3.3499996662139894},{\"serializedVersion\":\"2\",\"x\":-3.1499998569488527,\"y\":-0.31000006198883059,\"width\":2.0999999046325685,\"height\":1.380000114440918},{\"serializedVersion\":\"2\",\"x\":5.689999580383301,\"y\":-0.8499999642372131,\"width\":1.380000114440918,\"height\":2.0999999046325685}]}\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[MOBILE_CUSTOMERS] {\"customers\":[]}\n"
+        },
+        {
+          "kind": "console",
+          "type": "log",
+          "text": "[MOBILE_STATE] {\"paidCustomers\":12,\"paidDryOrders\":3,\"paidWashOrders\":3,\"activeWorkCustomers\":0,\"softCustomerLimit\":3,\"batchArrivals\":0,\"capacityPracticeUntilPaid\":0,\"restRemaining\":0.0,\"pacingReason\":\"ready\",\"checkoutWaiting\":0,\"checkoutAbandoned\":0,\"cashier\":{\"x\":3.549999713897705,\"y\":0.05000000074505806,\"z\":-3.6000001430511476},\"supplyIntroduced\":false,\"day\":2,\"completed\":0,\"target\":4,\"balance\":938,\"guided\":-1,\"working\":-1,\"targetCustomer\":-1,\"satisfaction\":100,\"activeCustomers\":0,\"waitingCustomers\":0,\"occupiedStations\":0,\"readyToRinse\":0,\"autoBlowRunning\":0,\"autoBlowReady\":0,\"ungreetedWaiting\":0,\"attentionDemand\":0,\"sourceWashKits\":12,\"carriedWashKits\":0,\"washRackWashKits\":3,\"padPaid\":0,\"haircutPadPaid\":2000,\"annexPadPaid\":0,\"waitingCapacity\":4,\"maxCustomers\":3,\"paused\":false,\"purchased\":false,\"padUnlocked\":false,\"haircutPadUnlocked\":true,\"annexPadUnlocked\":false,\"annexPadVisible\":false,\"available\":false,\"workingSuspended\":false,\"coop\":false,\"waitingSeats\":false,\"extraSeats\":false,\"state\":\"ClosedManagement\",\"action\":\"靠近顾客\",\"targetTool\":\"\",\"targetAction\":\"None\",\"wave\":\"平稳\",\"progress\":0.0,\"workingElapsed\":0.0,\"cameraSize\":8.350000381469727,\"reputation\":3.1999998092651369,\"reputationBefore\":3.1999998092651369,\"player\":{\"x\":0.0,\"y\":0.05000000074505806,\"z\":-3.200000047683716},\"cameraRight\":{\"x\":0.8944271802902222,\"y\":0.0,\"z\":-0.4472135901451111},\"cameraForward\":{\"x\":0.3627343773841858,\"y\":-0.5849092602729797,\"z\":0.7254687547683716},\"cameraPosition\":{\"x\":-12.0,\"y\":20.0,\"z\":-23.0},\"annexPad\":{\"x\":9.100000381469727,\"y\":0.20000000298023225,\"z\":3.9000000953674318},\"annexPadScreen\":{\"x\":581.7918090820313,\"y\":277.49639892578127,\"z\":38.75000762939453},\"playerScreen\":{\"x\":465.8643798828125,\"y\":132.32151794433595,\"z\":30.386035919189454},\"playerHeadScreen\":{\"x\":465.8643798828125,\"y\":170.2051544189453,\"z\":29.216217041015626},\"playerTwoScreen\":{\"x\":0.0,\"y\":0.0,\"z\":0.0},\"playerTwoHeadScreen\":{\"x\":0.0,\"y\":0.0,\"z\":0.0},\"joystick\":{\"x\":0.0,\"y\":0.0},\"interaction\":{\"x\":0.0,\"y\":0.0},\"pads\":[{\"id\":\"BlowDryer\",\"padId\":\"expansion-pad-blow-dryer\",\"openDay\":1,\"cost\":600,\"paid\":600,\"unlocked\":true,\"visible\":false,\"position\":{\"x\":-3.799999952316284,\"y\":0.20000000298023225,\"z\":0.3499999940395355},\"screen\":{\"x\":349.4148254394531,\"y\":155.32162475585938,\"z\":31.49532127380371}},{\"id\":\"WashStation\",\"padId\":\"expansion-pad-wash-station\",\"openDay\":1,\"cost\":1200,\"paid\":1200,\"unlocked\":true,\"visible\":false,\"position\":{\"x\":-8.75,\"y\":0.0,\"z\":4.049999713897705},\"screen\":{\"x\":207.3776397705078,\"y\":166.49966430664063,\"z\":32.500999450683597}},{\"id\":\"HaircutChair\",\"padId\":\"expansion-pad-haircut-2\",\"openDay\":1,\"cost\":2000,\"paid\":2000,\"unlocked\":true,\"visible\":false,\"position\":{\"x\":3.9000000953674318,\"y\":0.20000000298023225,\"z\":-0.3499999940395355},\"screen\":{\"x\":517.561767578125,\"y\":193.80667114257813,\"z\":33.780548095703128}},{\"id\":\"WaitingSeats\",\"padId\":\"expansion-pad-waiting-seats\",\"openDay\":1,\"cost\":2400,\"paid\":0,\"unlocked\":false,\"visible\":true,\"position\":{\"x\":-3.3499999046325685,\"y\":0.20000000298023225,\"z\":-4.199999809265137},\"screen\":{\"x\":406.3341369628906,\"y\":102.48103332519531,\"z\":28.357667922973634}},{\"id\":\"BlowStand\",\"padId\":\"expansion-pad-blow-stand\",\"openDay\":1,\"cost\":3000,\"paid\":0,\"unlocked\":false,\"visible\":false,\"position\":{\"x\":-3.799999952316284,\"y\":0.20000000298023225,\"z\":0.3499999940395355},\"screen\":{\"x\":349.4148254394531,\"y\":155.32162475585938,\"z\":31.49532127380371}},{\"id\":\"WashAnnex\",\"padId\":\"expansion-pad-wash-annex\",\"openDay\":1,\"cost\":3600,\"paid\":0,\"unlocked\":false,\"visible\":false,\"position\":{\"x\":9.100000381469727,\"y\":0.20000000298023225,\"z\":3.9000000953674318},\"screen\":{\"x\":581.7918090820313,\"y\":277.49639892578127,\"z\":38.75000762939453}},{\"id\":\"ExtraSeats\",\"padId\":\"expansion-pad-extra-seats\",\"openDay\":1,\"cost\":4200,\"paid\":0,\"unlocked\":false,\"visible\":false,\"position\":{\"x\":-3.3499999046325685,\"y\":0.20000000298023225,\"z\":-4.199999809265137},\"screen\":{\"x\":406.3341369628906,\"y\":102.48103332519531,\"z\":28.357667922973634}}],\"stations\":[{\"id\":0,\"position\":{\"x\":-8.75,\"y\":0.0,\"z\":4.049999713897705},\"type\":\"Wash\",\"occupied\":false,\"usable\":true},{\"id\":4,\"position\":{\"x\":11.649999618530274,\"y\":0.0,\"z\":4.049999713897705},\"type\":\"Wash\",\"occupied\":false,\"usable\":false},{\"id\":1,\"position\":{\"x\":-2.0999999046325685,\"y\":0.20000000298023225,\"z\":-1.1999999284744263},\"type\":\"Haircut\",\"occupied\":false,\"usable\":true},{\"id\":2,\"position\":{\"x\":4.799999713897705,\"y\":0.20000000298023225,\"z\":0.20000000298023225},\"type\":\"Haircut\",\"occupied\":false,\"usable\":true},{\"id\":3,\"position\":{\"x\":5.449999809265137,\"y\":0.20000000298023225,\"z\":3.700000047683716},\"type\":\"Perm\",\"occupied\":false,\"usable\":false}],\"buttons\":[{\"label\":\"准备下一天\",\"available\":true,\"position\":{\"x\":422.0,\"y\":-110.0}},{\"label\":\"Settings\",\"available\":true,\"position\":{\"x\":782.0,\"y\":320.0}}]}\n"
+        },
+        {
+          "kind": "console",
+          "type": "error",
+          "text": "NotSupportedError: screen.orientation.lock() is not available on this device."
+        }
+      ]
+    },
+    "http404": [],
+    "failedRequests": [
+      {
+        "url": "http://127.0.0.1:61437/Build/WebGLDemo.data",
+        "failure": "net::ERR_ABORTED"
+      },
+      {
+        "url": "http://127.0.0.1:61437/Build/WebGLDemo.data",
+        "failure": "net::ERR_ABORTED"
+      }
+    ],
+    "responseStatusCounts": {
+      "200": 24,
+      "304": 6
+    }
+  },
+  "historyCount": 1179,
+  "actionCount": 61,
+  "buildHash": {
+    "buildDirectory": "unity-hair-salon/Builds/WebGLDemo",
+    "aggregateSha256": "b0470c48a846975f869d0b6577b111d1621d3230504b6977152b86ffc4a48b85",
+    "files": [
+      {
+        "file": "unity-hair-salon/Builds/WebGLDemo/Build/WebGLDemo.data",
+        "sha256": "9cf3dc1b19d3854737a0f9ba63130dc123e12e26e91eb7798550b77b20c3ea74",
+        "bytes": 36893607
+      },
+      {
+        "file": "unity-hair-salon/Builds/WebGLDemo/Build/WebGLDemo.framework.js",
+        "sha256": "28171c8d35e7530226c80e2c7573bab969efde660d34f7768fe3210546d70527",
+        "bytes": 689410
+      },
+      {
+        "file": "unity-hair-salon/Builds/WebGLDemo/Build/WebGLDemo.loader.js",
+        "sha256": "eb7c3458b9a762ec09d367af6d87c59fa37a787f3a8314ed81b0630f08897d1f",
+        "bytes": 58617
+      },
+      {
+        "file": "unity-hair-salon/Builds/WebGLDemo/Build/WebGLDemo.wasm",
+        "sha256": "7a03aa4adbe2cf9afc235dcee25cd4e100f194179a11fab1206531b88a197cd5",
+        "bytes": 40641455
+      }
+    ]
+  }
+}

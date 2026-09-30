@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-01",
+  "passed": true,
+  "sourceRun": "resumed-browser-final/report.json",
+  "method": "Reanalyzed all three recorded days with the corrected acceptance script; asserted each day and compared refresh checkpoints from local telemetry.",
+  "pythonTests": {"total": 21, "passed": 21, "failed": 0},
+  "pacingRegressionTests": {"total": 7, "failuresBeforeFix": 4, "failuresAfterFix": 0},
+  "days": [
+    {"day": 1, "completed": 6, "target": 3, "passed": true, "maxRestRemainingSeconds": 7.959, "maxRestWithoutUsefulWorkSeconds": 1.884, "refreshPreserved": true},
+    {"day": 2, "completed": 5, "target": 4, "passed": true, "maxRestRemainingSeconds": 2.0, "maxRestWithoutUsefulWorkSeconds": 2.0, "refreshPreserved": true},
+    {"day": 3, "completed": 6, "target": 5, "passed": true, "maxRestRemainingSeconds": 7.983, "maxRestWithoutUsefulWorkSeconds": 0.0, "refreshPreserved": true}
+  ],
+  "extraRefreshChecks": ["capacityPracticeUntilPaid", "softCustomerLimit", "supplyIntroduced", "all pad paid and unlocked fields"],
+  "capacityPractice": {"purchaseDay": 2, "paidCustomersAtPurchase": 10, "untilPaid": 12, "preservedOnRefresh": true},
+  "rawTelemetry": "Retained locally and excluded from Git; live-run report and screenshots are committed."
+}

@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-01",
+  "scene": "HairSalonDemo",
+  "viewport": {"width": 844, "height": 390},
+  "canvas": {"width": 844, "height": 390},
+  "devicePixelRatio": 1,
+  "approvedReference": null,
+  "machine": {
+    "allFourBuildsSucceeded": true,
+    "allFourScenesLaunched": true,
+    "demoCoreFlowPassed": true,
+    "threeDayRealTouchPassed": true,
+    "unexpectedGameplayErrors": 0,
+    "http404": [],
+    "runtimeTextureDimensions": {"furniture-magazine-rack-wood": [1211, 1299], "furniture-wash-station-vintage-right-wall": [1254, 1254]},
+    "knownCompatibilityMessages": ["Chromium screen.orientation.lock is unsupported in this simulated device.", "Unity persistentDataPath manual synchronization API is deprecated."],
+    "refreshAbortedRequests": 3
+  },
+  "checks": [
+    {"category": "resources", "status": "pass", "evidence": "pipeline-browser-all.json; resumed-browser-final/report.json", "note": "No missing resources or unexpected gameplay errors; known compatibility and reload messages are retained in the raw report."},
+    {"category": "proportion", "status": "baseline-missing", "note": "Current scene inspected; no new full-scene approved comparison was supplied."},
+    {"category": "position", "status": "baseline-missing", "note": "Construction appears at the existing approved positions; no pixel comparison claimed."},
+    {"category": "direction", "status": "baseline-missing", "note": "Manifest direction and asset-lab runtime captures are available; visual approval is not inferred."},
+    {"category": "shadow", "status": "baseline-missing", "note": "No furniture artwork was created or replaced during this resumed task."},
+    {"category": "occlusion-depth", "status": "issue", "evidence": "resumed-browser-final/washing.png", "note": "A non-selected customer's overhead label can be partly obscured by the top HUD; selected interaction and service remain reachable."},
+    {"category": "character-size", "status": "baseline-missing", "note": "Character and station context inspected; no approved size comparison claimed."},
+    {"category": "safe-area", "status": "pass", "evidence": "resumed-browser-final/day3-seated.png; resumed-browser-final/day3-result.png", "note": "Joystick, primary action and result buttons are within the target frame."},
+    {"category": "stability", "status": "pass", "note": "Pipeline waits for settled assets and rejects blank screenshots; all three real-time business days and reloads completed."}
+  ],
+  "issues": [{"severity": "medium", "category": "occlusion-depth", "evidence": "resumed-browser-final/washing.png", "suggestedFollowUp": "Plan a focused readability check for non-selected customer labels near the top HUD."}],
+  "limitations": ["No physical-phone acceptance.", "Automated touch does not establish subjective pacing approval.", "The continuous run did not complete all four late construction purchases."]
+}

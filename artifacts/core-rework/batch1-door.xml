@@ -1,0 +1,541 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="81" result="Passed" total="81" passed="81" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:46Z" duration="0.6281646">
+  <test-suite type="TestSuite" id="1000" name="胡闹理发店灰盒 Demo" fullname="胡闹理发店灰盒 Demo" runstate="Runnable" testcasecount="800" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:46Z" duration="0.628165" total="81" passed="81" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1913" name="HairSalon.Tests.dll" fullname="/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Library/ScriptAssemblies/HairSalon.Tests.dll" runstate="Runnable" testcasecount="800" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:46Z" duration="0.622395" total="81" passed="81" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="47287" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestFixture" id="1001" name="AssetPipelineManifestTests" fullname="AssetPipelineManifestTests" classname="AssetPipelineManifestTests" runstate="Runnable" testcasecount="18" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.081779" total="18" passed="18" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1019" name="CandidateAlignmentEvidence_WaitsForTheStylistToReachTheReboundAnchor" fullname="AssetPipelineManifestTests.CandidateAlignmentEvidence_WaitsForTheStylistToReachTheReboundAnchor" methodname="CandidateAlignmentEvidence_WaitsForTheStylistToReachTheReboundAnchor" classname="AssetPipelineManifestTests" runstate="Runnable" seed="78994151" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.008382" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1012" name="CandidateRegression_CompletesExistingDryStepBeforeExpectingPayment" fullname="AssetPipelineManifestTests.CandidateRegression_CompletesExistingDryStepBeforeExpectingPayment" methodname="CandidateRegression_CompletesExistingDryStepBeforeExpectingPayment" classname="AssetPipelineManifestTests" runstate="Runnable" seed="1870006875" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.023858" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1010" name="CandidateRegression_DoesNotConfigureHaircutOrderWhileCurrentNeedIsWash" fullname="AssetPipelineManifestTests.CandidateRegression_DoesNotConfigureHaircutOrderWhileCurrentNeedIsWash" methodname="CandidateRegression_DoesNotConfigureHaircutOrderWhileCurrentNeedIsWash" classname="AssetPipelineManifestTests" runstate="Runnable" seed="388962313" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000777" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1011" name="CandidateRegression_RemovesCleanTowelBeforeTransferringToHaircut" fullname="AssetPipelineManifestTests.CandidateRegression_RemovesCleanTowelBeforeTransferringToHaircut" methodname="CandidateRegression_RemovesCleanTowelBeforeTransferringToHaircut" classname="AssetPipelineManifestTests" runstate="Runnable" seed="116330339" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.004942" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1005" name="CandidateSingleDirectionAndBakedShadow_AreRepresentedByTheContract" fullname="AssetPipelineManifestTests.CandidateSingleDirectionAndBakedShadow_AreRepresentedByTheContract" methodname="CandidateSingleDirectionAndBakedShadow_AreRepresentedByTheContract" classname="AssetPipelineManifestTests" runstate="Runnable" seed="177394530" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.003844" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1009" name="CandidateValidationScene_HasADevelopmentOnlyRuntimeAndBuildEntry" fullname="AssetPipelineManifestTests.CandidateValidationScene_HasADevelopmentOnlyRuntimeAndBuildEntry" methodname="CandidateValidationScene_HasADevelopmentOnlyRuntimeAndBuildEntry" classname="AssetPipelineManifestTests" runstate="Runnable" seed="837210787" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000218" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1015" name="CandidateWorldArtwork_DoesNotDependOnWebGLStrippedMeshCollider" fullname="AssetPipelineManifestTests.CandidateWorldArtwork_DoesNotDependOnWebGLStrippedMeshCollider" methodname="CandidateWorldArtwork_DoesNotDependOnWebGLStrippedMeshCollider" classname="AssetPipelineManifestTests" runstate="Runnable" seed="1141453623" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.013616" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1014" name="CandidateWorldArtwork_FlattensDepthToItsPivotSoWallsCannotSliceTheBillboard" fullname="AssetPipelineManifestTests.CandidateWorldArtwork_FlattensDepthToItsPivotSoWallsCannotSliceTheBillboard" methodname="CandidateWorldArtwork_FlattensDepthToItsPivotSoWallsCannotSliceTheBillboard" classname="AssetPipelineManifestTests" runstate="Runnable" seed="1735662696" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000915" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1013" name="CandidateWorldArtwork_HasAlphaClippedDepthForFrontAndBackCharacterOcclusion" fullname="AssetPipelineManifestTests.CandidateWorldArtwork_HasAlphaClippedDepthForFrontAndBackCharacterOcclusion" methodname="CandidateWorldArtwork_HasAlphaClippedDepthForFrontAndBackCharacterOcclusion" classname="AssetPipelineManifestTests" runstate="Runnable" seed="477340718" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000185" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1017" name="CandidateWorldArtwork_MeshOriginIsTheManifestPivotAndDepthBaseline" fullname="AssetPipelineManifestTests.CandidateWorldArtwork_MeshOriginIsTheManifestPivotAndDepthBaseline" methodname="CandidateWorldArtwork_MeshOriginIsTheManifestPivotAndDepthBaseline" classname="AssetPipelineManifestTests" runstate="Runnable" seed="222331121" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.005726" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1016" name="CandidateWorldArtwork_UsesManifestWorldSizeAndFacesTheGameCamera" fullname="AssetPipelineManifestTests.CandidateWorldArtwork_UsesManifestWorldSizeAndFacesTheGameCamera" methodname="CandidateWorldArtwork_UsesManifestWorldSizeAndFacesTheGameCamera" classname="AssetPipelineManifestTests" runstate="Runnable" seed="157225657" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.001297" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1008" name="NeedsReviewAsset_RemainsAValidCandidateWithAllProductionChecksEnabled" fullname="AssetPipelineManifestTests.NeedsReviewAsset_RemainsAValidCandidateWithAllProductionChecksEnabled" methodname="NeedsReviewAsset_RemainsAValidCandidateWithAllProductionChecksEnabled" classname="AssetPipelineManifestTests" runstate="Runnable" seed="1032170863" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000442" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1018" name="OrdinaryCandidate_BaselineStaysInFrontOfTheBackWallOcclusionPlane" fullname="AssetPipelineManifestTests.OrdinaryCandidate_BaselineStaysInFrontOfTheBackWallOcclusionPlane" methodname="OrdinaryCandidate_BaselineStaysInFrontOfTheBackWallOcclusionPlane" classname="AssetPipelineManifestTests" runstate="Runnable" seed="291839142" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000574" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1002" name="PackagedManifest_HasStableIdsAndPassesValidation" fullname="AssetPipelineManifestTests.PackagedManifest_HasStableIdsAndPassesValidation" methodname="PackagedManifest_HasStableIdsAndPassesValidation" classname="AssetPipelineManifestTests" runstate="Runnable" seed="1650033950" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.005655" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1007" name="Validator_RejectsCandidateWithoutOneAuthoritativeWorldScalePolicy" fullname="AssetPipelineManifestTests.Validator_RejectsCandidateWithoutOneAuthoritativeWorldScalePolicy" methodname="Validator_RejectsCandidateWithoutOneAuthoritativeWorldScalePolicy" classname="AssetPipelineManifestTests" runstate="Runnable" seed="1986131199" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000838" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1006" name="Validator_RejectsCandidateWithoutSceneValidationData" fullname="AssetPipelineManifestTests.Validator_RejectsCandidateWithoutSceneValidationData" methodname="Validator_RejectsCandidateWithoutSceneValidationData" classname="AssetPipelineManifestTests" runstate="Runnable" seed="1622441645" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000179" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1003" name="Validator_ReportsDuplicateIdIllegalDirectionInvalidFootprintAndMissingAnchor" fullname="AssetPipelineManifestTests.Validator_ReportsDuplicateIdIllegalDirectionInvalidFootprintAndMissingAnchor" methodname="Validator_ReportsDuplicateIdIllegalDirectionInvalidFootprintAndMissingAnchor" classname="AssetPipelineManifestTests" runstate="Runnable" seed="1054885721" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000399" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1004" name="Validator_ReportsMissingResourceAndInvalidPivot" fullname="AssetPipelineManifestTests.Validator_ReportsMissingResourceAndInvalidPivot" methodname="Validator_ReportsMissingResourceAndInvalidPivot" classname="AssetPipelineManifestTests" runstate="Runnable" seed="1286344918" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000289" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1060" name="CoreReworkProgressBarTests" fullname="CoreReworkProgressBarTests" classname="CoreReworkProgressBarTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.006660" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1063" name="DryBarIsFullExactlyWhenTheModelAllowsFinishing" fullname="CoreReworkProgressBarTests.DryBarIsFullExactlyWhenTheModelAllowsFinishing" methodname="DryBarIsFullExactlyWhenTheModelAllowsFinishing" classname="CoreReworkProgressBarTests" runstate="Runnable" seed="93995601" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.002122" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1062" name="FoamBarIsFullExactlyWhenTheModelAllowsRinsing" fullname="CoreReworkProgressBarTests.FoamBarIsFullExactlyWhenTheModelAllowsRinsing" methodname="FoamBarIsFullExactlyWhenTheModelAllowsRinsing" classname="CoreReworkProgressBarTests" runstate="Runnable" seed="842113470" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000876" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1061" name="HaircutBarIsFullExactlyWhenReleasingBecomesPerfect" fullname="CoreReworkProgressBarTests.HaircutBarIsFullExactlyWhenReleasingBecomesPerfect" methodname="HaircutBarIsFullExactlyWhenReleasingBecomesPerfect" classname="CoreReworkProgressBarTests" runstate="Runnable" seed="84275684" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000348" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1064" name="OnlyLateOrFailingBarsBlink" fullname="CoreReworkProgressBarTests.OnlyLateOrFailingBarsBlink" methodname="OnlyLateOrFailingBarsBlink" classname="CoreReworkProgressBarTests" runstate="Runnable" seed="710937938" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000969" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1065" name="CustomerExitRouteRegressionTests" fullname="CustomerExitRouteRegressionTests" classname="CustomerExitRouteRegressionTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.039772" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1066" name="LeavingRouteFromFormalBlowWorkstationAvoidsBothHaircutStationCollisions" fullname="CustomerExitRouteRegressionTests.LeavingRouteFromFormalBlowWorkstationAvoidsBothHaircutStationCollisions" methodname="LeavingRouteFromFormalBlowWorkstationAvoidsBothHaircutStationCollisions" classname="CustomerExitRouteRegressionTests" runstate="Runnable" seed="243683179" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.023442" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1067" name="LeavingRoutesFromBothFormalHaircutSeatsStayWithinTimeBudgetAndAvoidFurniture" fullname="CustomerExitRouteRegressionTests.LeavingRoutesFromBothFormalHaircutSeatsStayWithinTimeBudgetAndAvoidFurniture" methodname="LeavingRoutesFromBothFormalHaircutSeatsStayWithinTimeBudgetAndAvoidFurniture" classname="CustomerExitRouteRegressionTests" runstate="Runnable" seed="809942117" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.015747" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1149" name="EntranceDoorRouteTests" fullname="EntranceDoorRouteTests" classname="EntranceDoorRouteTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.024241" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1153" name="CheckoutRouteEndsAtRequestedSlotAndAvoidsCounterSide" fullname="EntranceDoorRouteTests.CheckoutRouteEndsAtRequestedSlotAndAvoidsCounterSide" methodname="CheckoutRouteEndsAtRequestedSlotAndAvoidsCounterSide" classname="EntranceDoorRouteTests" runstate="Runnable" seed="2084473195" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000412" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1159" name="DoorIsRegisteredInTheManifestWithCustomerAnchors" fullname="EntranceDoorRouteTests.DoorIsRegisteredInTheManifestWithCustomerAnchors" methodname="DoorIsRegisteredInTheManifestWithCustomerAnchors" classname="EntranceDoorRouteTests" runstate="Runnable" seed="1290502470" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000889" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1150" name="EnteringRouteCrossesTheDoorFromOutside" fullname="EntranceDoorRouteTests.EnteringRouteCrossesTheDoorFromOutside" methodname="EnteringRouteCrossesTheDoorFromOutside" classname="EntranceDoorRouteTests" runstate="Runnable" seed="623689602" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000441" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1151" name="LeavingRouteReachesExteriorAfterDoor" fullname="EntranceDoorRouteTests.LeavingRouteReachesExteriorAfterDoor" methodname="LeavingRouteReachesExteriorAfterDoor" classname="EntranceDoorRouteTests" runstate="Runnable" seed="1992474975" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000164" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1157" name="LeavingRoutesAvoidTheWaitingSofaCoffeeTableAndDoorPlant" fullname="EntranceDoorRouteTests.LeavingRoutesAvoidTheWaitingSofaCoffeeTableAndDoorPlant" methodname="LeavingRoutesAvoidTheWaitingSofaCoffeeTableAndDoorPlant" classname="EntranceDoorRouteTests" runstate="Runnable" seed="176167179" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.013475" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1154" name="LeftWallSelectorKeepsFloorAndBackWall" fullname="EntranceDoorRouteTests.LeftWallSelectorKeepsFloorAndBackWall" methodname="LeftWallSelectorKeepsFloorAndBackWall" classname="EntranceDoorRouteTests" runstate="Runnable" seed="134635459" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000320" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1155" name="PlayerWalkableBoundsStopBeforeTheExteriorDoorPoint" fullname="EntranceDoorRouteTests.PlayerWalkableBoundsStopBeforeTheExteriorDoorPoint" methodname="PlayerWalkableBoundsStopBeforeTheExteriorDoorPoint" classname="EntranceDoorRouteTests" runstate="Runnable" seed="629473057" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000223" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1156" name="QueueWalkoutsLeaveStraightThroughTheDoorWithoutADetour" fullname="EntranceDoorRouteTests.QueueWalkoutsLeaveStraightThroughTheDoorWithoutADetour" methodname="QueueWalkoutsLeaveStraightThroughTheDoorWithoutADetour" classname="EntranceDoorRouteTests" runstate="Runnable" seed="135998211" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000290" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1158" name="RebuiltLeftWallKeepsTheCraftedLowCutawayAwayFromTheDoorFrame" fullname="EntranceDoorRouteTests.RebuiltLeftWallKeepsTheCraftedLowCutawayAwayFromTheDoorFrame" methodname="RebuiltLeftWallKeepsTheCraftedLowCutawayAwayFromTheDoorFrame" classname="EntranceDoorRouteTests" runstate="Runnable" seed="82893676" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.005630" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1152" name="ServiceRouteUsesQueueAnchorWithoutPassingDestinationFirst" fullname="EntranceDoorRouteTests.ServiceRouteUsesQueueAnchorWithoutPassingDestinationFirst" methodname="ServiceRouteUsesQueueAnchorWithoutPassingDestinationFirst" classname="EntranceDoorRouteTests" runstate="Runnable" seed="1068640139" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000931" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1354" name="Phase3RuntimeViewTests" fullname="Phase3RuntimeViewTests" classname="Phase3RuntimeViewTests" runstate="Runnable" testcasecount="22" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.059023" total="22" passed="22" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="ParameterizedMethod" id="1369" name="CoinPileUsesOneVisualAndDoesNotShowAmountOnGround" fullname="Phase3RuntimeViewTests.CoinPileUsesOneVisualAndDoesNotShowAmountOnGround" classname="Phase3RuntimeViewTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.002257" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-case id="1366" name="CoinPileUsesOneVisualAndDoesNotShowAmountOnGround(60,Small)" fullname="Phase3RuntimeViewTests.CoinPileUsesOneVisualAndDoesNotShowAmountOnGround(60,Small)" methodname="CoinPileUsesOneVisualAndDoesNotShowAmountOnGround" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="2136687844" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.001441" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+          <test-case id="1367" name="CoinPileUsesOneVisualAndDoesNotShowAmountOnGround(120,Medium)" fullname="Phase3RuntimeViewTests.CoinPileUsesOneVisualAndDoesNotShowAmountOnGround(120,Medium)" methodname="CoinPileUsesOneVisualAndDoesNotShowAmountOnGround" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="1898485899" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000237" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+          <test-case id="1368" name="CoinPileUsesOneVisualAndDoesNotShowAmountOnGround(300,Large)" fullname="Phase3RuntimeViewTests.CoinPileUsesOneVisualAndDoesNotShowAmountOnGround(300,Large)" methodname="CoinPileUsesOneVisualAndDoesNotShowAmountOnGround" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="2072717628" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000213" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+        </test-suite>
+        <test-case id="1360" name="CustomerUiRootCannotBeReboundAndHidesWithoutAnAnchor" fullname="Phase3RuntimeViewTests.CustomerUiRootCannotBeReboundAndHidesWithoutAnAnchor" methodname="CustomerUiRootCannotBeReboundAndHidesWithoutAnAnchor" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="1039262964" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.018565" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1358" name="CustomerUiRootExposesAnIndependentMobileAnchor" fullname="Phase3RuntimeViewTests.CustomerUiRootExposesAnIndependentMobileAnchor" methodname="CustomerUiRootExposesAnIndependentMobileAnchor" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="1208471902" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000157" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1359" name="CustomerUiRootExposesOneRequirementContainerAndASeparateEmotionSlot" fullname="Phase3RuntimeViewTests.CustomerUiRootExposesOneRequirementContainerAndASeparateEmotionSlot" methodname="CustomerUiRootExposesOneRequirementContainerAndASeparateEmotionSlot" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="984100708" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000987" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1362" name="CustomerUiViewsIgnoreDuplicateInitialization" fullname="Phase3RuntimeViewTests.CustomerUiViewsIgnoreDuplicateInitialization" methodname="CustomerUiViewsIgnoreDuplicateInitialization" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="464748372" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.016799" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1371" name="CustomerUsesSeatedPoseOnlyAfterReachingAWaitingOrServiceSeat" fullname="Phase3RuntimeViewTests.CustomerUsesSeatedPoseOnlyAfterReachingAWaitingOrServiceSeat" methodname="CustomerUsesSeatedPoseOnlyAfterReachingAWaitingOrServiceSeat" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="904786959" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000420" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1356" name="DemandBubbleUsesGeneratedWidthProgressOnlyOnTheActiveRequirement" fullname="Phase3RuntimeViewTests.DemandBubbleUsesGeneratedWidthProgressOnlyOnTheActiveRequirement" methodname="DemandBubbleUsesGeneratedWidthProgressOnlyOnTheActiveRequirement" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="331273806" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.008400" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1375" name="EnteringAndLeavingUseDifferentWaypointLanes" fullname="Phase3RuntimeViewTests.EnteringAndLeavingUseDifferentWaypointLanes" methodname="EnteringAndLeavingUseDifferentWaypointLanes" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="1976144348" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000564" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1374" name="FinishedCustomerRemembersTheSeatUsedForFeedbackUi" fullname="Phase3RuntimeViewTests.FinishedCustomerRemembersTheSeatUsedForFeedbackUi" methodname="FinishedCustomerRemembersTheSeatUsedForFeedbackUi" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="111980159" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000713" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1376" name="PendingPickupsAtOneStationReceiveDistinctVisualOffsets" fullname="Phase3RuntimeViewTests.PendingPickupsAtOneStationReceiveDistinctVisualOffsets" methodname="PendingPickupsAtOneStationReceiveDistinctVisualOffsets" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="1340367857" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000339" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1365" name="PlayerHoldProgressDoesNotCreateASeparateBottomBar" fullname="Phase3RuntimeViewTests.PlayerHoldProgressDoesNotCreateASeparateBottomBar" methodname="PlayerHoldProgressDoesNotCreateASeparateBottomBar" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="993406" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000075" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1361" name="PlayerOperationFeedbackDoesNotCreateAWorldCanvasOverCustomerRequirements" fullname="Phase3RuntimeViewTests.PlayerOperationFeedbackDoesNotCreateAWorldCanvasOverCustomerRequirements" methodname="PlayerOperationFeedbackDoesNotCreateAWorldCanvasOverCustomerRequirements" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="1704983730" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.004714" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1377" name="ReputationSystemIsEnabledForPlayers" fullname="Phase3RuntimeViewTests.ReputationSystemIsEnabledForPlayers" methodname="ReputationSystemIsEnabledForPlayers" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="1423044065" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000226" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1357" name="RuntimeContainsAnInstanceOwnedCustomerUiRoot" fullname="Phase3RuntimeViewTests.RuntimeContainsAnInstanceOwnedCustomerUiRoot" methodname="RuntimeContainsAnInstanceOwnedCustomerUiRoot" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="1843519227" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000068" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1370" name="RuntimeDeclaresSeparateCustomerAndPlayerServiceAnchors" fullname="Phase3RuntimeViewTests.RuntimeDeclaresSeparateCustomerAndPlayerServiceAnchors" methodname="RuntimeDeclaresSeparateCustomerAndPlayerServiceAnchors" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="783940991" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000061" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1372" name="SeatedPoseLowersCustomerAndHidesStandingLegs" fullname="Phase3RuntimeViewTests.SeatedPoseLowersCustomerAndHidesStandingLegs" methodname="SeatedPoseLowersCustomerAndHidesStandingLegs" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="1291840408" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.001049" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1364" name="ToolbarChildIsHiddenBeforeDeferredDestroy" fullname="Phase3RuntimeViewTests.ToolbarChildIsHiddenBeforeDeferredDestroy" methodname="ToolbarChildIsHiddenBeforeDeferredDestroy" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="1455361158" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000228" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1355" name="ToolbarCleanupPreservesAnUnbackedDirectChildLabel" fullname="Phase3RuntimeViewTests.ToolbarCleanupPreservesAnUnbackedDirectChildLabel" methodname="ToolbarCleanupPreservesAnUnbackedDirectChildLabel" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="1327922448" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000292" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1373" name="WaitingSeatAnchorsStayOnTheSofaAtSeatedRootHeight" fullname="Phase3RuntimeViewTests.WaitingSeatAnchorsStayOnTheSofaAtSeatedRootHeight" methodname="WaitingSeatAnchorsStayOnTheSofaAtSeatedRootHeight" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="1744261818" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000162" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1363" name="WaitingSlotRegistryCompactsCustomersWhenTheHeadLeaves" fullname="Phase3RuntimeViewTests.WaitingSlotRegistryCompactsCustomersWhenTheHeadLeaves" methodname="WaitingSlotRegistryCompactsCustomersWhenTheHeadLeaves" classname="Phase3RuntimeViewTests" runstate="Runnable" seed="2006961791" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000376" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1483" name="ReportedGameplayRegressionTests" fullname="ReportedGameplayRegressionTests" classname="ReportedGameplayRegressionTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.018035" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1485" name="DeferredResultFinalizesAfterLastLeavingCustomerExits" fullname="ReportedGameplayRegressionTests.DeferredResultFinalizesAfterLastLeavingCustomerExits" methodname="DeferredResultFinalizesAfterLastLeavingCustomerExits" classname="ReportedGameplayRegressionTests" runstate="Runnable" seed="603520582" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.009236" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[[Salon] Result deferred while a customer is leaving.
+Customer exit view: Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently
+[Phase 7 DayStats] Day 1: spawned=0, completed=0, happy=0, normal=0, unhappy=0, veryUnhappy=0, abandoned=0, unservedAtClose=0, incompleteAtClose=0, orderIncome=0, tipIncome=0, operatingNet=0, reputation=3.0->3.0, wrongStation=0, mistakes=0/0/0
+]]></output>
+        </test-case>
+        <test-case id="1484" name="ResultTransitionDoesNotRemoveLeavingCustomerBeforeExited" fullname="ReportedGameplayRegressionTests.ResultTransitionDoesNotRemoveLeavingCustomerBeforeExited" methodname="ResultTransitionDoesNotRemoveLeavingCustomerBeforeExited" classname="ReportedGameplayRegressionTests" runstate="Runnable" seed="1549623939" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.001138" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[[Salon] Result deferred while a customer is leaving.
+]]></output>
+        </test-case>
+        <test-case id="1486" name="WaitingSecondCustomerCanBeGreetedAfterFirstGuidedCustomerStartsLeaving" fullname="ReportedGameplayRegressionTests.WaitingSecondCustomerCanBeGreetedAfterFirstGuidedCustomerStartsLeaving" methodname="WaitingSecondCustomerCanBeGreetedAfterFirstGuidedCustomerStartsLeaving" classname="ReportedGameplayRegressionTests" runstate="Runnable" seed="711936177" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.003109" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1646" name="SecondCustomerReceptionRegressionTests" fullname="SecondCustomerReceptionRegressionTests" classname="SecondCustomerReceptionRegressionTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.004221" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1648" name="GuidedWashCustomerCanBeAssignedToWrongHaircutStationWithFeedback" fullname="SecondCustomerReceptionRegressionTests.GuidedWashCustomerCanBeAssignedToWrongHaircutStationWithFeedback" methodname="GuidedWashCustomerCanBeAssignedToWrongHaircutStationWithFeedback" classname="SecondCustomerReceptionRegressionTests" runstate="Runnable" seed="256388177" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.001266" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1647" name="GuidedWashCustomerExplainsNextStepAndCanBeAssigned" fullname="SecondCustomerReceptionRegressionTests.GuidedWashCustomerExplainsNextStepAndCanBeAssigned" methodname="GuidedWashCustomerExplainsNextStepAndCanBeAssigned" classname="SecondCustomerReceptionRegressionTests" runstate="Runnable" seed="1294308231" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.002166" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1855" name="StructuredHaircutStationIntegrationTests" fullname="StructuredHaircutStationIntegrationTests" classname="StructuredHaircutStationIntegrationTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.009989" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1860" name="BuiltinStationUsesThePackagedSalonShaderInAPlayerBuild" fullname="StructuredHaircutStationIntegrationTests.BuiltinStationUsesThePackagedSalonShaderInAPlayerBuild" methodname="BuiltinStationUsesThePackagedSalonShaderInAPlayerBuild" classname="StructuredHaircutStationIntegrationTests" runstate="Runnable" seed="1120111819" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.002925" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1857" name="CustomerServiceRouteCanPassThroughStationQueueAnchor" fullname="StructuredHaircutStationIntegrationTests.CustomerServiceRouteCanPassThroughStationQueueAnchor" methodname="CustomerServiceRouteCanPassThroughStationQueueAnchor" classname="StructuredHaircutStationIntegrationTests" runstate="Runnable" seed="1044854419" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000368" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1859" name="HairdresserCanExplicitlyFaceTheCustomerAfterReachingTheAnchor" fullname="StructuredHaircutStationIntegrationTests.HairdresserCanExplicitlyFaceTheCustomerAfterReachingTheAnchor" methodname="HairdresserCanExplicitlyFaceTheCustomerAfterReachingTheAnchor" classname="StructuredHaircutStationIntegrationTests" runstate="Runnable" seed="2090385622" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000095" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1856" name="MainHaircutZoneBuildsTwoInstancesFromOneStructuredAsset" fullname="StructuredHaircutStationIntegrationTests.MainHaircutZoneBuildsTwoInstancesFromOneStructuredAsset" methodname="MainHaircutZoneBuildsTwoInstancesFromOneStructuredAsset" classname="StructuredHaircutStationIntegrationTests" runstate="Runnable" seed="1370055366" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.003466" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1858" name="ServiceStartCheckRejectsAStylistWhoHasNotReachedTheWorkAnchor" fullname="StructuredHaircutStationIntegrationTests.ServiceStartCheckRejectsAStylistWhoHasNotReachedTheWorkAnchor" methodname="ServiceStartCheckRejectsAStylistWhoHasNotReachedTheWorkAnchor" classname="StructuredHaircutStationIntegrationTests" runstate="Runnable" seed="575382314" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.001626" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1861" name="StructuredCollisionCanRejectACharacterStepThroughFurniture" fullname="StructuredHaircutStationIntegrationTests.StructuredCollisionCanRejectACharacterStepThroughFurniture" methodname="StructuredCollisionCanRejectACharacterStepThroughFurniture" classname="StructuredHaircutStationIntegrationTests" runstate="Runnable" seed="2066247715" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000413" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1891" name="WashAnnexExpansionTests" fullname="WashAnnexExpansionTests" classname="WashAnnexExpansionTests" runstate="Runnable" testcasecount="14" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:46Z" duration="0.349447" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1903" name="AnnexPadChargesThenOpensStationFourAndRecordsProgress" fullname="WashAnnexExpansionTests.AnnexPadChargesThenOpensStationFourAndRecordsProgress" methodname="AnnexPadChargesThenOpensStationFourAndRecordsProgress" classname="WashAnnexExpansionTests" runstate="Runnable" seed="85339941" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.118059" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1902" name="AnnexPadStaysHiddenBeforeItsDayOpens" fullname="WashAnnexExpansionTests.AnnexPadStaysHiddenBeforeItsDayOpens" methodname="AnnexPadStaysHiddenBeforeItsDayOpens" classname="WashAnnexExpansionTests" runstate="Runnable" seed="222092658" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.001131" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1895" name="AnnexPortalLaneClearsTheSecondHaircutChairAndCornerPlant" fullname="WashAnnexExpansionTests.AnnexPortalLaneClearsTheSecondHaircutChairAndCornerPlant" methodname="AnnexPortalLaneClearsTheSecondHaircutChairAndCornerPlant" classname="WashAnnexExpansionTests" runstate="Runnable" seed="969459633" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.008051" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1892" name="AnnexProgressUsesItsOwnLedgerAndRequiresTheFullPayment" fullname="WashAnnexExpansionTests.AnnexProgressUsesItsOwnLedgerAndRequiresTheFullPayment" methodname="AnnexProgressUsesItsOwnLedgerAndRequiresTheFullPayment" classname="WashAnnexExpansionTests" runstate="Runnable" seed="1813254503" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000665" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1900" name="AnnexShellLeavesTheWalkableInteriorClear" fullname="WashAnnexExpansionTests.AnnexShellLeavesTheWalkableInteriorClear" methodname="AnnexShellLeavesTheWalkableInteriorClear" classname="WashAnnexExpansionTests" runstate="Runnable" seed="1712093591" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.019655" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1899" name="AnnexShellUsesOnlyTheCraftedRoomMaterials" fullname="WashAnnexExpansionTests.AnnexShellUsesOnlyTheCraftedRoomMaterials" methodname="AnnexShellUsesOnlyTheCraftedRoomMaterials" classname="WashAnnexExpansionTests" runstate="Runnable" seed="1256548175" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.002661" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1898" name="CraftedRoomCutOpensTheRightWallButKeepsFloorBackWallAndRearJamb" fullname="WashAnnexExpansionTests.CraftedRoomCutOpensTheRightWallButKeepsFloorBackWallAndRearJamb" methodname="CraftedRoomCutOpensTheRightWallButKeepsFloorBackWallAndRearJamb" classname="WashAnnexExpansionTests" runstate="Runnable" seed="1158504881" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.084410" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1894" name="CustomersEnterTransferAndLeaveTheAnnexOnlyThroughTheOpening" fullname="WashAnnexExpansionTests.CustomersEnterTransferAndLeaveTheAnnexOnlyThroughTheOpening" methodname="CustomersEnterTransferAndLeaveTheAnnexOnlyThroughTheOpening" classname="WashAnnexExpansionTests" runstate="Runnable" seed="2116112355" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.002346" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1897" name="CutterRemovesOnlySelectedIslandsAndKeepsSubmeshes" fullname="WashAnnexExpansionTests.CutterRemovesOnlySelectedIslandsAndKeepsSubmeshes" methodname="CutterRemovesOnlySelectedIslandsAndKeepsSubmeshes" classname="WashAnnexExpansionTests" runstate="Runnable" seed="298209901" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000778" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1905" name="GuidedWashCustomerIsSentToTheAnnexWhenTheFirstBedIsBusy" fullname="WashAnnexExpansionTests.GuidedWashCustomerIsSentToTheAnnexWhenTheFirstBedIsBusy" methodname="GuidedWashCustomerIsSentToTheAnnexWhenTheFirstBedIsBusy" classname="WashAnnexExpansionTests" runstate="Runnable" seed="1521137184" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.001292" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1901" name="JoystickEntersTheAnnexThroughTheOpeningAndReachesTheWashAnchor" fullname="WashAnnexExpansionTests.JoystickEntersTheAnnexThroughTheOpeningAndReachesTheWashAnchor" methodname="JoystickEntersTheAnnexThroughTheOpeningAndReachesTheWashAnchor" classname="WashAnnexExpansionTests" runstate="Runnable" seed="869994179" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.001628" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1893" name="LegacyProgressJsonKeepsTheAnnexClosed" fullname="WashAnnexExpansionTests.LegacyProgressJsonKeepsTheAnnexClosed" methodname="LegacyProgressJsonKeepsTheAnnexClosed" classname="WashAnnexExpansionTests" runstate="Runnable" seed="1886794743" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000142" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1896" name="MainRoomRoutesKeepTheirApprovedLanes" fullname="WashAnnexExpansionTests.MainRoomRoutesKeepTheirApprovedLanes" methodname="MainRoomRoutesKeepTheirApprovedLanes" classname="WashAnnexExpansionTests" runstate="Runnable" seed="24299135" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:45Z" duration="0.000158" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1904" name="OpeningTheAnnexCutsTheWallAndAClosedCheckpointRestoresIt" fullname="WashAnnexExpansionTests.OpeningTheAnnexCutsTheWallAndAClosedCheckpointRestoresIt" methodname="OpeningTheAnnexCutsTheWallAndAClosedCheckpointRestoresIt" classname="WashAnnexExpansionTests" runstate="Runnable" seed="2049980222" result="Passed" start-time="2026-09-30 08:32:45Z" end-time="2026-09-30 08:32:46Z" duration="0.106109" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Saving results to: /Users/kker/Documents/ChatGPT/game2/artifacts/core-rework/batch1-door.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

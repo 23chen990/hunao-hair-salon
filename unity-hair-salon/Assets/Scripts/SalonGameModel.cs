@@ -20,7 +20,7 @@ namespace HairSalon
         Completed
     }
     public enum SalonViewState { Overview, WorkstationFocus }
-    public enum CustomerState { Entering, Waiting, MovingToStation, Serving, Finished, Leaving, Exited }
+    public enum CustomerState { Entering, Waiting, MovingToStation, Serving, Finished, Leaving, Exited, Checkout }
     public enum CustomerEmotion { Calm, Impatient, Angry, Happy }
     public enum CustomerReactionKind { None, Confused, Protest, Resistance, Impatient, Angry }
     public enum CustomerWrongServiceKind { None, Wash, Dry, Haircut }
@@ -178,6 +178,7 @@ namespace HairSalon
         /// -1 means no player-specific reservation (legacy/single-player path).
         /// </summary>
         public int InteractionOwnerPlayerId = -1;
+        public bool TimedActionPaused;
         public float ActiveServiceElapsed;
         public float ActiveServiceDuration;
         public bool TowelWrapped;
@@ -255,7 +256,7 @@ namespace HairSalon
     public sealed class SalonGameModel
     {
         public const int LocalPlayerId = 1;
-        public const bool ReputationSystemEnabled = false;
+        public const bool ReputationSystemEnabled = true;
         public const int MaxCustomers = 5;
         public const int WaitingCapacity = 4;
         public const float EnteringSeconds = .8f;
@@ -280,9 +281,12 @@ namespace HairSalon
         public SalonServiceConfig ServiceConfig { get; }
         public CustomerExperienceProfile ExperienceProfile { get; }
         public EquipmentProductModel AutoBlowStandProduct { get; } = new EquipmentProductModel();
-        /// <summary>基础自动吹发属于首日可玩的服务；购买支架只升级时间窗口。</summary>
-        public bool AutoBlowAvailable => true;
+        /// <summary>Only the built stand can run a dryer without the stylist holding it.</summary>
+        public bool AutoBlowAvailable => HasAutoBlowStand;
         public bool HasAutoBlowStand => AutoBlowStandProduct.Purchased;
+        /// <summary>Every waiting slot is a seat once the waiting seats are built.</summary>
+        public bool WaitingSeatsInstalled { get; set; }
+        public bool RequireCheckout { get; set; }
         public bool FirstDayCompleteForShop { get; private set; }
         public int Balance => Payments.Balance;
         public int Served { get; private set; }
@@ -428,7 +432,7 @@ namespace HairSalon
                     // and the unattended auto-blow timer remain protected until the player
                     // returns to finish them.
                     if ((IsAwaitingTransfer(customer) || customer.HasServiceEngaged) &&
-                        !IsUninterruptibleOperation(customer))
+                        !IsUninterruptibleOperation(customer) && !IsProtectedFoamWait(customer))
                         AddServiceDelay(customer, step);
                     else customer.ServiceElapsed += step;
                 }
@@ -447,7 +451,9 @@ namespace HairSalon
                     {
                         ClearFocusForCustomer(customer.Id);
                         ReleaseWorkstation(customer);
-                        ChangeState(customer, CustomerState.Leaving);
+                        ChangeState(customer, RequireCheckout && customer.IsComplete &&
+                            customer.ServiceResult != CustomerServiceResult.Failed
+                            ? CustomerState.Checkout : CustomerState.Leaving);
                     }
                     continue;
                 }
@@ -960,6 +966,59 @@ namespace HairSalon
                     customer.ServiceExecution.State == ServiceExecutionState.Executing);
         }
 
+        /// <summary>
+        /// A seated customer who has not started an operation can stand up.
+        /// Cross-seated customers otherwise deadlock: each correct chair is held by the other.
+        /// </summary>
+        public bool CanRecallFromStation(CustomerModel customer)
+        {
+            if (customer == null || customer.IsComplete)
+                return false;
+            if (customer.State != CustomerState.Serving && customer.State != CustomerState.MovingToStation)
+                return false;
+            if (customer.Station < 0 || customer.Station >= Workstations.Count) return false;
+            if (IsMovementLocked(customer) || customer.IsProcessing || IsWashWorkInProgress(customer))
+                return false;
+            if (customer.BackgroundTask.State == BackgroundTaskState.Running) return false;
+            if (customer.AutoBlowRunning || customer.AutoBlowSafetyStopped) return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Foam, shampoo and a wrapped towel are unfinished wash work.
+        /// A rinsed customer waiting for the next chair is not: they can stand up.
+        /// </summary>
+        private static bool IsWashWorkInProgress(CustomerModel customer)
+        {
+            if (customer == null) return false;
+            if (customer.TowelWrapped || customer.ShampooApplied) return true;
+            return customer.WashStage == WashStage.Wetting
+                || customer.WashStage == WashStage.ShampooApplied
+                || customer.WashStage == WashStage.Shampooing
+                || customer.WashStage == WashStage.Foamy
+                || customer.WashStage == WashStage.Rinsing;
+        }
+
+        public bool RecallFromStation(CustomerModel customer)
+        {
+            if (!CanRecallFromStation(customer)) return false;
+            ReleaseWorkstation(customer);
+            if (customer.ReactionKind == CustomerReactionKind.Confused)
+            {
+                customer.ReactionKind = CustomerReactionKind.None;
+                customer.ReactionRemaining = 0f;
+            }
+            bool alreadyEngaged = customer.HasServiceEngaged;
+            ChangeState(customer, CustomerState.Waiting);
+            if (alreadyEngaged)
+                customer.AttentionState = CustomerAttentionState.ServiceEngaged;
+            else
+                EngageService(customer);
+            RefreshFocusedStation(customer);
+            CustomerChanged?.Invoke(customer);
+            return true;
+        }
+
         public bool IsAwaitingTransfer(CustomerModel customer)
         {
             return customer != null && customer.State == CustomerState.Serving &&
@@ -1425,6 +1484,7 @@ namespace HairSalon
         public bool TickActiveServiceAction(CustomerModel customer, float dt)
         {
             if (customer == null || customer.ActiveServiceAction == ActiveServiceAction.None) return false;
+            if (customer.TimedActionPaused) return true;
             customer.ActiveServiceElapsed += Math.Max(0f, dt);
             if (customer.ActiveServiceElapsed < customer.ActiveServiceDuration) return true;
 
@@ -1549,7 +1609,7 @@ namespace HairSalon
                     customer, preview, GetServiceProgressSnapshot(customer), GetServicePhysicalSnapshot(customer));
                 _washServiceAdapter.DiscardTimedAction(customer, ClearReason.ToolBecameInvalid);
                 var cancelled = new ApplyActionResult(ApplyStatus.InvalidToken, DiagnosticCode.InvalidToken);
-                EndManualBlowState(customer, cancelled, classification, elapsed);
+                EndManualBlowState(customer, cancelled, classification, elapsed, -1);
                 return;
             }
             float activeElapsed = customer.ActiveServiceElapsed;
@@ -1584,16 +1644,31 @@ namespace HairSalon
         }
 
         public bool StartManualBlow(CustomerModel customer)
+            => StartManualBlowInternal(-1, customer);
+
+        internal bool StartManualBlowForPlayer(int playerId, CustomerModel customer)
+            => StartManualBlowInternal(playerId, customer);
+
+        private bool StartManualBlowInternal(int playerId, CustomerModel customer)
         {
+            if (playerId <= 0 && playerId != -1) return false;
+            if (playerId > 0)
+            {
+                if (IsPlayerBusy(playerId)) return false;
+                if (customer == null ||
+                    (customer.InteractionOwnerPlayerId > 0 && customer.InteractionOwnerPlayerId != playerId))
+                    return false;
+            }
             if (customer == null || !CanPerformBlowDry(customer) ||
                 customer.State != CustomerState.Serving || !IsCompatibleStation(ServiceType.Dry, customer.Station) ||
                 (customer.BlowStage != BlowStage.AwaitingStart && customer.BlowStage != BlowStage.Early) ||
-                customer.AutoBlowRunning) return false;
+                customer.AutoBlowRunning || customer.ActiveServiceAction != ActiveServiceAction.None ||
+                customer.AttentionState == CustomerAttentionState.ActiveOperation) return false;
             float accumulatedElapsed = customer.BlowStage == BlowStage.Early
                 ? Math.Max(0f, customer.ManualBlowElapsed) : 0f;
             if (!_washServiceAdapter.BeginTimedAction(customer, ServiceActionType.BlowDry, ServiceTool.BlowDryer, WorldElapsed))
                 return false;
-            if (!BeginTimedAction(customer, ActiveServiceAction.ManualBlow, ServiceConfig.ManualBlowMinorEnd))
+            if (!BeginTimedAction(customer, ActiveServiceAction.ManualBlow, ServiceConfig.ManualBlowMinorEnd, playerId))
             {
                 _washServiceAdapter.CompleteTimedAction(customer, 0f, true);
                 return false;
@@ -1608,9 +1683,17 @@ namespace HairSalon
         }
 
         public bool TickManualBlow(CustomerModel customer, float dt)
+            => TickManualBlowInternal(-1, customer, dt);
+
+        internal bool TickManualBlowForPlayer(int playerId, CustomerModel customer, float dt)
+            => TickManualBlowInternal(playerId, customer, dt);
+
+        private bool TickManualBlowInternal(int playerId, CustomerModel customer, float dt)
         {
+            if (playerId <= 0 && playerId != -1) return false;
             if (customer == null || !customer.ManualBlowHolding ||
                 customer.ActiveServiceAction != ActiveServiceAction.ManualBlow) return false;
+            if (playerId > 0 && customer.InteractionOwnerPlayerId != playerId) return false;
             customer.ManualBlowElapsed += Math.Max(0f, dt);
             if (customer.ManualBlowElapsed >= Math.Max(0f, ServiceConfig.ManualBlowMinorEnd))
                 customer.BlowStage = BlowStage.Moderate;
@@ -1624,8 +1707,16 @@ namespace HairSalon
         }
 
         public BlowResult EndManualBlowHold(CustomerModel customer)
+            => EndManualBlowHoldInternal(-1, customer);
+
+        internal BlowResult EndManualBlowHoldForPlayer(int playerId, CustomerModel customer)
+            => EndManualBlowHoldInternal(playerId, customer);
+
+        private BlowResult EndManualBlowHoldInternal(int playerId, CustomerModel customer)
         {
+            if (playerId <= 0 && playerId != -1) return BlowResult.None;
             if (customer == null || !customer.ManualBlowHolding) return BlowResult.None;
+            if (playerId > 0 && customer.InteractionOwnerPlayerId != playerId) return BlowResult.None;
             customer.ManualBlowHolding = false;
             float elapsed = customer.ManualBlowElapsed;
             ActionResult preview = _washServiceAdapter.PreviewTimedActionResult(customer, elapsed);
@@ -1642,7 +1733,7 @@ namespace HairSalon
             {
                 applied = _washServiceAdapter.CompleteTimedAction(customer, elapsed, false);
             }
-            BlowResult result = EndManualBlowState(customer, applied, classification, elapsed);
+            BlowResult result = EndManualBlowState(customer, applied, classification, elapsed, playerId);
             if (result != BlowResult.Undone)
             {
                 if (!customer.IsComplete && customer.CurrentNeed == ServiceType.Dry)
@@ -1657,7 +1748,8 @@ namespace HairSalon
             CustomerModel customer,
             ApplyActionResult applied,
             ServiceActionClassification classification,
-            float elapsed)
+            float elapsed,
+            int ownerPlayerId = -1)
         {
             if (customer == null) return BlowResult.None;
             customer.ActiveServiceAction = ActiveServiceAction.None;
@@ -1665,7 +1757,8 @@ namespace HairSalon
             customer.ActiveServiceElapsed = 0f;
             customer.ActiveServiceDuration = 0f;
             customer.ServicePhase = ServiceStepPhase.Ready;
-            EndActiveOperation(customer);
+            if (ownerPlayerId > 0) EndActiveOperationForPlayer(ownerPlayerId, customer);
+            else EndActiveOperation(customer);
 
             BlowResult result = elapsed < Math.Max(0f, ServiceConfig.ManualBlowGoodStart)
                 ? BlowResult.Undone
@@ -1726,6 +1819,17 @@ namespace HairSalon
             return true;
         }
 
+        /// <summary>
+        /// Installs the stand after its construction pad has been paid in
+        /// full; the coins were already spent on the pad.
+        /// </summary>
+        public void InstallAutoBlowStand()
+        {
+            AutoBlowStandProduct.Purchased = true;
+            AutoBlowStandProduct.CanPurchase = false;
+            AutoBlowStandProduct.LockReason = string.Empty;
+        }
+
         public bool PayCompensation(DayStats stats, int amount)
         {
             int expense = Math.Max(0, amount);
@@ -1734,13 +1838,30 @@ namespace HairSalon
             return true;
         }
 
-        public void ForceCloseRemainingCustomers(DayStats stats)
+        public bool FinishCheckout(int customerId, bool paid)
+        {
+            CustomerModel customer = Customers.Find(c => c.Id == customerId);
+            if (customer == null || (customer.State != CustomerState.Checkout &&
+                customer.State != CustomerState.Finished)) return false;
+            ClearFocusForCustomer(customer.Id);
+            ReleaseWorkstation(customer);
+            if (!paid) { customer.Emotion = CustomerEmotion.Angry; customer.ReactionRemaining = 5f; }
+            ChangeState(customer, CustomerState.Leaving);
+            return true;
+        }
+
+        public void ForceCloseRemainingCustomers(DayStats stats) => CloseRemainingCustomers(stats, false);
+
+        public void BeginClosingWalks(DayStats stats) => CloseRemainingCustomers(stats, true);
+
+        private void CloseRemainingCustomers(DayStats stats, bool walkOut)
         {
             for (int i = Customers.Count - 1; i >= 0; i--)
             {
                 CustomerModel customer = Customers[i];
                 if (customer.State == CustomerState.Exited) continue;
-                if (customer.State == CustomerState.Finished ||
+                if (walkOut && (customer.State == CustomerState.Leaving || customer.State == CustomerState.Finished)) continue;
+                if (customer.State == CustomerState.Finished || customer.State == CustomerState.Leaving ||
                     (customer.OrderRequirementsCompleted && !customer.HasBlockingPhysicalState))
                 {
                     stats?.RecordCustomerSnapshot(customer);
@@ -1755,17 +1876,31 @@ namespace HairSalon
                 }
                 else
                 {
-                    customer.ServiceResult = CustomerServiceResult.Failed;
-                    customer.ServiceFeedback = CustomerServiceFeedback.Dissatisfied;
-                    customer.Emotion = CustomerEmotion.Angry;
+                    bool normalClosingDeparture =
+                        (customer.State == CustomerState.Entering || customer.State == CustomerState.Waiting) &&
+                        customer.Patience > 0f && customer.ServiceResult == CustomerServiceResult.None &&
+                        customer.WrongStationCount == 0 && customer.WrongServiceKind == CustomerWrongServiceKind.None &&
+                        customer.AccidentSeverity == AccidentSeverity.None && !customer.HadServiceDelay;
+                    // A customer still patiently waiting when the shop closes
+                    // has no service outcome to rate. Keep unserved statistics
+                    // without manufacturing a failed order during cleanup.
+                    customer.ServiceResult = normalClosingDeparture
+                        ? CustomerServiceResult.None : CustomerServiceResult.Failed;
+                    customer.ServiceFeedback = normalClosingDeparture
+                        ? CustomerServiceFeedback.None : CustomerServiceFeedback.Dissatisfied;
+                    customer.Emotion = normalClosingDeparture ? CustomerEmotion.Calm : CustomerEmotion.Angry;
                     stats?.RecordUnservedAtClose();
                 }
                 ReleaseWorkstation(customer);
-                customer.State = CustomerState.Exited;
+                customer.ActiveServiceAction = ActiveServiceAction.None;
+                customer.AutoBlowRunning = false;
+                customer.BackgroundTask.State = BackgroundTaskState.Complete;
+                customer.State = walkOut ? CustomerState.Leaving : CustomerState.Exited;
+                customer.StateElapsed = 0f;
                 stats?.RecordCustomerSnapshot(customer);
                 CustomerChanged?.Invoke(customer);
             }
-            Customers.Clear();
+            if (!walkOut) Customers.Clear();
             _waitingQueue.Clear();
             ClearAllPlayerFocus();
         }
@@ -2261,6 +2396,7 @@ namespace HairSalon
         {
             if (customer == null || customer.ActiveServiceAction != ActiveServiceAction.None) return false;
             customer.ActiveServiceAction = action;
+            customer.TimedActionPaused = false;
             customer.ActiveServiceElapsed = 0f;
             customer.ActiveServiceDuration = Math.Max(0f, duration);
             customer.ServicePhase = ServiceStepPhase.Active;
@@ -2309,7 +2445,9 @@ namespace HairSalon
 
         private void UpdateServiceStage(CustomerModel customer, float dt)
         {
-            if (customer == null) return;
+            // A closing customer may still have physical foam on their head.
+            // Its ready-state projection must not reset the departure clock.
+            if (customer == null || customer.State != CustomerState.Serving) return;
             if (customer.WashStage == WashStage.FoamWait ||
                 customer.WashStage == WashStage.ReadyToRinse)
             {
@@ -2539,9 +2677,10 @@ namespace HairSalon
             if (customer == null || customer.State == CustomerState.Entering)
                 return 1f;
             if (customer.State == CustomerState.Waiting)
-                return customer.HasServiceEngaged ? 0f : 1f;
+                return customer.HasServiceEngaged ? 0f
+                    : WaitingSeatsInstalled ? SalonUnlockRoute.SeatedWaitingPatienceMultiplier : 1f;
             if (customer.State != CustomerState.Serving) return 0f;
-            if (IsUninterruptibleOperation(customer))
+            if (IsUninterruptibleOperation(customer) || IsProtectedFoamWait(customer))
                 return 0f;
             if (customer.Station >= 0 && customer.Station < Workstations.Count &&
                 !IsCompatibleStation(customer.CurrentNeed, Workstations[customer.Station].Type)) return 1f;
@@ -2558,6 +2697,16 @@ namespace HairSalon
                 return Math.Max(0f, ExperienceProfile.ServiceDelayPatienceMultiplier);
             }
             return 1f;
+        }
+
+        /// <summary>
+        /// Foam is a designed "walk away" window like the unattended dryer.
+        /// Its own late thresholds carry the consequence once it is ignored.
+        /// </summary>
+        private bool IsProtectedFoamWait(CustomerModel customer)
+        {
+            return ServiceConfig.BackgroundFoamIsNotServiceDelay && IsWashFoamWaitRunning(customer) &&
+                   customer.BackgroundTask.Elapsed < ServiceConfig.FoamMinorLateThreshold;
         }
 
         private static bool IsUninterruptibleOperation(CustomerModel customer)
@@ -2617,8 +2766,15 @@ namespace HairSalon
         private void CreatePayment(CustomerModel customer, int station, HaircutServiceRating rating, bool happyCompletion)
         {
             if (station < 0) return;
+            int tip = happyCompletion ? Math.Max(0, Payments.Config.HappyTipReward) : 0;
+            if (Payments.Config.SpeedTipTiers)
+            {
+                float maxPatience = Math.Max(1f, customer.MaxPatience);
+                tip = Payments.ResolveSpeedTip(customer.Patience / maxPatience,
+                    customer.AccidentSeverity, customer.WrongStationCount > 0);
+            }
             PaymentDropModel drop = Payments.CreateOrderPayment(
-                customer.Id, station, customer.Needs, rating, happyCompletion);
+                customer.Id, station, customer.Needs, rating, tip);
             PaymentCreated?.Invoke(drop);
         }
 

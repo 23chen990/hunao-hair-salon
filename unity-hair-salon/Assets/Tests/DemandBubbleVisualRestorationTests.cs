@@ -33,6 +33,55 @@ public class DemandBubbleVisualRestorationTests
     }
 
     [Test]
+    public void SelectedDemandBubbleFitsBetweenMobileHudAndControls()
+    {
+        var root = new GameObject("Selected wash demand");
+        var cameraObject = new GameObject("Landscape camera", typeof(Camera));
+        var texture = new RenderTexture(844, 390, 16);
+        try
+        {
+            Camera camera = cameraObject.GetComponent<Camera>();
+            camera.orthographic = true;
+            camera.orthographicSize = 6f;
+            camera.transform.position = new Vector3(0f, 0f, -10f);
+            camera.targetTexture = texture;
+            var bubble = root.AddComponent<OrderDemandBubbleView>();
+            bubble.Initialize(new CustomerModel
+            {
+                Needs = new List<ServiceType> { ServiceType.Wash, ServiceType.Dry }
+            }, camera);
+            MethodInfo constrain = typeof(OrderDemandBubbleView).GetMethod("ConstrainToMobileScreen");
+            Assert.IsNotNull(constrain, "Selected world bubbles need a mobile HUD safe-area adjustment.");
+            constrain.Invoke(bubble, null);
+
+            var canvas = root.transform.Find("完整订单需求气泡") as RectTransform;
+            Assert.IsNotNull(canvas);
+            var corners = new Vector3[4];
+            canvas.GetWorldCorners(corners);
+            float bottom = float.PositiveInfinity, top = float.NegativeInfinity;
+            foreach (Vector3 corner in corners)
+            {
+                float y = camera.WorldToScreenPoint(corner).y;
+                bottom = Mathf.Min(bottom, y);
+                top = Mathf.Max(top, y);
+            }
+            Assert.LessOrEqual(top, 390f * .66f + 1f,
+                "The demand bubble must sit below the 844×390 top HUD and task strip.");
+            Assert.GreaterOrEqual(bottom, 390f * .35f - 1f,
+                "The demand bubble must stay above the touch-control zone.");
+            Assert.Less(camera.WorldToScreenPoint(canvas.position).z, camera.nearClipPlane + .1f,
+                "A bubble moved below the HUD must still render in front of characters and furniture.");
+        }
+        finally
+        {
+            cameraObject.GetComponent<Camera>().targetTexture = null;
+            Object.DestroyImmediate(texture);
+            Object.DestroyImmediate(root);
+            Object.DestroyImmediate(cameraObject);
+        }
+    }
+
+    [Test]
     public void DyeFailureVisualUsesMultipleHairColors()
     {
         var root = new GameObject("Rainbow hair customer");

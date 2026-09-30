@@ -1,0 +1,4 @@
+{
+  "passed": false,
+  "error": "Leaving customer did not reach the configured exit: {'startScreen': {'x': 431.1422119140625, 'y': 190.46551513671875}, 'maxScreenDisplacementPx': 269.3185233886762, 'closestExitDistance': 8.730783466585509, 'exit': {'x': -10.8, 'z': 5.9}, 'screenshot': '14-first-customer-leaving.png'}"
+}

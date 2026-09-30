@@ -34,6 +34,7 @@ namespace HairSalon
         public int LongWaitPenalty = 4;
         public int WrongServicePenalty = 8;
         public int DisasterPenalty = 15;
+        public int MinorAccidentPenalty = 15;
         public int FailedServicePenalty = 8;
         public float LongWaitSeconds = 12f;
     }
@@ -74,7 +75,8 @@ namespace HairSalon
 
         public bool TrySettleCustomer(CustomerModel customer)
         {
-            if (customer == null || !IsTerminal(customer.State) || !_settledCustomers.Add(customer.Id))
+            if (customer == null || !IsTerminal(customer.State) ||
+                customer.ServiceResult == CustomerServiceResult.None || !_settledCustomers.Add(customer.Id))
                 return false;
 
             int delta = 0;
@@ -87,7 +89,9 @@ namespace HairSalon
                 delta -= Math.Max(0, _config.LongWaitPenalty);
             if (customer.WrongStationCount > 0 || customer.WrongServiceKind != CustomerWrongServiceKind.None)
                 delta -= Math.Max(0, _config.WrongServicePenalty);
-            if (customer.AccidentSeverity != AccidentSeverity.None)
+            if (customer.AccidentSeverity == AccidentSeverity.Minor)
+                delta -= Math.Max(0, _config.MinorAccidentPenalty);
+            else if (customer.AccidentSeverity != AccidentSeverity.None)
                 delta -= Math.Max(0, _config.DisasterPenalty);
             if (customer.ServiceResult == CustomerServiceResult.HappyCompletion &&
                 customer.TotalWaitSeconds <= Math.Max(0f, _config.LongWaitSeconds) &&

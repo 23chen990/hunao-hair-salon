@@ -157,8 +157,8 @@ public sealed partial class SalonDemo : MonoBehaviour
         ApplyFocus(customer);
     }
 
-    private static readonly Vector3 EntrancePosition = new Vector3(-10.4f, 1.05f, -2.7f);
-    private static readonly Vector3 ExitPosition = new Vector3(-10.8f, 1.05f, 5.9f);
+    private static readonly Vector3 EntrancePosition = SalonEntranceDoor.OutsideSpawn;
+    private static readonly Vector3 ExitPosition = SalonEntranceDoor.OutsideExit;
     public static readonly Vector3 PrimaryWashBedPosition = new Vector3(-7.2f, .35f, 4.6f);
     public static readonly Vector3 SecondaryWashBedPosition = PrimaryWashBedPosition + new Vector3(2.6f, 0f, 0f);
     public static readonly Vector3 WashCustomerAnchorPosition = PrimaryWashBedPosition + new Vector3(0f, 1.4f, -.6f);
@@ -242,8 +242,9 @@ public sealed partial class SalonDemo : MonoBehaviour
         if (_mobileMode)
             _game.ConfigureWorkstationAvailability(
                 _mobileProgress != null && _mobileProgress.HaircutExpansionPurchased,
-                false, false);
-        _dayController = new BusinessDayController(DaySettings);
+                IsMobileWashAnnexUnlocked, false);
+        _dayController = new BusinessDayController(DaySettings,
+            _mobileMode ? SalonMobileDayConfig.CreateReputationConfig() : null);
         _satisfaction = new ShopSatisfactionModel(SatisfactionSettings);
         _trafficDirector = new CustomerTrafficDirector(DaySettings);
         _dayController.StateChanged += HandleDayStateChanged;
@@ -255,6 +256,8 @@ public sealed partial class SalonDemo : MonoBehaviour
         _game.ViewChanged += HandleViewChanged;
         BuildWorld();
         WashCraftIntegration.Apply(GameObject.Find("Fixed Salon Map").transform);
+        ApplyEntranceDoor();
+        ApplyMobileWashAnnexPresentation();
         BuildHud();
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (DevelopmentDebugOverlay.IsRequested(Application.absoluteURL, System.Environment.GetCommandLineArgs()))
@@ -309,6 +312,7 @@ public sealed partial class SalonDemo : MonoBehaviour
             else TryFinalizeDeferredResult();
             return;
         }
+        if (_mobileMode) UpdateMobileFoamHoldInput();
         _game.Tick(Time.deltaTime);
         MaintainCustomerFlow(Time.deltaTime);
         if (_mobileMode)
@@ -341,6 +345,13 @@ public sealed partial class SalonDemo : MonoBehaviour
         if (_mobileMode) return;
         if (!CanInteractWithSalon() || _game == null || _game.SelectedCustomer == null) return;
         CustomerModel customer = _game.SelectedCustomer;
+        if (customer.Station == stationId && _game.RecallFromStation(customer))
+        {
+            ResetToolSelection();
+            ApplyFocus(customer);
+            ShowToast("顾客已离开工位");
+            return;
+        }
         bool targetMatchesCurrentNeed = stationId >= 0 && stationId < _game.Workstations.Count &&
             SalonGameModel.IsCompatibleStation(
                 customer.CurrentNeed, _game.Workstations[stationId].Type);
@@ -461,7 +472,12 @@ public sealed partial class SalonDemo : MonoBehaviour
     {
         Block("Back Wall", root, new Vector3(0f, 2.2f, 7.65f), new Vector3(22.5f, 4.7f, .55f), CoralLight);
         Block("Back Wall Cream", root, new Vector3(0f, 3.7f, 7.34f), new Vector3(21.8f, 1.55f, .16f), Cream);
-        Block("Left Wall", root, new Vector3(-10.85f, 2.2f, 1f), new Vector3(.55f, 4.7f, 13.7f), Coral);
+        float doorFrontLength = SalonEntranceDoor.OpeningMinZ - SalonEntranceDoor.FallbackWallMinZ;
+        float doorBackLength = SalonEntranceDoor.FallbackWallMaxZ - SalonEntranceDoor.OpeningMaxZ;
+        Block("Left Wall", root, new Vector3(-10.85f, 2.2f, SalonEntranceDoor.FallbackWallMinZ + doorFrontLength * .5f),
+            new Vector3(.55f, 4.7f, doorFrontLength), Coral);
+        Block("Left Wall", root, new Vector3(-10.85f, 2.2f, SalonEntranceDoor.OpeningMaxZ + doorBackLength * .5f),
+            new Vector3(.55f, 4.7f, doorBackLength), Coral);
         Block("Right Wall", root, new Vector3(10.85f, 2.2f, 1f), new Vector3(.55f, 4.7f, 13.7f), Coral);
         for (int x = -9; x <= 9; x += 3)
             Block("Wall Panel", root, new Vector3(x, 1.25f, 7.02f), new Vector3(2.65f, 1.8f, .18f), x % 2 == 0 ? Coral : CoralLight);
@@ -474,9 +490,15 @@ public sealed partial class SalonDemo : MonoBehaviour
         for (int i = 0; i < 2; i++)
         {
             int stationId = i == 0 ? 0 : 4;
-            Vector3 position = i == 0 ? PrimaryWashBedPosition : SecondaryWashBedPosition;
-            Vector3 customerAnchor = i == 0 ? WashCustomerAnchorPosition : SecondaryWashCustomerAnchorPosition;
-            Vector3 playerAnchor = i == 0 ? WashPlayerAnchorPosition : SecondaryWashPlayerAnchorPosition;
+            // The mobile shop builds its second bed in the right-wall annex;
+            // the legacy acceptance harnesses keep the original twin bed.
+            bool annexBed = i == 1 && _mobileMode;
+            Vector3 position = i == 0 ? PrimaryWashBedPosition :
+                annexBed ? SalonWashAnnexLayout.WashBedPosition : SecondaryWashBedPosition;
+            Vector3 customerAnchor = i == 0 ? WashCustomerAnchorPosition :
+                annexBed ? SalonWashAnnexLayout.WashCustomerAnchorPosition : SecondaryWashCustomerAnchorPosition;
+            Vector3 playerAnchor = i == 0 ? WashPlayerAnchorPosition :
+                annexBed ? SalonWashAnnexLayout.WashPlayerAnchorPosition : SecondaryWashPlayerAnchorPosition;
             var station = new GameObject("Wash Workstation " + (i + 1)).transform;
             station.SetParent(zone, false);
             Block("Wash Base", station, position, new Vector3(2.2f, .65f, 3.05f), TealDark);
@@ -486,7 +508,7 @@ public sealed partial class SalonDemo : MonoBehaviour
             _customerSeatAnchors[stationId] = target;
             _playerServiceAnchors[stationId] = Marker("PlayerServiceAnchor", station, playerAnchor);
             _stationUiAnchors[stationId] = Marker("CustomerUIAnchor", station,
-                customerAnchor + new Vector3(i == 0 ? -.18f : .18f, .9f, 0f));
+                customerAnchor + new Vector3(i == 0 || annexBed ? -.18f : .18f, .9f, 0f));
             _stationRoots[stationId] = station.gameObject;
             var stationClick = station.gameObject.AddComponent<SalonStationClick>();
             stationClick.Owner = this;
@@ -581,12 +603,16 @@ public sealed partial class SalonDemo : MonoBehaviour
     {
         var zone = new GameObject("顾客等候区").transform;
         zone.SetParent(root, false);
-        Block("Sofa Seat", zone, new Vector3(-7.3f, .55f, -4.5f), new Vector3(5.2f, .65f, 1.6f), DarkWood);
-        Block("Sofa Cushion", zone, new Vector3(-7.3f, 1f, -4.3f), new Vector3(4.75f, .45f, 1.25f), Hex("D69A32"));
-        Block("Sofa Back", zone, new Vector3(-7.3f, 1.55f, -3.85f), new Vector3(5f, 1.25f, .45f), Wood);
-        Block("Coffee Table", zone, new Vector3(-6.9f, .35f, -2.35f), new Vector3(3.2f, .35f, 1.2f), Wood);
-        FurnitureShadow(zone, "furniture-waiting-sofa", new Vector3(-7.3f, 0f, -4.3f));
-        FurnitureShadow(zone, "furniture-coffee-table", new Vector3(-6.9f, 0f, -2.35f));
+        _waitingSeatsRoot = new GameObject("Waiting Seats");
+        Transform seats = _waitingSeatsRoot.transform;
+        seats.SetParent(zone, false);
+        Block("Sofa Seat", seats, new Vector3(-7.3f, .55f, -4.5f), new Vector3(5.2f, .65f, 1.6f), DarkWood);
+        Block("Sofa Cushion", seats, new Vector3(-7.3f, 1f, -4.3f), new Vector3(4.75f, .45f, 1.25f), Hex("D69A32"));
+        Block("Sofa Back", seats, new Vector3(-7.3f, 1.55f, -3.85f), new Vector3(5f, 1.25f, .45f), Wood);
+        Block("Coffee Table", seats, new Vector3(-6.9f, .35f, -2.35f), new Vector3(3.2f, .35f, 1.2f), Wood);
+        FurnitureShadow(seats, "furniture-waiting-sofa", new Vector3(-7.3f, 0f, -4.3f));
+        FurnitureShadow(seats, "furniture-coffee-table", new Vector3(-6.9f, 0f, -2.35f));
+        BuildMobileWaitingUnlocks(zone);
         for (int i = 0; i < WaitingPositions.Length; i++)
         {
             // Fixed staggered rows keep adjacent multi-step request groups visually distinct.
@@ -606,6 +632,7 @@ public sealed partial class SalonDemo : MonoBehaviour
         Block("Register", zone, new Vector3(6.5f, 2.3f, -3.7f), new Vector3(1.2f, .75f, .75f), Ink, new Vector3(-10f, 0f, 0f));
         Block("Coin Screen", zone, new Vector3(6.5f, 2.35f, -3.25f), new Vector3(.75f, .42f, .08f), Hex("60B85C"));
         FurnitureShadow(zone, "furniture-cashier-counter", new Vector3(7.2f, 0f, -3.9f));
+        BuildMobileCashier(zone);
     }
 
     private void BuildShelvesAndPlants(Transform root)
@@ -784,6 +811,17 @@ public sealed partial class SalonDemo : MonoBehaviour
             new Vector2(0f, 330f), new Vector2(430f, 64f));
         _managementFundsLabel = UiLabel("当前资金  0", surface, 25, Gold, TextAnchor.MiddleCenter,
             new Vector2(0f, 282f), new Vector2(430f, 48f));
+        if (_mobileMode)
+        {
+            // Every mobile unlock is a coin-drop pad in the salon; closing
+            // only previews what tomorrow's level opens.
+            _shopStatusLabel = UiLabel("", surface, 28, Color.white, TextAnchor.MiddleCenter,
+                new Vector2(0f, 40f), new Vector2(680f, 330f), DarkWood);
+            UiButton("准备下一天", surface, new Vector2(.5f, .5f), new Vector2(0f, -305f),
+                new Vector2(330f, 72f), Teal, BeginNextDay);
+            _shopPanel.SetActive(false);
+            return;
+        }
         EquipmentProductModel product = _game.AutoBlowStandProduct;
         UiLabel("A", surface, 72, Gold, TextAnchor.MiddleCenter,
             new Vector2(-300f, 205f), new Vector2(120f, 120f), DarkWood);
@@ -856,6 +894,12 @@ public sealed partial class SalonDemo : MonoBehaviour
         EquipmentProductModel product = _game.AutoBlowStandProduct;
         if (_managementFundsLabel != null)
             _managementFundsLabel.text = "当前资金  🪙 " + _game.Balance.ToString("N0");
+        if (_mobileMode)
+        {
+            if (_shopStatusLabel != null && _dayController != null)
+                _shopStatusLabel.text = DescribeMobileRouteForTomorrow(_dayController.DayNumber + 1);
+            return;
+        }
         if (product.Purchased)
             _shopStatusLabel.text = "已购买 · 下一营业日立即生效";
         else if (!_game.FirstDayCompleteForShop)
@@ -904,6 +948,11 @@ public sealed partial class SalonDemo : MonoBehaviour
         }
         else if (state == DayState.Result)
         {
+            if (_mobileMode)
+            {
+                _mobileCheckout?.ForceClose();
+                _game.BeginClosingWalks(_dayController.Stats);
+            }
             // A result notification is normally emitted only after the day
             // controller sees zero active customers. Keep this guard at the
             // presentation boundary as well: a visible Finished/Leaving
@@ -945,6 +994,12 @@ public sealed partial class SalonDemo : MonoBehaviour
             if (state == CustomerState.Finished || state == CustomerState.Leaving)
                 return true;
         }
+        // The model marks a customer Exited on a timer; the view still walks
+        // out of the door before it is removed.
+        for (int i = 0; i < _customerViews.Count; i++)
+            if (_customerViews[i] != null && _customerViews[i].Customer != null &&
+                _customerViews[i].Customer.State == CustomerState.Exited)
+                return true;
         return false;
     }
 
@@ -1020,6 +1075,8 @@ public sealed partial class SalonDemo : MonoBehaviour
         CancelHaircutInteraction(true);
         ClearCustomerViews();
         _game.ResetForNextDay();
+        if (_mobileMode && _satisfaction != null)
+            _satisfaction.SetCurrent(SalonMobileDayConfig.OvernightSatisfaction(_satisfaction.CurrentSatisfaction));
         _dayController.PrepareNextDay();
         _coinBalanceLabel.text = _game.Balance.ToString("N0");
         ApplyOverview(true);
@@ -1161,20 +1218,29 @@ public sealed partial class SalonDemo : MonoBehaviour
         var feedback = root.gameObject.AddComponent<HaircutRuntimeFeedback>();
         feedback.Initialize(view, HaircutSettings, _camera);
         view.HaircutFeedback = feedback;
+        if (_mobileMode) view.Comedy = CustomerComedyReaction.Attach(root, SalonUiFactory.GetPackagedUiFont());
         view.LastStationPosition = position;
         _customerViews.Add(view);
     }
 
     private bool SpawnRuntimeCustomer(float entranceOffset = 0f)
     {
+        if (_mobileMode && !_mobilePacing.CanAdmit(_game, _mobileProgress)) return false;
         int id = _nextCustomerId;
         string orderId = _mobileMode
             ? SalonMobileDayConfig.PickOrderForSpawn(DaySettings, id, _dayController.BusinessProgress)
             : DaySettings.PickOrder(Random.value);
+        if (_mobileMode) orderId = PickMobileAvailableOrder(orderId);
+        if (orderId == null) return false;
         var needs = new List<ServiceType>(SalonOrderCatalog.Get(orderId));
         CustomerModel customer = _game.Spawn(id, needs);
         if (customer == null) return false;
         _nextCustomerId++;
+        if (_mobileMode)
+        {
+            _mobilePacing.RegisterArrival();
+            if (orderId == _mobileTeachingOrder) _mobileTeachingOrder = null;
+        }
         _dayController.Stats.RecordSpawn(customer);
         if (customer.CurrentNeed == ServiceType.Cut)
         {
@@ -1193,6 +1259,15 @@ public sealed partial class SalonDemo : MonoBehaviour
     private void MaintainCustomerFlow(float dt)
     {
         if (_dayController == null) return;
+        if (_mobileMode)
+        {
+            bool managementWork = MobileHasUsefulManagementWork();
+            _mobilePacing.Tick(dt, _game, managementWork);
+            // Do not keep the player waiting for an old random arrival timer
+            // after both service and useful shop management have run out.
+            if (!managementWork && SalonPacingDirector.ActiveCount(_game) == 0 &&
+                _mobilePacing.RestRemaining <= 0f) _spawnCooldown = 0f;
+        }
         _spawnCooldown = Mathf.Max(0f, _spawnCooldown - Mathf.Max(0f, dt));
         if (!_dayController.CanSpawnCustomers) return;
         if (_spawnCooldown > 0f) return;
@@ -1229,6 +1304,7 @@ public sealed partial class SalonDemo : MonoBehaviour
             {
                 CustomerModel customer = _game.Customers[i];
                 if (customer.State == CustomerState.Exited) continue;
+                if (_mobileMode && !SalonPacingDirector.IsActive(customer)) continue;
                 active++;
                 if (customer.State == CustomerState.Entering || customer.State == CustomerState.Waiting) waiting++;
                 if (customer.Emotion == CustomerEmotion.Angry) angry++;
@@ -1785,12 +1861,14 @@ public sealed partial class SalonDemo : MonoBehaviour
                 continue;
             }
             CustomerModel customer = view.Customer;
+            view.Comedy?.RestoreFramePose();
+            if (view.Comedy != null) view.ApplyHairStage(customer.HairStage);
             Vector3 target;
             int waitingSlot = -1;
             if (customer.State == CustomerState.Entering || customer.State == CustomerState.Waiting)
             {
                 waitingSlot = _game.GetWaitingSlot(customer);
-                target = waitingSlot >= 0 ? WaitingPositions[waitingSlot] : view.transform.position;
+                target = waitingSlot >= 0 ? WaitingSlotPosition(waitingSlot) : view.transform.position;
             }
             else if (customer.State == CustomerState.MovingToStation || customer.State == CustomerState.Serving)
             {
@@ -1808,6 +1886,10 @@ public sealed partial class SalonDemo : MonoBehaviour
                 }
                 target = view.LastStationPosition;
             }
+            else if (customer.State == CustomerState.Checkout)
+            {
+                target = MobileCheckoutSlot(customer.Id);
+            }
             else if (customer.State == CustomerState.Finished)
             {
                 target = view.LastStationPosition;
@@ -1818,13 +1900,20 @@ public sealed partial class SalonDemo : MonoBehaviour
             }
 
             Vector3 customerPositionBeforeMove = view.transform.position;
-            view.MoveAlongCurrentRoute(customer.State, target, 5.2f, Time.deltaTime);
+            bool following = TryMoveMobileFollower(view, Time.deltaTime);
+            if (!following) view.MoveAlongCurrentRoute(customer.State, target,
+                customer.State == CustomerState.Leaving && customer.Emotion == CustomerEmotion.Angry ? 8f : 5.2f,
+                Time.deltaTime);
+            if (customer.State == CustomerState.Checkout && view.IsAtMovementDestination)
+                _mobileCheckout?.MarkArrived(customer.Id);
             // The cut-station collision volumes protect active customers and
             // the player. They must not roll back an exit route: the door path
             // deliberately leaves the chair through that footprint.
-            if (customer.State != CustomerState.Leaving && customer.State != CustomerState.Exited &&
+            if (!following && customer.State != CustomerState.Leaving && customer.State != CustomerState.Exited &&
                 IsAnyCutStationMovementBlocked(view.transform.position))
                 view.transform.position = customerPositionBeforeMove;
+            // Followers already respect furniture and may still be walking out
+            // of their starting seat; do not roll that departure back into it.
             // A compatible chair can never be the source of a wrong-station question mark.
             // Enforce this immediately before presentation as well as at model arrival so a
             // late event cannot make the invalid reaction visible for even one frame.
@@ -1835,12 +1924,15 @@ public sealed partial class SalonDemo : MonoBehaviour
             WorkstationType poseStation = customer.Station >= 0 && customer.Station < _game.Workstations.Count
                 ? _game.Workstations[customer.Station].Type
                 : WorkstationType.Haircut;
-            view.ApplyStationPose(customer.State, view.IsAtMovementDestination, poseStation);
+            view.ApplyStationPose(customer.State, !following && view.IsAtMovementDestination, poseStation, AreWaitingSeatsBuilt);
             if (view.IsAtMovementDestination && _cutStations.TryGetValue(customer.Station, out var poseStationData))
                 view.transform.rotation = Quaternion.LookRotation(poseStationData.Layout.CustomerFacing, Vector3.up);
             if (customer.State == CustomerState.Exited)
             {
                 view.CustomerUI?.SetAnchor(null);
+                view.ExitWalkSeconds += Time.deltaTime;
+                if (!SalonCustomerView.HasFinishedExitWalk(view.IsAtMovementDestination, view.ExitWalkSeconds))
+                    continue;
                 view.gameObject.SetActive(false);
                 _customerViews.RemoveAt(viewIndex);
                 Destroy(view.gameObject);
@@ -1867,27 +1959,29 @@ public sealed partial class SalonDemo : MonoBehaviour
             {
                 view.ActionProgress?.SetServiceExecution(customer.ServiceExecution);
             }
+            else if (IsMobileWorkView(view))
+            {
+                // TickMobileWork/TickCoopWork already drew this frame's hold progress.
+            }
             else if (customer.CurrentNeed == ServiceType.Wash &&
                 (customer.WashStage == WashStage.FoamWait || customer.WashStage == WashStage.ReadyToRinse) &&
                 customer.BackgroundTask.State == BackgroundTaskState.Running)
             {
-                float ideal = Mathf.Max(.01f, ServiceSettings.FoamOptimalStart);
-                float elapsed = customer.BackgroundTask.Elapsed;
-                Color color = elapsed < ideal ? SalonPalette.Warning :
-                    elapsed < ServiceSettings.FoamMinorLateThreshold ? SalonPalette.Success :
-                    elapsed < ServiceSettings.FoamModerateLateThreshold ? SalonPalette.Warning : SalonPalette.Danger;
-                view.ActionProgress?.SetProgressForService(
-                    ServiceType.Wash, "♨", elapsed / ideal, color);
+                ServiceProgressDisplay.Phase phase = ServiceProgressDisplay.BackgroundPhase(customer.BackgroundTask);
+                view.ActionProgress?.SetProgressForService(ServiceType.Wash, "♨",
+                    ServiceProgressDisplay.BackgroundFill(customer.BackgroundTask),
+                    ServiceProgressDisplay.ColorFor(phase, Time.unscaledTime));
             }
             else if (customer.CurrentNeed == ServiceType.Dry &&
-                customer.BackgroundTask.State == BackgroundTaskState.Running)
+                (customer.BackgroundTask.State == BackgroundTaskState.Running || customer.AutoBlowSafetyStopped))
             {
-                float progress = customer.BackgroundTask.Elapsed / Mathf.Max(.01f, ServiceSettings.BlowLateEnd);
-                Color color = customer.BlowStage == BlowStage.Minor ? SalonPalette.Warning :
-                    customer.BlowStage == BlowStage.Moderate || customer.BlowStage == BlowStage.SafetyStopped
-                        ? SalonPalette.Danger : SalonPalette.Success;
-                view.ActionProgress?.SetProgressForService(
-                    ServiceType.Dry, "♨", progress, color);
+                ServiceProgressDisplay.Phase phase = customer.AutoBlowSafetyStopped
+                    ? ServiceProgressDisplay.Phase.Failing
+                    : ServiceProgressDisplay.BackgroundPhase(customer.BackgroundTask);
+                float progress = customer.AutoBlowSafetyStopped
+                    ? 1f : ServiceProgressDisplay.BackgroundFill(customer.BackgroundTask);
+                view.ActionProgress?.SetProgressForService(ServiceType.Dry, "♨", progress,
+                    ServiceProgressDisplay.ColorFor(phase, Time.unscaledTime));
             }
             else if (view.ActionProgress != null &&
                 !(_activeHaircutView == view && _haircutInteraction != null &&
@@ -1897,6 +1991,7 @@ public sealed partial class SalonDemo : MonoBehaviour
                 view.ActionProgress.ClearProgress();
                 view.ActionProgress.ClearBackgroundWaitProgress();
             }
+            UpdateMobileComedy(view);
             Vector3 targetScale = customer == _game.SelectedCustomer ? view.BaseScale * 1.08f : view.BaseScale;
             view.transform.localScale = Vector3.Lerp(view.transform.localScale, targetScale, 1f - Mathf.Exp(-16f * Time.deltaTime));
         }
@@ -1906,7 +2001,12 @@ public sealed partial class SalonDemo : MonoBehaviour
     private void UpdateCustomerUiAnchor(SalonCustomerView view, CustomerModel customer, int waitingSlot)
     {
         if (view.CustomerUI == null) return;
-        if (customer.State == CustomerState.Waiting && view.IsAtMovementDestination &&
+        if (_mobileMode && (customer == _mobileGuidedCustomer || customer == _coopPlayerTwo?.GuidedCustomer ||
+            customer.State == CustomerState.Checkout))
+        {
+            view.CustomerUI.SetMobileAnchor(view.transform.position);
+        }
+        else if (customer.State == CustomerState.Waiting && view.IsAtMovementDestination &&
             _waitingUiAnchors.TryGetValue(waitingSlot, out var waitingAnchor))
         {
             view.CustomerUI.SetAnchor(waitingAnchor);
@@ -1934,8 +2034,15 @@ public sealed partial class SalonDemo : MonoBehaviour
         if (_mobileMode)
         {
             bool waiting = customer.State == CustomerState.Waiting || customer.State == CustomerState.Entering;
-            view.CustomerUI.VisualRoot.localScale = Vector3.one * (waiting ? .65f : 1f);
+            bool selected = customer == _game.SelectedCustomer || customer == _mobileGuidedCustomer ||
+                customer == _coopPlayerTwo?.GuidedCustomer || customer == _coopPlayerTwo?.WorkingView?.Customer;
+            view.CustomerUI.VisualRoot.localScale = Vector3.one * (waiting && !selected ? .65f : 1f);
             view.CustomerUI.UrgencyContainer.gameObject.SetActive(!waiting);
+            if (view.CustomerUI.IsVisible)
+            {
+                view.OrderDemand?.SetMobileSelected(selected);
+                view.OrderDemand?.ConstrainToMobileScreen();
+            }
         }
     }
 
@@ -2299,6 +2406,12 @@ public sealed partial class SalonDemo : MonoBehaviour
 
     private void HandlePaymentCreated(PaymentDropModel drop)
     {
+        if (_mobileMode && drop != null && _game != null)
+        {
+            if (_mobileCheckout == null) ResetMobileCheckout();
+            _mobileCheckout.RegisterCompletedBill(drop.CustomerId, drop.Amount);
+            return;
+        }
         if (drop == null || _game == null || !_game.Payments.BeginCollection(drop.Id)) return;
         if (!_game.Payments.CompleteCollection(drop.Id)) return;
         _dayController?.Stats.RecordPaymentCollected(drop);
@@ -3058,6 +3171,26 @@ public sealed partial class SalonDemo : MonoBehaviour
 public sealed class SalonCustomerView : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerClickHandler,
     IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+    public CustomerComedyReaction Comedy;
+    public bool ComedyOvercutShown, ComedyFoamShown, ComedyBlowShown, ComedyHappyShown;
+
+    public void SeatDirectly(Vector3 destination)
+    {
+        transform.position = LastStationPosition = destination;
+        _routeKind = 2;
+        _routeDestination = destination;
+        _route = new[] { destination };
+        _routeIndex = 1;
+        IsAtMovementDestination = true;
+    }
+
+    public void FollowAt(Vector3 position)
+    {
+        transform.position = position;
+        _routeKind = -1;
+        IsAtMovementDestination = false;
+    }
+
     public SalonDemo Owner;
     public CustomerModel Customer;
     public Image RingFill;
@@ -3073,6 +3206,12 @@ public sealed class SalonCustomerView : MonoBehaviour, IPointerDownHandler, IPoi
     public int LastStationId = -1;
     public Transform LastServiceUiAnchor;
     public bool IsAtMovementDestination { get; private set; }
+    public float ExitWalkSeconds { get; set; }
+    // Upper bound for a customer still walking after the model already exited
+    // them, so a blocked route can never leave a ghost behind.
+    public const float MaxExitWalkSeconds = 8f;
+    public static bool HasFinishedExitWalk(bool atExit, float exitWalkSeconds)
+        => atExit || exitWalkSeconds >= MaxExitWalkSeconds;
     public bool IsTowelVisualVisible => _towelVisual != null && _towelVisual.activeSelf;
     public int TowelVisualPartCount => _towelVisual == null ? 0 : _towelVisual.transform.childCount;
     public int VisibleFoamPartCount
@@ -3118,16 +3257,22 @@ public sealed class SalonCustomerView : MonoBehaviour, IPointerDownHandler, IPoi
     }
 
     public static bool ShouldUseSeatedPose(CustomerState state, bool reachedDestination)
+        => ShouldUseSeatedPose(state, reachedDestination, true);
+
+    /// <summary>Before the waiting seats are built, the queue stands.</summary>
+    public static bool ShouldUseSeatedPose(CustomerState state, bool reachedDestination, bool waitingSeatsBuilt)
     {
         if (!reachedDestination) return false;
-        return state == CustomerState.Waiting || state == CustomerState.Serving || state == CustomerState.Finished;
+        if (state == CustomerState.Waiting) return waitingSeatsBuilt;
+        return state == CustomerState.Serving || state == CustomerState.Finished;
     }
 
-    public void ApplyStationPose(CustomerState state, bool reachedDestination, WorkstationType stationType)
+    public void ApplyStationPose(CustomerState state, bool reachedDestination, WorkstationType stationType,
+        bool waitingSeatsBuilt = true)
     {
         IsWashPose = reachedDestination && stationType == WorkstationType.Wash &&
                      (state == CustomerState.Serving || state == CustomerState.Finished);
-        SetSeatedPose(ShouldUseSeatedPose(state, reachedDestination));
+        SetSeatedPose(ShouldUseSeatedPose(state, reachedDestination, waitingSeatsBuilt));
         transform.localRotation = IsWashPose ? Quaternion.Euler(72f, 0f, 0f) : Quaternion.identity;
     }
 
@@ -3163,7 +3308,7 @@ public sealed class SalonCustomerView : MonoBehaviour, IPointerDownHandler, IPoi
         int kind = state == CustomerState.Entering ? 0 :
                    state == CustomerState.Waiting ? 1 :
                    state == CustomerState.MovingToStation || state == CustomerState.Serving ? 2 :
-                   state == CustomerState.Finished ? 3 : 4;
+                   state == CustomerState.Finished ? 3 : state == CustomerState.Checkout ? 5 : 4;
         if (_routeKind != kind || (_routeDestination - destination).sqrMagnitude > .01f)
         {
             _routeKind = kind;
@@ -3174,6 +3319,7 @@ public sealed class SalonCustomerView : MonoBehaviour, IPointerDownHandler, IPoi
                          ? SalonCustomerPath.BuildServiceRoute(transform.position, _serviceQueueAnchor.position, destination) :
                      kind == 2 ? SalonCustomerPath.BuildServiceRoute(transform.position, destination) :
                      kind == 4 ? SalonCustomerPath.BuildLeavingRoute(transform.position, destination) :
+                     kind == 5 ? SalonCustomerPath.BuildCheckoutRoute(transform.position, destination) :
                      new[] { destination };
         }
 

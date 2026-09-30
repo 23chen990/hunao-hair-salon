@@ -17,6 +17,8 @@ public sealed class CustomerUrgencyView : MonoBehaviour
     private Text _patienceLabel;
     private Image _patienceTrack;
     private Image _patienceFill;
+    private Image _timerFill;
+    private GameObject _timerRoot;
 
     public CustomerModel Customer => _customer;
     public bool IsVisible => _statusRoot != null && _statusRoot.activeSelf;
@@ -50,12 +52,30 @@ public sealed class CustomerUrgencyView : MonoBehaviour
 
         float patience = _customer.PatienceProgress;
         _statusLabel.text = StatusLabel(_customer);
+        bool timing = _customer.State == CustomerState.Serving &&
+            _customer.BackgroundTask.State == BackgroundTaskState.Running &&
+            (_customer.CurrentNeed == ServiceType.Wash || _customer.CurrentNeed == ServiceType.Dry);
         // The bar carries the patience meaning. Keeping only the percentage here
         // leaves room for the state label at the target mobile viewport.
-        _patienceLabel.text = Mathf.RoundToInt(patience * 100f) + "%";
+        bool showPatience = !timing && !IsForegroundServiceActive(_customer) && _customer.State != CustomerState.Checkout;
+        _patienceLabel.text = showPatience ? Mathf.RoundToInt(patience * 100f) + "%" : string.Empty;
+        _patienceLabel.gameObject.SetActive(showPatience);
+        _patienceTrack.gameObject.SetActive(showPatience);
         _patienceTrack.color = PatienceTrackColor(patience);
         _patienceFill.color = PatienceFillColor(patience);
         _patienceFill.rectTransform.localScale = new Vector3(patience, 1f, 1f);
+        _timerRoot.SetActive(timing);
+        if (timing)
+        {
+            var timer = _customer.BackgroundTask;
+            bool ready = timer.Elapsed >= timer.IdealStart;
+            var phase = ServiceProgressDisplay.BackgroundPhase(timer);
+            _timerFill.fillAmount = ServiceProgressDisplay.BackgroundFill(timer);
+            _timerFill.color = ServiceProgressDisplay.ColorFor(phase, Time.unscaledTime);
+            _statusLabel.text = ready ? (_customer.CurrentNeed == ServiceType.Wash ? "回来冲洗" : "回来收尾") : "可以先离开";
+            _patienceLabel.gameObject.SetActive(true);
+            _patienceLabel.text = ready ? "好了" : Mathf.CeilToInt(timer.IdealStart - timer.Elapsed) + "秒";
+        }
         FaceCamera();
     }
 
@@ -128,6 +148,21 @@ public sealed class CustomerUrgencyView : MonoBehaviour
         fillRect.anchoredPosition = new Vector2(2f, 0f);
         fillRect.localScale = new Vector3(0f, 1f, 1f);
 
+        _timerRoot = new GameObject("Background Timer Ring", typeof(RectTransform), typeof(Image));
+        _timerRoot.transform.SetParent(_statusRoot.transform, false);
+        _timerFill = _timerRoot.GetComponent<Image>();
+        _timerFill.rectTransform.anchoredPosition = new Vector2(-20f, -19f);
+        _timerFill.rectTransform.sizeDelta = new Vector2(32f, 32f);
+        _timerFill.sprite = SalonUiFactory.GetCircleSprite();
+        _timerFill.type = Image.Type.Filled;
+        _timerFill.fillMethod = Image.FillMethod.Radial360;
+        _timerFill.fillOrigin = 2;
+        _timerFill.raycastTarget = false;
+        Image center = Bar("Timer Ring Center", _timerRoot.transform, Vector2.zero,
+            new Vector2(23f, 23f), new Color(.96f, .88f, .71f, 1f));
+        center.sprite = SalonUiFactory.GetCircleSprite();
+        _timerRoot.SetActive(false);
+
         SalonUiFactory.MakeClickThrough(canvasObject);
     }
 
@@ -168,6 +203,7 @@ public sealed class CustomerUrgencyView : MonoBehaviour
 
     private static string StatusLabel(CustomerModel customer)
     {
+        if (customer.State == CustomerState.Checkout) return "等结账";
         if (customer.AutoBlowSafetyStopped || customer.BlowStage == BlowStage.SafetyStopped)
             return "超时收尾";
         if (customer.State != CustomerState.Finished && customer.Patience <= .01f)

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="36" result="Passed" total="36" passed="36" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.1927077">
+  <test-suite type="TestSuite" id="1000" name="胡闹理发店灰盒 Demo" fullname="胡闹理发店灰盒 Demo" runstate="Runnable" testcasecount="790" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.192708" total="36" passed="36" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1902" name="HairSalon.Tests.dll" fullname="/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Library/ScriptAssemblies/HairSalon.Tests.dll" runstate="Runnable" testcasecount="790" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.185886" total="36" passed="36" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="42957" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestFixture" id="1060" name="CoreReworkProgressBarTests" fullname="CoreReworkProgressBarTests" classname="CoreReworkProgressBarTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.043961" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1063" name="DryBarIsFullExactlyWhenTheModelAllowsFinishing" fullname="CoreReworkProgressBarTests.DryBarIsFullExactlyWhenTheModelAllowsFinishing" methodname="DryBarIsFullExactlyWhenTheModelAllowsFinishing" classname="CoreReworkProgressBarTests" runstate="Runnable" seed="1225798036" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.032610" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1062" name="FoamBarIsFullExactlyWhenTheModelAllowsRinsing" fullname="CoreReworkProgressBarTests.FoamBarIsFullExactlyWhenTheModelAllowsRinsing" methodname="FoamBarIsFullExactlyWhenTheModelAllowsRinsing" classname="CoreReworkProgressBarTests" runstate="Runnable" seed="977172151" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.001951" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1061" name="HaircutBarIsFullExactlyWhenReleasingBecomesPerfect" fullname="CoreReworkProgressBarTests.HaircutBarIsFullExactlyWhenReleasingBecomesPerfect" methodname="HaircutBarIsFullExactlyWhenReleasingBecomesPerfect" classname="CoreReworkProgressBarTests" runstate="Runnable" seed="867303342" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000377" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1064" name="OnlyLateOrFailingBarsBlink" fullname="CoreReworkProgressBarTests.OnlyLateOrFailingBarsBlink" methodname="OnlyLateOrFailingBarsBlink" classname="CoreReworkProgressBarTests" runstate="Runnable" seed="1267905901" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.001048" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1173" name="FirstSessionCoopFlowTests" fullname="FirstSessionCoopFlowTests" classname="FirstSessionCoopFlowTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.012564" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1174" name="CoopWashThenDryCustomerCanBeGuidedFromWashBedToBlowChair" fullname="FirstSessionCoopFlowTests.CoopWashThenDryCustomerCanBeGuidedFromWashBedToBlowChair" methodname="CoopWashThenDryCustomerCanBeGuidedFromWashBedToBlowChair" classname="FirstSessionCoopFlowTests" runstate="Runnable" seed="594448461" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.010697" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1175" name="CoopWrongStationCanBeCorrectedWithoutAddingAnotherWrongStationPenalty" fullname="FirstSessionCoopFlowTests.CoopWrongStationCanBeCorrectedWithoutAddingAnotherWrongStationPenalty" methodname="CoopWrongStationCanBeCorrectedWithoutAddingAnotherWrongStationPenalty" classname="FirstSessionCoopFlowTests" runstate="Runnable" seed="808571217" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000768" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1283" name="MobileGameplayRuntimeTests" fullname="MobileGameplayRuntimeTests" classname="MobileGameplayRuntimeTests" runstate="Runnable" testcasecount="13" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.083410" total="13" passed="13" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1296" name="CompletedOrderSettlesIncomeImmediatelyWithoutACoinPile" fullname="MobileGameplayRuntimeTests.CompletedOrderSettlesIncomeImmediatelyWithoutACoinPile" methodname="CompletedOrderSettlesIncomeImmediatelyWithoutACoinPile" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="1020238606" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.035578" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1294" name="FinishedCustomerRemainsActiveUntilItExitsTheShop" fullname="MobileGameplayRuntimeTests.FinishedCustomerRemainsActiveUntilItExitsTheShop" methodname="FinishedCustomerRemainsActiveUntilItExitsTheShop" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="1863119083" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.003364" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1291" name="GuidingAnotherCustomerDoesNotBlockFinishingAnOccupiedStation" fullname="MobileGameplayRuntimeTests.GuidingAnotherCustomerDoesNotBlockFinishingAnOccupiedStation" methodname="GuidingAnotherCustomerDoesNotBlockFinishingAnOccupiedStation" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="1962213556" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.005572" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1285" name="HoldingPastTheWindowFailsWithoutCountingTowardTheDailyGoal" fullname="MobileGameplayRuntimeTests.HoldingPastTheWindowFailsWithoutCountingTowardTheDailyGoal" methodname="HoldingPastTheWindowFailsWithoutCountingTowardTheDailyGoal" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="2100754814" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.012455" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1295" name="NearbyFoamWaitDoesNotHideAReadyHaircut" fullname="MobileGameplayRuntimeTests.NearbyFoamWaitDoesNotHideAReadyHaircut" methodname="NearbyFoamWaitDoesNotHideAReadyHaircut" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="2078297184" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.001717" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1290" name="PauseButtonPressWinsOverSimultaneousHaircutReleaseAndDoesNotToggleTwice" fullname="MobileGameplayRuntimeTests.PauseButtonPressWinsOverSimultaneousHaircutReleaseAndDoesNotToggleTwice" methodname="PauseButtonPressWinsOverSimultaneousHaircutReleaseAndDoesNotToggleTwice" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="2146898650" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.004518" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-suite type="ParameterizedMethod" id="1289" name="PausingAHaircutRequiresFreshInputAndDoesNotResolveAPhantomRelease" fullname="MobileGameplayRuntimeTests.PausingAHaircutRequiresFreshInputAndDoesNotResolveAPhantomRelease" classname="MobileGameplayRuntimeTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.008884" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-case id="1287" name="PausingAHaircutRequiresFreshInputAndDoesNotResolveAPhantomRelease(False)" fullname="MobileGameplayRuntimeTests.PausingAHaircutRequiresFreshInputAndDoesNotResolveAPhantomRelease(False)" methodname="PausingAHaircutRequiresFreshInputAndDoesNotResolveAPhantomRelease" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="1886379149" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.002255" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+          <test-case id="1288" name="PausingAHaircutRequiresFreshInputAndDoesNotResolveAPhantomRelease(True)" fullname="MobileGameplayRuntimeTests.PausingAHaircutRequiresFreshInputAndDoesNotResolveAPhantomRelease(True)" methodname="PausingAHaircutRequiresFreshInputAndDoesNotResolveAPhantomRelease" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="1177268782" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.004328" asserts="0">
+            <properties>
+              <property name="retryIteration" value="0" />
+              <property name="repeatIteration" value="0" />
+            </properties>
+          </test-case>
+        </test-suite>
+        <test-case id="1292" name="ReadyServiceWinsOverAGuidedAssignmentWhenItIsCloser" fullname="MobileGameplayRuntimeTests.ReadyServiceWinsOverAGuidedAssignmentWhenItIsCloser" methodname="ReadyServiceWinsOverAGuidedAssignmentWhenItIsCloser" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="67169222" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.002181" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1284" name="ReleasingEarlyKeepsTheOrderAndAllowsASecondAttempt" fullname="MobileGameplayRuntimeTests.ReleasingEarlyKeepsTheOrderAndAllowsASecondAttempt" methodname="ReleasingEarlyKeepsTheOrderAndAllowsASecondAttempt" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="125050781" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.001696" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1293" name="TransferTargetIsDisabledWhenAllCompatibleStationsAreOccupied" fullname="MobileGameplayRuntimeTests.TransferTargetIsDisabledWhenAllCompatibleStationsAreOccupied" methodname="TransferTargetIsDisabledWhenAllCompatibleStationsAreOccupied" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="197240698" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.001766" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1286" name="TwoToolOrderRequiresTwoSeparatePressesAndPaysOnce" fullname="MobileGameplayRuntimeTests.TwoToolOrderRequiresTwoSeparatePressesAndPaysOnce" methodname="TwoToolOrderRequiresTwoSeparatePressesAndPaysOnce" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="145030478" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.001774" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1297" name="WashThenDryOrderKeepsTheWholeOrderAliveUntilDryFinishes" fullname="MobileGameplayRuntimeTests.WashThenDryOrderKeepsTheWholeOrderAliveUntilDryFinishes" methodname="WashThenDryOrderKeepsTheWholeOrderAliveUntilDryFinishes" classname="MobileGameplayRuntimeTests" runstate="Runnable" seed="1985084547" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.001731" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1298" name="MobileServiceRulesTests" fullname="MobileServiceRulesTests" classname="MobileServiceRulesTests" runstate="Runnable" testcasecount="14" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.012880" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1306" name="BackgroundAutoBlowCanBeFinishedLateAndStillSettles" fullname="MobileServiceRulesTests.BackgroundAutoBlowCanBeFinishedLateAndStillSettles" methodname="BackgroundAutoBlowCanBeFinishedLateAndStillSettles" classname="MobileServiceRulesTests" runstate="Runnable" seed="333936056" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.002234" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1307" name="BackgroundAutoBlowSurvivesASecondCustomerFocusSwitch" fullname="MobileServiceRulesTests.BackgroundAutoBlowSurvivesASecondCustomerFocusSwitch" methodname="BackgroundAutoBlowSurvivesASecondCustomerFocusSwitch" classname="MobileServiceRulesTests" runstate="Runnable" seed="606496942" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000845" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1304" name="BaseAutoBlowIsAvailableBeforeTheEquipmentPurchase" fullname="MobileServiceRulesTests.BaseAutoBlowIsAvailableBeforeTheEquipmentPurchase" methodname="BaseAutoBlowIsAvailableBeforeTheEquipmentPurchase" classname="MobileServiceRulesTests" runstate="Runnable" seed="831748926" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000937" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1308" name="IgnoredEngagedCustomerLosesPatienceAfterGraceAndLeavesOnce" fullname="MobileServiceRulesTests.IgnoredEngagedCustomerLosesPatienceAfterGraceAndLeavesOnce" methodname="IgnoredEngagedCustomerLosesPatienceAfterGraceAndLeavesOnce" classname="MobileServiceRulesTests" runstate="Runnable" seed="1007796475" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000440" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1300" name="MobileWashThenCutSettlesWithoutManualTowelActions" fullname="MobileServiceRulesTests.MobileWashThenCutSettlesWithoutManualTowelActions" methodname="MobileWashThenCutSettlesWithoutManualTowelActions" classname="MobileServiceRulesTests" runstate="Runnable" seed="2094059083" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000389" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1301" name="MobileWashThenCutThenDrySettlesWithoutManualTowelActions" fullname="MobileServiceRulesTests.MobileWashThenCutThenDrySettlesWithoutManualTowelActions" methodname="MobileWashThenCutThenDrySettlesWithoutManualTowelActions" classname="MobileServiceRulesTests" runstate="Runnable" seed="852037329" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000372" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1303" name="NoDryOrderStillBlocksOnFoamChemicalResidueAndActiveAction" fullname="MobileServiceRulesTests.NoDryOrderStillBlocksOnFoamChemicalResidueAndActiveAction" methodname="NoDryOrderStillBlocksOnFoamChemicalResidueAndActiveAction" classname="MobileServiceRulesTests" runstate="Runnable" seed="757571835" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000865" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1305" name="PurchasedStandShortensStartWindowAndWidensLateRecoveryWindow" fullname="MobileServiceRulesTests.PurchasedStandShortensStartWindowAndWidensLateRecoveryWindow" methodname="PurchasedStandShortensStartWindowAndWidensLateRecoveryWindow" classname="MobileServiceRulesTests" runstate="Runnable" seed="81761827" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000581" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1312" name="ResetForNextDayReusesCustomerIdWithFreshServiceStateAndKeepsWalletAndEquipment" fullname="MobileServiceRulesTests.ResetForNextDayReusesCustomerIdWithFreshServiceStateAndKeepsWalletAndEquipment" methodname="ResetForNextDayReusesCustomerIdWithFreshServiceStateAndKeepsWalletAndEquipment" classname="MobileServiceRulesTests" runstate="Runnable" seed="977207774" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.001580" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1310" name="RestorePersistentStateDoesNotResetCollectedPaymentProtection" fullname="MobileServiceRulesTests.RestorePersistentStateDoesNotResetCollectedPaymentProtection" methodname="RestorePersistentStateDoesNotResetCollectedPaymentProtection" classname="MobileServiceRulesTests" runstate="Runnable" seed="2060246713" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000096" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1311" name="RestorePersistentStateRejectsAPlayerDayWithLiveCustomers" fullname="MobileServiceRulesTests.RestorePersistentStateRejectsAPlayerDayWithLiveCustomers" methodname="RestorePersistentStateRejectsAPlayerDayWithLiveCustomers" classname="MobileServiceRulesTests" runstate="Runnable" seed="710983401" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000744" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1309" name="RestorePersistentStateRestoresBalanceAndPermanentFlagsAtSafeBoundary" fullname="MobileServiceRulesTests.RestorePersistentStateRestoresBalanceAndPermanentFlagsAtSafeBoundary" methodname="RestorePersistentStateRestoresBalanceAndPermanentFlagsAtSafeBoundary" classname="MobileServiceRulesTests" runstate="Runnable" seed="258680709" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000233" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1299" name="WashOnlyOrderSettlesWhenWetHairIsTheOnlyRemainingExitBlocker" fullname="MobileServiceRulesTests.WashOnlyOrderSettlesWhenWetHairIsTheOnlyRemainingExitBlocker" methodname="WashOnlyOrderSettlesWhenWetHairIsTheOnlyRemainingExitBlocker" classname="MobileServiceRulesTests" runstate="Runnable" seed="2102926489" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.000185" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1302" name="WashThenCutSettlesAfterCleanCutWithoutAnUnrequestedDryStep" fullname="MobileServiceRulesTests.WashThenCutSettlesAfterCleanCutWithoutAnUnrequestedDryStep" methodname="WashThenCutSettlesAfterCleanCutWithoutAnUnrequestedDryStep" classname="MobileServiceRulesTests" runstate="Runnable" seed="828666263" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.001567" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1472" name="ReportedGameplayRegressionTests" fullname="ReportedGameplayRegressionTests" classname="ReportedGameplayRegressionTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.013085" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1474" name="DeferredResultFinalizesAfterLastLeavingCustomerExits" fullname="ReportedGameplayRegressionTests.DeferredResultFinalizesAfterLastLeavingCustomerExits" methodname="DeferredResultFinalizesAfterLastLeavingCustomerExits" classname="ReportedGameplayRegressionTests" runstate="Runnable" seed="1715209257" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.008737" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[[Salon] Result deferred while a customer is leaving.
+Customer exit view: Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently
+[Phase 7 DayStats] Day 1: spawned=0, completed=0, happy=0, normal=0, unhappy=0, veryUnhappy=0, abandoned=0, unservedAtClose=0, incompleteAtClose=0, orderIncome=0, tipIncome=0, operatingNet=0, reputation=3.0->3.0, wrongStation=0, mistakes=0/0/0
+]]></output>
+        </test-case>
+        <test-case id="1473" name="ResultTransitionDoesNotRemoveLeavingCustomerBeforeExited" fullname="ReportedGameplayRegressionTests.ResultTransitionDoesNotRemoveLeavingCustomerBeforeExited" methodname="ResultTransitionDoesNotRemoveLeavingCustomerBeforeExited" classname="ReportedGameplayRegressionTests" runstate="Runnable" seed="1541312927" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.001078" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[[Salon] Result deferred while a customer is leaving.
+]]></output>
+        </test-case>
+        <test-case id="1475" name="WaitingSecondCustomerCanBeGreetedAfterFirstGuidedCustomerStartsLeaving" fullname="ReportedGameplayRegressionTests.WaitingSecondCustomerCanBeGreetedAfterFirstGuidedCustomerStartsLeaving" methodname="WaitingSecondCustomerCanBeGreetedAfterFirstGuidedCustomerStartsLeaving" classname="ReportedGameplayRegressionTests" runstate="Runnable" seed="1033942613" result="Passed" start-time="2026-09-30 08:22:31Z" end-time="2026-09-30 08:22:31Z" duration="0.001300" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Saving results to: /Users/kker/Documents/ChatGPT/game2/artifacts/core-rework/batch1-filter.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

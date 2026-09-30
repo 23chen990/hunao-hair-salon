@@ -52,6 +52,7 @@ public sealed class SalonProgressSaveTests
         object repository = CreateRepository();
         object expected = CreateData(2, 875, true, true, 4.25f, true, true);
         SetField(expected, "ShopSatisfaction", 84);
+        SetField(expected, "WashAnnexExpansionPaid", 240);
 
         Assert.IsTrue((bool)Invoke(repository, "Save", expected));
         object loaded = Invoke(repository, "Load");
@@ -229,6 +230,8 @@ public sealed class SalonProgressSaveTests
         {
             "SchemaVersion", "DayNumber", "Balance", "AutoBlowPurchased",
             "SupplyRackExpansionPurchased", "SupplyRackExpansionPaid",
+            "HaircutExpansionPurchased", "HaircutExpansionPaid",
+            "WashAnnexExpansionPurchased", "WashAnnexExpansionPaid",
             "FirstDayComplete", "DaySettled", "ShopSatisfaction", "ReputationStars",
             "TutorialCompleted",
             "CompletedDays", "BestCompletedOrders"

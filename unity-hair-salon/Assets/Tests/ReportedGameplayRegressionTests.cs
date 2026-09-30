@@ -102,6 +102,14 @@ public sealed class ReportedGameplayRegressionTests
                 "Day settlement must not complete before the customer reaches Exited.");
 
             customer.State = CustomerState.Exited;
+            Invoke(demo, "UpdateCustomerViews");
+            Assert.AreEqual(1, views.Count,
+                "The model exit timer must not make the customer vanish before walking out of the door.");
+            Assert.IsTrue(viewObject.activeSelf);
+            Assert.IsFalse(resultPanel.activeSelf,
+                "The result panel waits until the last customer has walked out.");
+
+            view.ExitWalkSeconds = SalonCustomerView.MaxExitWalkSeconds;
             LogAssert.Expect(LogType.Error,
                 new Regex("Customer exit view: Destroy may not be called from edit mode!"));
             Invoke(demo, "UpdateCustomerViews");

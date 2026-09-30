@@ -15,8 +15,8 @@ using UnityEngine.UI;
 public sealed class SalonMobileQueueView : MonoBehaviour
 {
     public const int MaxVisibleCustomers = 4;
-    public const float CardWidth = 310f;
-    public const float CardHeight = 82f;
+    public const float CardWidth = 336f;
+    public const float CardHeight = 94f;
     public const float CardSpacing = 8f;
 
     private static readonly Color CardCream = new Color32(249, 226, 189, 250);
@@ -182,23 +182,26 @@ public sealed class SalonMobileQueueView : MonoBehaviour
             outline.useGraphicAlpha = true;
 
             _customerLabel = CreateLabel("Customer Number", _root.transform,
-                new Vector2(-118f, 9f), new Vector2(60f, 48f), 28, TextAnchor.MiddleCenter);
+                // Two lines need a little vertical headroom at the target
+                // viewport. Keep the card height fixed so four cards still
+                // stay clear of the lower-left joystick.
+                new Vector2(-128f, 13f), new Vector2(80f, 70f), 28, TextAnchor.MiddleCenter);
 
-            float[] iconPositions = { -53f, -6f, 41f };
+            float[] iconPositions = { -61f, -5f, 51f };
             for (int i = 0; i < _orderIcons.Length; i++)
             {
                 _orderIcons[i] = DemandBubbleArtwork.Image("Order Icon " + (i + 1),
-                    _root.transform, new Vector2(iconPositions[i], 8f), new Vector2(40f, 40f), null);
+                    _root.transform, new Vector2(iconPositions[i], 10f), new Vector2(44f, 44f), null);
                 _orderIcons[i].gameObject.SetActive(false);
             }
 
             _patienceValue = CreateLabel("Patience Value", _root.transform,
-                new Vector2(111f, 9f), new Vector2(70f, 48f), 26, TextAnchor.MiddleCenter);
+                new Vector2(125f, 12f), new Vector2(80f, 48f), 34, TextAnchor.MiddleCenter);
 
             _patienceTrack = CreateBar("Patience Track", _root.transform,
-                new Vector2(0f, -24f), new Vector2(282f, 12f), BarTrack);
+                new Vector2(0f, -30f), new Vector2(304f, 16f), BarTrack);
             _patienceFill = CreateBar("Patience Fill", _patienceTrack.transform,
-                new Vector2(2f, 0f), new Vector2(278f, 8f), PatienceGood);
+                new Vector2(2f, 0f), new Vector2(300f, 10f), PatienceGood);
             RectTransform fillRect = _patienceFill.rectTransform;
             fillRect.anchorMin = new Vector2(0f, .5f);
             fillRect.anchorMax = new Vector2(0f, .5f);
@@ -209,7 +212,7 @@ public sealed class SalonMobileQueueView : MonoBehaviour
 
         internal void Refresh(CustomerModel customer)
         {
-            _customerLabel.text = (customer.Id + 1) + "号";
+            _customerLabel.text = (customer.Id + 1) + "号\n" + StatusText(customer);
 
             float patience = customer == null ? 0f : Mathf.Clamp01(customer.PatienceProgress);
             _patienceValue.text = Mathf.RoundToInt(patience * 100f) + "%";
@@ -253,11 +256,23 @@ public sealed class SalonMobileQueueView : MonoBehaviour
             label.fontSize = fontSize;
             label.fontStyle = FontStyle.Bold;
             label.alignment = alignment;
-            label.horizontalOverflow = HorizontalWrapMode.Overflow;
-            label.verticalOverflow = VerticalWrapMode.Overflow;
+            label.horizontalOverflow = HorizontalWrapMode.Wrap;
+            label.verticalOverflow = VerticalWrapMode.Truncate;
+            label.resizeTextForBestFit = true;
+            label.resizeTextMinSize = Mathf.Max(22, fontSize * 2 / 3);
+            label.resizeTextMaxSize = fontSize;
             label.color = Ink;
             label.raycastTarget = false;
             return label;
+        }
+
+        private static string StatusText(CustomerModel customer)
+        {
+            if (customer == null)
+                return string.Empty;
+            if (customer.State == CustomerState.Entering)
+                return "进场";
+            return customer.HasServiceEngaged ? "已接" : "待接";
         }
 
         private static Image CreateBar(string name, Transform parent, Vector2 position,

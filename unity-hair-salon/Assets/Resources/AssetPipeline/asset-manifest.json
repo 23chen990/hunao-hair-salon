@@ -61,7 +61,9 @@
             "y": 0,
             "z": 1
           }
-        }
+        },
+        {"Id": "cashier-player", "Position": {"x": -3.65, "y": 0, "z": 0.3}, "Facing": {"x": 1, "y": 0, "z": 0}},
+        {"Id": "checkout-queue", "Position": {"x": -3.75, "y": 0, "z": 1.8}, "Facing": {"x": 1, "y": 0, "z": 0}}
       ],
       "RequiredAnchors": [
         "payment"
@@ -1490,6 +1492,293 @@
       "InteractionAnchors": [{"Id": "stand", "Position": {"x": 0, "y": 0, "z": 0}, "Facing": {"x": 0, "y": 0, "z": 1}}],
       "RequiredAnchors": ["stand"],
       "Sorting": {"Layer": "Default", "Order": 1, "DepthOffset": 0, "SortByWorldZ": true}
+    },
+    {
+      "Id": "expansion-pad-wash-annex",
+      "DisplayName": "第二洗发区施工点（程序化灰盒）",
+      "Category": "stage1-proximity-expansion",
+      "Type": "prop",
+      "ResourcePath": "builtin://prop/expansion-pad-wash-annex",
+      "Status": "review",
+      "Directions": ["free"],
+      "DefaultOrientation": "free",
+      "Pivot": {"x": 0.5, "y": 0},
+      "Footprint": {"Center": {"x": 0, "y": 0}, "Size": {"x": 2.2, "y": 2.2}},
+      "Collision": {"Center": {"x": 0, "y": 0}, "Size": {"x": 1.8, "y": 1.8}},
+      "Shadow": {"Mode": "procedural", "Enabled": true, "Size": {"x": 1.9, "y": 1.9}, "Offset": {"x": 0, "y": 0}, "Opacity": 0.16, "Softness": 0.9},
+      "InteractionAnchors": [{"Id": "stand", "Position": {"x": 0, "y": 0, "z": 0}, "Facing": {"x": 0, "y": 0, "z": 1}}],
+      "RequiredAnchors": ["stand"],
+      "Sorting": {"Layer": "Default", "Order": 1, "DepthOffset": 0, "SortByWorldZ": true}
+    },
+    {
+      "Id": "room-annex-wash-2",
+      "DisplayName": "右墙外第二洗发区房间外壳（沿用木饰面材质，程序化）",
+      "Category": "room-finish-extension",
+      "Type": "prop",
+      "ResourcePath": "builtin://prop/room-annex-wash-2",
+      "Status": "review",
+      "Directions": ["free"],
+      "DefaultOrientation": "free",
+      "Pivot": {"x": 0.5, "y": 0},
+      "Footprint": {"Center": {"x": 0, "y": 0}, "Size": {"x": 5.6, "y": 6.84}},
+      "Collision": {"Center": {"x": 0, "y": 0}, "Size": {"x": 5.6, "y": 6.84}},
+      "Shadow": {"Mode": "none", "Enabled": false},
+      "InteractionAnchors": [],
+      "RequiredAnchors": [],
+      "Sorting": {"Layer": "Default", "Order": 0, "DepthOffset": 0, "SortByWorldZ": false}
+    },
+    {
+      "Id": "room-entrance-door-left",
+      "DisplayName": "左墙顾客进出门（低矮木饰面墙开口 + 门框 + 门外地垫，程序化）",
+      "Category": "room-finish-extension",
+      "Type": "prop",
+      "ResourcePath": "builtin://prop/room-entrance-door-left",
+      "Status": "review",
+      "Directions": ["free"],
+      "DefaultOrientation": "free",
+      "Pivot": {"x": 0.5, "y": 0},
+      "Footprint": {"Center": {"x": -1.0, "y": 0}, "Size": {"x": 3.35, "y": 2.3}},
+      "Collision": {"Center": {"x": 0, "y": 0}, "Size": {"x": 0.4, "y": 1.6}},
+      "Shadow": {"Mode": "none", "Enabled": false},
+      "InteractionAnchors": [
+        {"Id": "customer-inside", "Position": {"x": 0.58, "y": 0, "z": 0}, "Facing": {"x": 1, "y": 0, "z": 0}},
+        {"Id": "customer-outside", "Position": {"x": -0.62, "y": 0, "z": 0}, "Facing": {"x": -1, "y": 0, "z": 0}}
+      ],
+      "RequiredAnchors": ["customer-inside", "customer-outside"],
+      "Sorting": {"Layer": "Default", "Order": 0, "DepthOffset": 0, "SortByWorldZ": false}
+    },
+    {
+      "Id": "expansion-pad-waiting-seats",
+      "DisplayName": "等候座椅施工点（程序化灰盒）",
+      "Category": "unlock-route-proximity-expansion",
+      "Type": "prop",
+      "ResourcePath": "builtin://prop/expansion-pad-waiting-seats",
+      "Status": "review",
+      "Directions": ["free"],
+      "DefaultOrientation": "free",
+      "Pivot": {"x": 0.5, "y": 0},
+      "Footprint": {"Center": {"x": 0, "y": 0}, "Size": {"x": 2.2, "y": 2.2}},
+      "Collision": {"Center": {"x": 0, "y": 0}, "Size": {"x": 1.8, "y": 1.8}},
+      "Shadow": {"Mode": "procedural", "Enabled": true, "Size": {"x": 1.9, "y": 1.9}, "Offset": {"x": 0, "y": 0}, "Opacity": 0.16, "Softness": 0.9},
+      "InteractionAnchors": [{"Id": "stand", "Position": {"x": 0, "y": 0, "z": 0}, "Facing": {"x": 0, "y": 0, "z": 1}}],
+      "RequiredAnchors": ["stand"],
+      "Sorting": {"Layer": "Default", "Order": 1, "DepthOffset": 0, "SortByWorldZ": true}
+    },
+    {
+      "Id": "expansion-pad-blow-stand",
+      "DisplayName": "吹风支架施工点（程序化灰盒）",
+      "Category": "unlock-route-proximity-expansion",
+      "Type": "prop",
+      "ResourcePath": "builtin://prop/expansion-pad-blow-stand",
+      "Status": "review",
+      "Directions": ["free"],
+      "DefaultOrientation": "free",
+      "Pivot": {"x": 0.5, "y": 0},
+      "Footprint": {"Center": {"x": 0, "y": 0}, "Size": {"x": 2.2, "y": 2.2}},
+      "Collision": {"Center": {"x": 0, "y": 0}, "Size": {"x": 1.8, "y": 1.8}},
+      "Shadow": {"Mode": "procedural", "Enabled": true, "Size": {"x": 1.9, "y": 1.9}, "Offset": {"x": 0, "y": 0}, "Opacity": 0.16, "Softness": 0.9},
+      "InteractionAnchors": [{"Id": "stand", "Position": {"x": 0, "y": 0, "z": 0}, "Facing": {"x": 0, "y": 0, "z": 1}}],
+      "RequiredAnchors": ["stand"],
+      "Sorting": {"Layer": "Default", "Order": 1, "DepthOffset": 0, "SortByWorldZ": true}
+    },
+    {
+      "Id": "expansion-pad-extra-seats",
+      "DisplayName": "加座长凳施工点（程序化灰盒）",
+      "Category": "unlock-route-proximity-expansion",
+      "Type": "prop",
+      "ResourcePath": "builtin://prop/expansion-pad-extra-seats",
+      "Status": "review",
+      "Directions": ["free"],
+      "DefaultOrientation": "free",
+      "Pivot": {"x": 0.5, "y": 0},
+      "Footprint": {"Center": {"x": 0, "y": 0}, "Size": {"x": 2.2, "y": 2.2}},
+      "Collision": {"Center": {"x": 0, "y": 0}, "Size": {"x": 1.8, "y": 1.8}},
+      "Shadow": {"Mode": "procedural", "Enabled": true, "Size": {"x": 1.9, "y": 1.9}, "Offset": {"x": 0, "y": 0}, "Opacity": 0.16, "Softness": 0.9},
+      "InteractionAnchors": [{"Id": "stand", "Position": {"x": 0, "y": 0, "z": 0}, "Facing": {"x": 0, "y": 0, "z": 1}}],
+      "RequiredAnchors": ["stand"],
+      "Sorting": {"Layer": "Default", "Order": 1, "DepthOffset": 0, "SortByWorldZ": true}
+    },
+    {
+      "Id": "furniture-waiting-bench",
+      "DisplayName": "店内加座长凳（两座，沿用等候沙发配色，程序化）",
+      "Category": "unlock-route-furniture",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/waiting-bench",
+      "Status": "review",
+      "Directions": ["back-wall", "right-wall"],
+      "DefaultOrientation": "back-wall",
+      "Pivot": {"x": 0.5, "y": 0},
+      "Footprint": {"Center": {"x": 0, "y": 0}, "Size": {"x": 2.6, "y": 1.8}},
+      "Collision": {"Center": {"x": 0, "y": 0}, "Size": {"x": 2.4, "y": 1.5}},
+      "Shadow": {"Mode": "procedural", "Enabled": true, "Size": {"x": 2.4, "y": 1.5}, "Offset": {"x": 0, "y": 0}, "Opacity": 0.25, "Softness": 0.8},
+      "InteractionAnchors": [{"Id": "wait-left", "Position": {"x": -0.63, "y": 0.65, "z": -0.1}, "Facing": {"x": 0, "y": 0, "z": -1}}, {"Id": "wait-right", "Position": {"x": 0.63, "y": 0.65, "z": -0.1}, "Facing": {"x": 0, "y": 0, "z": -1}}],
+      "RequiredAnchors": ["wait-left", "wait-right"],
+      "Sorting": {"Layer": "Default", "Order": 3, "DepthOffset": 0, "SortByWorldZ": true}
+    },
+    {
+      "Id": "furniture-blow-stand",
+      "DisplayName": "落地吹风支架（程序化）",
+      "Category": "unlock-route-furniture",
+      "Type": "furniture",
+      "ResourcePath": "builtin://furniture/blow-stand",
+      "Status": "review",
+      "Directions": ["free"],
+      "DefaultOrientation": "free",
+      "Pivot": {"x": 0.5, "y": 0},
+      "Footprint": {"Center": {"x": 0, "y": 0}, "Size": {"x": 1.2, "y": 1.2}},
+      "Collision": {"Center": {"x": 0, "y": 0}, "Size": {"x": 0.9, "y": 0.9}},
+      "Shadow": {"Mode": "procedural", "Enabled": true, "Size": {"x": 1.0, "y": 1.0}, "Offset": {"x": 0, "y": 0}, "Opacity": 0.22, "Softness": 0.82},
+      "InteractionAnchors": [],
+      "RequiredAnchors": [],
+      "Sorting": {"Layer": "Default", "Order": 3, "DepthOffset": 0, "SortByWorldZ": true}
+    },
+{
+  "Id": "expansion-pad-blow-dryer",
+  "DisplayName": "吹风机施工点",
+  "Category": "unlock-route-proximity-expansion",
+  "Type": "prop",
+  "ResourcePath": "builtin://prop/expansion-pad-blow-dryer",
+  "Status": "review",
+  "Directions": [
+    "free"
+  ],
+  "DefaultOrientation": "free",
+  "Pivot": {
+    "x": 0.5,
+    "y": 0
+  },
+  "Footprint": {
+    "Center": {
+      "x": 0,
+      "y": 0
+    },
+    "Size": {
+      "x": 2.2,
+      "y": 2.2
     }
+  },
+  "Collision": {
+    "Center": {
+      "x": 0,
+      "y": 0
+    },
+    "Size": {
+      "x": 1.8,
+      "y": 1.8
+    }
+  },
+  "Shadow": {
+    "Mode": "procedural",
+    "Enabled": true,
+    "Size": {
+      "x": 1.9,
+      "y": 1.9
+    },
+    "Offset": {
+      "x": 0,
+      "y": 0
+    },
+    "Opacity": 0.16,
+    "Softness": 0.9
+  },
+  "InteractionAnchors": [
+    {
+      "Id": "stand",
+      "Position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "Facing": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+      }
+    }
+  ],
+  "RequiredAnchors": [
+    "stand"
+  ],
+  "Sorting": {
+    "Layer": "Default",
+    "Order": 1,
+    "DepthOffset": 0,
+    "SortByWorldZ": true
+  }
+},
+{
+  "Id": "expansion-pad-wash-station",
+  "DisplayName": "洗头台施工点",
+  "Category": "unlock-route-proximity-expansion",
+  "Type": "prop",
+  "ResourcePath": "builtin://prop/expansion-pad-wash-station",
+  "Status": "review",
+  "Directions": [
+    "free"
+  ],
+  "DefaultOrientation": "free",
+  "Pivot": {
+    "x": 0.5,
+    "y": 0
+  },
+  "Footprint": {
+    "Center": {
+      "x": 0,
+      "y": 0
+    },
+    "Size": {
+      "x": 2.2,
+      "y": 2.2
+    }
+  },
+  "Collision": {
+    "Center": {
+      "x": 0,
+      "y": 0
+    },
+    "Size": {
+      "x": 1.8,
+      "y": 1.8
+    }
+  },
+  "Shadow": {
+    "Mode": "procedural",
+    "Enabled": true,
+    "Size": {
+      "x": 1.9,
+      "y": 1.9
+    },
+    "Offset": {
+      "x": 0,
+      "y": 0
+    },
+    "Opacity": 0.16,
+    "Softness": 0.9
+  },
+  "InteractionAnchors": [
+    {
+      "Id": "stand",
+      "Position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "Facing": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+      }
+    }
+  ],
+  "RequiredAnchors": [
+    "stand"
+  ],
+  "Sorting": {
+    "Layer": "Default",
+    "Order": 1,
+    "DepthOffset": 0,
+    "SortByWorldZ": true
+  }
+}
   ]
 }

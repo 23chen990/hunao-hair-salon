@@ -235,7 +235,8 @@ public class Phase3RuntimeViewTests
     [Test]
     public void CustomerUsesSeatedPoseOnlyAfterReachingAWaitingOrServiceSeat()
     {
-        var shouldSit = typeof(SalonCustomerView).GetMethod("ShouldUseSeatedPose");
+        var shouldSit = typeof(SalonCustomerView).GetMethod("ShouldUseSeatedPose",
+            new[] { typeof(CustomerState), typeof(bool) });
 
         Assert.IsNotNull(shouldSit,
             "The runtime view needs an explicit state-to-pose rule instead of remaining in its spawn pose.");
@@ -332,18 +333,19 @@ public class Phase3RuntimeViewTests
         Assert.IsNotNull(buildLeaving);
         Vector3[] entering = (Vector3[])buildEntering.Invoke(null, new object[]
         {
-            new Vector3(-10.4f, 1f, -2.7f), new Vector3(-8.4f, 1f, -4.1f)
+            SalonEntranceDoor.OutsideSpawn, new Vector3(-8.4f, 1f, -4.1f)
         });
         Vector3[] leaving = (Vector3[])buildLeaving.Invoke(null, new object[]
         {
-            new Vector3(2.2f, 1f, .2f), new Vector3(-10.8f, 1f, 5.9f)
+            new Vector3(2.2f, 1f, .2f), SalonEntranceDoor.OutsideExit
         });
 
         Assert.GreaterOrEqual(entering.Length, 2);
         Assert.GreaterOrEqual(leaving.Length, 3);
         Assert.AreNotEqual(entering[0].z, leaving[0].z,
             "Incoming and outgoing customers must not fully share one trajectory.");
-        Assert.AreEqual(-10.8f, leaving[leaving.Length - 1].x, .001f);
+        Assert.AreEqual(SalonEntranceDoor.OutsideExit.x, leaving[leaving.Length - 1].x, .001f,
+            "Leaving customers walk out of the left-wall door instead of vanishing inside.");
     }
 
     [Test]
@@ -362,11 +364,11 @@ public class Phase3RuntimeViewTests
     }
 
     [Test]
-    public void ReputationHudIsExplicitlyMarkedUnavailableInThisPhase()
+    public void ReputationSystemIsEnabledForPlayers()
     {
         var field = typeof(SalonGameModel).GetField("ReputationSystemEnabled");
         Assert.IsNotNull(field);
-        Assert.AreEqual(false, field.GetValue(null));
+        Assert.AreEqual(true, field.GetValue(null));
     }
 
     private static int CountDirectChildren(Transform root, string name)

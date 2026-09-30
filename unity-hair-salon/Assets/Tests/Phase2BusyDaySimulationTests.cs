@@ -9,7 +9,7 @@ using NUnit.Framework;
 /// SalonGameModel 跑完一整个营业日，并由一个"称职玩家"策略驱动，测量真实并发。
 ///
 /// 目的不是模拟完美操作，而是回答两个问题：
-///   1. 现有 Director 参数能不能自然产生 2 → 3 → 4 的并发爬升；
+///   1. 首日真实 pacing 是否限制在小批活跃顾客并提供喘息；
 ///   2. Day 1 的目标订单在一个称职玩家手里能不能达成。
 ///
 /// 注意：模型层没有玩家位置，模拟不证明实际触控体验；完整操作由 Chromium 回归检查。
@@ -34,37 +34,41 @@ public sealed class Phase2BusyDaySimulationTests
         public int Abandoned;
         public int CollectedPayments;
         public float DayLength;
+        public float LongestQuietWindow;
         public string Trace = "";
     }
 
     // ------------------------------------------------------------------ 验收
 
     [Test]
-    public void UnfinishedMobileDayClimbsFromTwoToThreeAndPeaksAtFour()
+    public void FirstDayPacingStaysBoundedAndLeavesARecoveryWindow()
     {
         Report report = RunDay(1, pressureOnly: true);
 
         TestContext.Out.WriteLine(report.Trace);
 
-        Assert.GreaterOrEqual(report.PeakActive, 4,
-            "A competent player must still see four customers in the salon at peak. " +
-            "Trace: " + report.Trace);
-        Assert.GreaterOrEqual(report.SecondsAtThree, 15f,
-            "Three simultaneous customers must hold for a meaningful stretch, not appear for one frame.");
-        Assert.GreaterOrEqual(report.SecondsAtTwo, 40f,
-            "Two simultaneous customers must be the normal state, not a spike.");
-        Assert.Greater(report.FirstAtTwo, 0f, "Pressure must start early in the day.");
-        Assert.Less(report.FirstAtTwo, report.FirstAtThree, "Pressure must climb 2 -> 3.");
-        Assert.Less(report.FirstAtThree, report.FirstAtFour, "Pressure must climb 3 -> 4.");
+        Assert.LessOrEqual(report.PeakActive, 2,
+            "首日活跃顾客不能越过两位软上限。 Trace: " + report.Trace);
+        Assert.GreaterOrEqual(report.CompletedOrders, SalonMobileDayConfig.TargetOrdersForDay(1),
+            "首日即使保持单椅学习节奏，也必须完成实际业务目标。");
+        Assert.AreEqual(-1f, report.FirstAtThree, .001f,
+            "首日不应在未完成成长前堆到三位活跃顾客。");
+        Assert.AreEqual(-1f, report.FirstAtFour, .001f,
+            "首日不应在未完成成长前堆到四位活跃顾客。");
+        Assert.GreaterOrEqual(report.LongestQuietWindow, 2f,
+            "没有施工或补货任务时仍应有可读的短喘息，而不是无缝撞上下一单。");
+        Assert.LessOrEqual(report.LongestQuietWindow, 4f,
+            "没有可做管理任务时，空店不能超过四秒仍无下一位顾客。");
     }
 
     [Test]
-    public void ACompetentPlayerStillHasSeveralThingsPendingAtThePeak()
+    public void ACompetentPlayerKeepsPeakWorkBoundedWhileStillHavingWork()
     {
         Report report = RunDay(1, pressureOnly: true);
-        Assert.GreaterOrEqual(report.PeakPendingActions, 3,
-            "At the busiest moment the player must have at least three separate things waiting. " +
-            "Trace: " + report.Trace);
+        Assert.GreaterOrEqual(report.PeakPendingActions, 1,
+            "称职玩家仍应有真实服务动作，而不是没有工作。 Trace: " + report.Trace);
+        Assert.LessOrEqual(report.PeakPendingActions, 2,
+            "首日峰值待办不应演变为同时堆三件事。 Trace: " + report.Trace);
     }
 
     [Test]
@@ -98,6 +102,9 @@ public sealed class Phase2BusyDaySimulationTests
                 WaitingCapacity = 4,
                 InitialCustomerCount = 0
             });
+        var progress = SalonProgressData.CreateDefault();
+        game.ConfigureWorkstationAvailability(progress.HaircutExpansionPurchased,
+            progress.WashAnnexExpansionPurchased, false);
         var day = new BusinessDayController(SalonMobileDayConfig.CreateForDay(dayNumber));
         day.StartDay(dayNumber);
         // Test the existing traffic curve independently from the new early
@@ -105,6 +112,7 @@ public sealed class Phase2BusyDaySimulationTests
         if (pressureOnly) day.Config.TargetOrders = int.MaxValue;
         day.StartBusiness();
         var director = new CustomerTrafficDirector(day.Config);
+        var pacing = new SalonPacingDirector();
         var haircut = new HaircutConfig();
         // DayStats 由 CustomerChanged 事件驱动（真实运行时由 SalonDemo 挂钩），
         // 模拟里必须自己接上，否则 CompletedOrders 永远是 0。
@@ -116,7 +124,9 @@ public sealed class Phase2BusyDaySimulationTests
         int spawnIndex = 0;
         int nextId = 4100;
         float elapsed = 0f;
+        float quietWindow = 0f;
         CustomerModel cutting = null;
+        SalonTool cuttingTool = SalonTool.Scissors;
         float cutRemaining = 0f;
         uint seed = 20260919u;
         int sampleCounter = 0;
@@ -130,17 +140,22 @@ public sealed class Phase2BusyDaySimulationTests
                 if (cutRemaining <= 0f)
                 {
                     game.CompleteHaircutAction(cutting,
-                        game.HaircutHoldDurationFor(SalonTool.Scissors, haircut), false);
+                        game.HaircutHoldDurationFor(cuttingTool, haircut), false);
                     game.EndActiveOperation(cutting);
                     cutting = null;
+                    cuttingTool = SalonTool.Scissors;
                 }
             }
             else if (playerActs && !game.PlayerBusy)
             {
-                PerformOnePlayerAction(game, day, haircut, ref cutting, ref cutRemaining);
+                PerformOnePlayerAction(game, day, progress, haircut, ref cutting, ref cuttingTool,
+                    ref cutRemaining);
             }
 
             // 2. 客流：与 SalonDemo.MaintainCustomerFlow 同口径。
+            pacing.Tick(Step, game, false);
+            if (SalonPacingDirector.ActiveCount(game) == 0 && pacing.RestRemaining <= 0f)
+                spawnCooldown = 0f;
             if (day.CanSpawnCustomers)
             {
                 spawnCooldown = Math.Max(0f, spawnCooldown - Step);
@@ -150,7 +165,7 @@ public sealed class Phase2BusyDaySimulationTests
                     float roll = (seed % 10000u) / 10000f;
                     TrafficDecision decision = director.Evaluate(
                         day.BusinessProgress, BuildSnapshot(game), roll, day.Reputation.CurrentStars);
-                    if (decision.ShouldSpawn && TrySpawn(game, day, nextId, spawnIndex))
+                    if (decision.ShouldSpawn && TrySpawn(game, day, pacing, progress, nextId, spawnIndex))
                     {
                         nextId++;
                         spawnIndex++;
@@ -174,6 +189,15 @@ public sealed class Phase2BusyDaySimulationTests
             report.PeakActive = Math.Max(report.PeakActive, active);
             report.PeakPendingActions = Math.Max(report.PeakPendingActions, pending);
             Bucket(report, active, elapsed);
+            if (active == 0)
+            {
+                quietWindow += Step;
+                report.LongestQuietWindow = Math.Max(report.LongestQuietWindow, quietWindow);
+            }
+            else
+            {
+                quietWindow = 0f;
+            }
 
             if (++sampleCounter % 16 == 0)
                 trace.AppendLine(string.Format(
@@ -241,7 +265,8 @@ public sealed class Phase2BusyDaySimulationTests
     // ------------------------------------------------------------ 玩家策略
 
     private static void PerformOnePlayerAction(SalonGameModel game, BusinessDayController day,
-        HaircutConfig haircut, ref CustomerModel cutting, ref float cutRemaining)
+        SalonProgressData progress, HaircutConfig haircut, ref CustomerModel cutting,
+        ref SalonTool cuttingTool, ref float cutRemaining)
     {
         // a. 泡沫已经可以冲洗 —— 回来了就得收尾。
         for (int i = 0; i < game.Customers.Count; i++)
@@ -267,9 +292,13 @@ public sealed class Phase2BusyDaySimulationTests
             PaymentDropModel drop = game.Payments.Drops[i];
             if (game.Payments.BeginCollection(drop.Id))
             {
-                game.Payments.CompleteCollection(drop.Id);
-                day.Stats.RecordPaymentCollected(drop);
-                return;
+                if (game.Payments.CompleteCollection(drop.Id))
+                {
+                    day.Stats.RecordPaymentCollected(drop);
+                    RecordPaidServiceProgress(game, drop, progress);
+                    game.FinishCheckout(drop.CustomerId, true);
+                    return;
+                }
             }
         }
 
@@ -309,9 +338,12 @@ public sealed class Phase2BusyDaySimulationTests
             if (c.State != CustomerState.Serving || c.CurrentNeed != ServiceType.Cut) continue;
             if (c.Station < 0 || !SalonGameModel.IsCompatibleStation(ServiceType.Cut, c.Station)) continue;
             game.SelectCustomer(c);
-            if (!game.BeginHaircutAction(c, SalonTool.Scissors, haircut)) continue;
+            SalonTool tool = c.HaircutService == null
+                ? SalonTool.Scissors : c.HaircutService.CurrentRequiredTool;
+            if (!game.BeginHaircutAction(c, tool, haircut)) continue;
             cutting = c;
-            cutRemaining = game.HaircutHoldDurationFor(SalonTool.Scissors, haircut);
+            cuttingTool = tool;
+            cutRemaining = game.HaircutHoldDurationFor(tool, haircut);
             return;
         }
 
@@ -323,6 +355,17 @@ public sealed class Phase2BusyDaySimulationTests
             if (c.AutoBlowRunning) continue;
             if (game.StartAutoBlow(c)) return;
         }
+    }
+
+    private static void RecordPaidServiceProgress(SalonGameModel game, PaymentDropModel drop,
+        SalonProgressData progress)
+    {
+        CustomerModel served = game.Customers.Find(c => c.Id == drop.CustomerId);
+        if (served == null || !served.IsComplete || served.ServiceResult == CustomerServiceResult.Failed)
+            return;
+        progress.PaidCustomerCount++;
+        if (served.Needs.Contains(ServiceType.Dry)) progress.PaidDryOrderCount++;
+        if (served.Needs.Contains(ServiceType.Wash)) progress.PaidWashOrderCount++;
     }
 
     // ---------------------------------------------------------------- 统计
@@ -388,14 +431,20 @@ public sealed class Phase2BusyDaySimulationTests
 
     // ---------------------------------------------------------------- 辅助
 
-    private static bool TrySpawn(SalonGameModel game, BusinessDayController day, int id, int spawnIndex)
+    private static bool TrySpawn(SalonGameModel game, BusinessDayController day,
+        SalonPacingDirector pacing, SalonProgressData progress, int id, int spawnIndex)
     {
-        string orderId = SalonMobileDayConfig.PickOrderForSpawn(
-            day.Config, spawnIndex, day.BusinessProgress);
+        if (!pacing.CanAdmit(game, progress)) return false;
+        string orderId = SalonPacingDirector.SelectOrder(game, progress, spawnIndex, null, 6,
+            day.BusinessRemainingTime);
+        if (orderId == null) return false;
         var needs = new List<ServiceType>(SalonOrderCatalog.Get(orderId));
         CustomerModel customer = game.Spawn(id, needs);
         if (customer == null) return false;
-        game.ConfigureHaircutOrder(customer, SalonTool.Scissors);
+        if (customer.CurrentNeed == ServiceType.Cut)
+            game.ConfigureHaircutOrder(customer,
+                SalonMobileDayConfig.GetHaircutToolsForSpawn(day.Config.MobileDayNumber, spawnIndex));
+        pacing.RegisterArrival();
         day.Stats.RecordSpawn(customer);
         return true;
     }
@@ -417,13 +466,18 @@ public sealed class Phase2BusyDaySimulationTests
         for (int i = 0; i < game.Customers.Count; i++)
         {
             CustomerModel c = game.Customers[i];
-            if (c.State == CustomerState.Exited) continue;
+            if (!SalonPacingDirector.IsActive(c)) continue;
             active++;
             if (c.State == CustomerState.Entering || c.State == CustomerState.Waiting) waiting++;
             if (c.Emotion == CustomerEmotion.Angry) angry++;
         }
+        int serviceStations = 0;
         for (int i = 0; i < game.Workstations.Count; i++)
+        {
+            if (!game.Workstations[i].IsUsable) continue;
+            serviceStations++;
             if (game.Workstations[i].Occupied) occupied++;
-        return new TrafficSnapshot(active, waiting, occupied, angry, 4);
+        }
+        return new TrafficSnapshot(active, waiting, occupied, angry, serviceStations);
     }
 }

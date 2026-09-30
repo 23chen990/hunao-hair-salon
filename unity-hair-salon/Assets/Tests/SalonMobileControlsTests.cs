@@ -282,6 +282,33 @@ public sealed class SalonMobileControlsTests
     }
 
     [Test]
+    public void TouchLabelsStayReadableAndJoystickNamesTheMovementSurface()
+    {
+        Component controls = CreateControls();
+        Transform joystick = FindChild(controls.transform, "MobileJoystick");
+        Transform interaction = FindChild(controls.transform, "MobileInteractionButton");
+        Transform hint = FindChild(controls.transform, "MobileHint");
+
+        RectTransform interactionRect = interaction as RectTransform;
+        Assert.That(interactionRect.rect.width, Is.GreaterThanOrEqualTo(340f),
+            "The right action surface needs enough width for a readable Chinese action label at 844x390.");
+        Assert.That(interactionRect.rect.height, Is.GreaterThanOrEqualTo(190f));
+
+        Text actionLabel = FindNamedText(interaction, "InteractionLabel");
+        Text hintLabel = FindNamedText(hint, "MobileHintLabel");
+        Text joystickLabel = FindNamedText(joystick, "MobileJoystickLabel");
+        Assert.That(actionLabel, Is.Not.Null);
+        Assert.That(actionLabel.fontSize, Is.GreaterThanOrEqualTo(44));
+        Assert.That(actionLabel.resizeTextMinSize, Is.GreaterThanOrEqualTo(24));
+        Assert.That(hintLabel, Is.Not.Null);
+        Assert.That(hintLabel.fontSize, Is.GreaterThanOrEqualTo(30));
+        Assert.That(hintLabel.resizeTextMinSize, Is.GreaterThanOrEqualTo(20));
+        Assert.That(joystickLabel, Is.Not.Null, "The movement surface needs a short in-world label for first-session touch discovery.");
+        Assert.That(joystickLabel.text, Is.EqualTo("移动"));
+        Assert.That(joystickLabel.fontSize, Is.GreaterThanOrEqualTo(28));
+    }
+
+    [Test]
     public void VisibilityCanBeToggledWithoutDestroyingTheActionSurface()
     {
         Component controls = CreateControls();
@@ -421,5 +448,11 @@ public sealed class SalonMobileControlsTests
                 return tmpText.text;
         }
         return null;
+    }
+
+    private static Text FindNamedText(Transform root, string name)
+    {
+        Transform target = FindChild(root, name);
+        return target == null ? null : target.GetComponent<Text>();
     }
 }

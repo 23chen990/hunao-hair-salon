@@ -1,0 +1,71 @@
+{
+  "passed": true,
+  "viewport": {
+    "width": 844,
+    "height": 390
+  },
+  "input": "Chromium real touch events",
+  "lowPerformanceContinuation": false,
+  "admissionWithinCapacity": true,
+  "haircutGestureChecks": true,
+  "balance": 1836,
+  "upgraded": false,
+  "businessDaysRequested": 1,
+  "satisfaction": 94,
+  "satisfactionPersisted": true,
+  "maxWaiting": 3,
+  "manualCoinPickups": 0,
+  "paymentsAutoSettled": true,
+  "firstCustomerLeavingTrajectory": {
+    "startScreen": {
+      "x": 443.5372009277344,
+      "y": 194.9974822998047
+    },
+    "maxScreenDisplacementPx": 281.9887726714287,
+    "closestExitDistance": 9.536743128535363e-08,
+    "exit": {
+      "x": -13.25,
+      "z": -4.15
+    },
+    "samplesBeyondLeftWall": [
+      {
+        "x": -11.661,
+        "z": -4.15
+      },
+      {
+        "x": -13.154,
+        "z": -4.15
+      },
+      {
+        "x": -13.25,
+        "z": -4.15
+      },
+      {
+        "x": -13.25,
+        "z": -4.15
+      },
+      {
+        "x": -13.25,
+        "z": -4.15
+      }
+    ],
+    "screenshot": "14-first-customer-leaving.png",
+    "passed": true
+  },
+  "secondCustomerOverlapOccurred": false,
+  "secondCustomerGreetedWhileFirstLeaving": null,
+  "secondCustomerReceptionFlow": null,
+  "backgroundWhileOtherService": true,
+  "dayResults": {
+    "1": {
+      "completed": 6,
+      "target": 3,
+      "balance": 1836,
+      "satisfaction": 94
+    }
+  },
+  "framesObserved": 787,
+  "actions": 56,
+  "errors": [],
+  "warnings": []
+}

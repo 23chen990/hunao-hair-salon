@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Failed(Child)" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-30 18:04:09Z" end-time="2026-09-30 18:04:09Z" duration="0.0647827">
+  <test-suite type="TestSuite" id="1000" name="胡闹理发店灰盒 Demo" fullname="胡闹理发店灰盒 Demo" runstate="Runnable" testcasecount="852" result="Failed" site="Child" start-time="2026-09-30 18:04:09Z" end-time="2026-09-30 18:04:09Z" duration="0.064783" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1970" name="HairSalon.Tests.dll" fullname="/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Library/ScriptAssemblies/HairSalon.Tests.dll" runstate="Runnable" testcasecount="852" result="Failed" site="Child" start-time="2026-09-30 18:04:09Z" end-time="2026-09-30 18:04:09Z" duration="0.050232" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="54363" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestFixture" id="1667" name="SalonPurchasePadRuntimeIntegrationTests" fullname="SalonPurchasePadRuntimeIntegrationTests" classname="SalonPurchasePadRuntimeIntegrationTests" runstate="Runnable" testcasecount="8" result="Failed" site="Child" start-time="2026-09-30 18:04:09Z" end-time="2026-09-30 18:04:09Z" duration="0.036108" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1676" name="BuyingSecondChairPersistsTwoPaidOrdersOfLowerPressure" fullname="SalonPurchasePadRuntimeIntegrationTests.BuyingSecondChairPersistsTwoPaidOrdersOfLowerPressure" methodname="BuyingSecondChairPersistsTwoPaidOrdersOfLowerPressure" classname="SalonPurchasePadRuntimeIntegrationTests" runstate="Runnable" seed="1299759801" result="Failed" label="Error" start-time="2026-09-30 18:04:09Z" end-time="2026-09-30 18:04:09Z" duration="0.026908" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[System.Reflection.TargetInvocationException : Exception has been thrown by the target of an invocation.
+  ----> System.NullReferenceException : Object reference not set to an instance of an object]]></message>
+            <stack-trace><![CDATA[  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x00083] in <299d5c9ae27b4d27af003e5f456f4b13>:0 
+  at System.Reflection.MethodBase.Invoke (System.Object obj, System.Object[] parameters) [0x00000] in <299d5c9ae27b4d27af003e5f456f4b13>:0 
+  at SalonPurchasePadRuntimeIntegrationTests.Invoke (System.String name, System.Object[] args) [0x00000] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/SalonPurchasePadRuntimeIntegrationTests.cs:160 
+  at SalonPurchasePadRuntimeIntegrationTests.BuyingSecondChairPersistsTwoPaidOrdersOfLowerPressure () [0x000af] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/SalonPurchasePadRuntimeIntegrationTests.cs:141 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <299d5c9ae27b4d27af003e5f456f4b13>:0 
+--NullReferenceException
+  at SalonDemo.BuildMobileCollisionMap () [0x00183] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Scripts/SalonDemo.Mobile.cs:786 
+  at SalonDemo.UpdateMobileHaircutExpansionPad (System.Single dt) [0x00219] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Scripts/SalonDemo.Mobile.cs:654 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <299d5c9ae27b4d27af003e5f456f4b13>:0 ]]></stack-trace>
+          </failure>
+          <output><![CDATA[Saving results to: /Users/kker/Documents/ChatGPT/game2/artifacts/pacing-rebalance/legacy-capacity-red.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

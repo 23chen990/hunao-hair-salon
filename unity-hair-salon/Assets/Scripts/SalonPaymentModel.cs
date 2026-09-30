@@ -16,6 +16,12 @@ namespace HairSalon
         public int BlowBaseReward = 160;
         public float HappyMaxWaitSeconds = 12f;
         public float HappyMaxServiceSeconds = 15f;
+        public bool SpeedTipTiers;
+        public float TipGreenPatienceRatio = .66f;
+        public float TipYellowPatienceRatio = .33f;
+        public int TipGreenReward = 60;
+        public int TipYellowReward = 38;
+        public int TipRedReward = 22;
     }
 
     [Serializable]
@@ -91,6 +97,14 @@ namespace HairSalon
             int customerId, int workstationId, IReadOnlyList<ServiceType> order,
             HaircutServiceRating haircutRating, bool happyCompletion)
         {
+            int tipReward = happyCompletion ? Math.Max(0, Config.HappyTipReward) : 0;
+            return CreateOrderPayment(customerId, workstationId, order, haircutRating, tipReward);
+        }
+
+        public PaymentDropModel CreateOrderPayment(
+            int customerId, int workstationId, IReadOnlyList<ServiceType> order,
+            HaircutServiceRating haircutRating, int tipReward)
+        {
             if (order == null || order.Count == 0)
                 throw new ArgumentException("A completed order must contain at least one service.", nameof(order));
             int baseReward = 0;
@@ -108,8 +122,22 @@ namespace HairSalon
                         throw new ArgumentException("A completed cut step requires a completed haircut rating.", nameof(haircutRating));
                 }
             }
-            int tipReward = happyCompletion ? Math.Max(0, Config.HappyTipReward) : 0;
-            return CreatePaymentDrop(customerId, workstationId, baseReward, tipReward);
+            return CreatePaymentDrop(customerId, workstationId, baseReward, Math.Max(0, tipReward));
+        }
+
+        /// <summary>
+        /// Speed tier from the customer's remaining patience. A minor mistake
+        /// drops one tier; a moderate or worse accident earns no tip.
+        /// </summary>
+        public int ResolveSpeedTip(float patienceRatio, AccidentSeverity accident, bool wrongStation)
+        {
+            if (accident >= AccidentSeverity.Moderate) return 0;
+            int tier = patienceRatio >= Config.TipGreenPatienceRatio ? 0 :
+                patienceRatio >= Config.TipYellowPatienceRatio ? 1 : 2;
+            if (accident == AccidentSeverity.Minor || wrongStation) tier++;
+            return tier == 0 ? Math.Max(0, Config.TipGreenReward) :
+                tier == 1 ? Math.Max(0, Config.TipYellowReward) :
+                tier == 2 ? Math.Max(0, Config.TipRedReward) : 0;
         }
 
         public PaymentDropModel CreateFinalPayment(

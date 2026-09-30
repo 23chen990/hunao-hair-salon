@@ -37,5 +37,14 @@ namespace HairSalon
         {
             return game != null && game.EndActiveOperationForPlayer(playerId, customer);
         }
+
+        public static bool StartManualBlow(this SalonGameModel game, int playerId, CustomerModel customer)
+            => game != null && game.StartManualBlowForPlayer(playerId, customer);
+
+        public static bool TickManualBlow(this SalonGameModel game, int playerId, CustomerModel customer, float dt)
+            => game != null && game.TickManualBlowForPlayer(playerId, customer, dt);
+
+        public static BlowResult EndManualBlowHold(this SalonGameModel game, int playerId, CustomerModel customer)
+            => game == null ? BlowResult.None : game.EndManualBlowHoldForPlayer(playerId, customer);
     }
 }

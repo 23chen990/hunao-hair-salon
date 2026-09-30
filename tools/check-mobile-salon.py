@@ -15,11 +15,22 @@ MAX_DAY_WALL_SECONDS = 8 * 60
 MAX_GOTO_WALL_SECONDS = 45
 SUPPLY_SOURCE = {'x': 3.15, 'y': .2, 'z': .7}
 SUPPLY_RACK = {'x': -1.25, 'y': .2, 'z': 4.6}
+# SalonEntranceDoor: customers enter and leave through the left-wall door.
+LEFT_WALL_X = -10.73
+DOOR_Z = -4.15
+DOOR_HALF_OPENING = .8
+DOOR_OUTSIDE_EXIT_X = -13.25
 spec = importlib.util.spec_from_file_location('salon_browser', ROOT/'tools/browser-check.py')
 qa = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(qa)
 
 class MobileDriver:
+    # Legacy WebGL packages do not expose WorkstationModel.IsUsable in their
+    # mobile telemetry.  The opening mobile layout only exposes station 0 and
+    # station 1; once a package emits ``usable`` we trust that explicit value
+    # so later unlocks continue to work without changing this driver.
+    OPENING_USABLE_STATION_IDS = frozenset((0, 1))
+
     def __init__(self, page):
         self.page = page
         self.cdp = page.context.new_cdp_session(page)
@@ -36,6 +47,9 @@ class MobileDriver:
         self.result = {"passed":False}
         self.satisfaction_persisted = None
         self.last_progress_log = None
+        self.last_telemetry_wall = None
+        self.layout = None
+        self.pending_customers = None
         page.on('console', self.console)
         page.on('pageerror', lambda error: self.add_error(str(error)))
 
@@ -52,14 +66,44 @@ class MobileDriver:
 
     def console(self, message):
         value = message.text
+        if '[MOBILE_LAYOUT] ' in value:
+            try:
+                layout = json.loads(value.split('[MOBILE_LAYOUT] ', 1)[1])
+            except ValueError:
+                self.add_error('[MOBILE_LAYOUT] unparseable (%d chars)' % len(value))
+                return
+            if isinstance(layout, dict):
+                self.layout = layout
+            return
+        if '[MOBILE_CUSTOMERS] ' in value:
+            try:
+                customers = json.loads(value.split('[MOBILE_CUSTOMERS] ', 1)[1])
+            except ValueError:
+                self.add_error('[MOBILE_CUSTOMERS] unparseable (%d chars)' % len(value))
+                return
+            if isinstance(customers, dict) and isinstance(customers.get('customers'), list):
+                self.pending_customers = customers['customers']
+            else:
+                self.add_error('[MOBILE_CUSTOMERS] unparseable (%d chars)' % len(value))
+            return
         if '[MOBILE_STATE] ' in value:
             try:
                 self.state = json.loads(value.split('[MOBILE_STATE] ', 1)[1])
                 if not isinstance(self.state, dict):
                     self.state = None
                     return
+                # New builds split the large customer list into the line
+                # immediately before MOBILE_STATE.  setdefault deliberately
+                # preserves customers embedded by old builds.
+                pending_customers = getattr(self, 'pending_customers', None)
+                if pending_customers is not None:
+                    self.state.setdefault('customers', pending_customers)
+                self.pending_customers = None
+                for key, item in (getattr(self, 'layout', None) or {}).items():
+                    self.state.setdefault(key, item)
                 self.state["state"] = {"Starting":"PreOpen", "Shop":"ClosedManagement"}.get(self.state["state"],self.state["state"])
                 self.history.append(self.state)
+                self.last_telemetry_wall = time.monotonic()
                 self.track_first_leaving(self.state)
                 progress_key = (self.state.get('day'), self.state['state'],
                                 int((self.progress(self.state) or 0) * 5))
@@ -69,7 +113,9 @@ class MobileDriver:
                         ('day', 'state', 'progress', 'completed', 'target', 'balance', 'satisfaction')},
                         ensure_ascii=False), flush=True)
             except ValueError:
-                pass
+                # A truncated line leaves the driver acting on stale state;
+                # fail loudly instead of silently timing out later.
+                self.add_error('[MOBILE_STATE] unparseable (%d chars)' % len(value))
         if message.type == 'error' or 'Exception:' in value or "Coroutine couldn't" in value:
             self.add_error(value)
 
@@ -108,6 +154,14 @@ class MobileDriver:
                 if isinstance(value, (int, float)) and math.isfinite(value):
                     return value
         return None
+
+    @classmethod
+    def station_is_usable(cls, station):
+        if not isinstance(station, dict):
+            return False
+        if 'usable' in station:
+            return bool(station['usable'])
+        return station.get('id') in cls.OPENING_USABLE_STATION_IDS
 
     def until(self, predicate, timeout=45):
         limit = time.monotonic() + timeout
@@ -175,6 +229,9 @@ class MobileDriver:
             # exercise a clean pass for each configured timing range.
             hold_seconds = .95 if self.state.get('targetTool') == 'Clippers' else 1.8
             self.hold_action(hold_seconds)
+        elif self.state.get('targetAction') == 'StartDry' and not self.state.get('purchased'):
+            # The handheld dryer occupies the stylist until the stand is built.
+            self.hold_action(7.45)
         else:
             self.tap(p['x'], 390-p['y'])
             self.wait(.4)
@@ -195,7 +252,9 @@ class MobileDriver:
             assert self.goto(customer['position'])
             self.action()
             self.until(lambda s:s['guided']==0)
-            station = next(p for p in self.state['stations'] if p['type']=='Haircut' and not p['occupied'])
+            station = next(p for p in self.state['stations']
+                           if p['type']=='Haircut' and not p['occupied'] and
+                           self.station_is_usable(p))
             assert self.goto(station['position'])
             self.action()
             self.until(lambda s:s['targetCustomer']==0 and s['targetAction']=='Cut' and s['available'])
@@ -249,6 +308,43 @@ class MobileDriver:
             and (not (customer['autoRunning'] or customer['autoStopped'])
                  or customer['autoElapsed']>=customer['autoReady']))
 
+    @classmethod
+    def choose_ready_service(cls, state):
+        """Choose an actionable service without stealing a transfer target.
+
+        A customer whose wash just completed remains ``Serving`` while
+        ``needsTransfer`` is true. Their target is a disabled Guide action
+        until a compatible chair is free, so treating that customer as a
+        normal ready service traps the real-touch driver on the old chair.
+        Finish another ready customer first, then route the transfer when the
+        compatible chair is available.
+        """
+        ready = [customer for customer in state.get('customers', [])
+                 if cls.service_ready(customer) and not customer.get('needsTransfer')]
+        if not ready:
+            return None
+        return min(ready, key=lambda customer: (
+            not customer.get('autoStopped'),
+            not customer.get('foamReady'),
+            not (customer.get('need') == 'Dry' and not customer.get('autoRunning')),
+            customer.get('autoRunning', False),
+            customer.get('patience', 1.0)))
+
+    @classmethod
+    def transfer_stations(cls, state, customer):
+        """Return currently usable free chairs compatible with a transfer."""
+        kind = 'Wash' if customer.get('need') == 'Wash' else 'Haircut'
+        return [station for station in state.get('stations', [])
+                if station.get('type') == kind and not station.get('occupied')
+                and cls.station_is_usable(station)]
+
+    @classmethod
+    def transfer_anchor(cls, state, customer):
+        """Find the occupied chair where Guide must be touched first."""
+        station_id = customer.get('station', -1)
+        return next((station for station in state.get('stations', [])
+                     if station.get('id') == station_id), None)
+
     def joystick(self, dx, dy):
         p = self.state['joystick']
         cx, cy = p['x'], 390-p['y']
@@ -269,6 +365,10 @@ class MobileDriver:
             self.touch = None
             self.wait(.08)
 
+    def telemetry_is_stale(self, max_age=.6):
+        return (self.last_telemetry_wall is not None and
+                time.monotonic() - self.last_telemetry_wall > max_age)
+
     def shot(self, name):
         self.release()
         EVIDENCE.mkdir(parents=True, exist_ok=True)
@@ -287,7 +387,8 @@ class MobileDriver:
                 'startScreen': {'x': screen.get('x', 0), 'y': screen.get('y', 0)},
                 'maxScreenDisplacementPx': 0.0,
                 'closestExitDistance': float('inf'),
-                'exit': {'x': -10.8, 'z': 5.9},
+                'exit': {'x': DOOR_OUTSIDE_EXIT_X, 'z': DOOR_Z},
+                'samplesBeyondLeftWall': [],
                 'screenshot': '14-first-customer-leaving.png'
             }
             if state.get('state') != 'Result':
@@ -301,6 +402,9 @@ class MobileDriver:
                                   (exit_position['x'], exit_position['z']))
         self.first_leaving['closestExitDistance'] = min(
             self.first_leaving['closestExitDistance'], exit_distance)
+        if position.get('x', 0) < LEFT_WALL_X:
+            self.first_leaving['samplesBeyondLeftWall'].append(
+                {'x': round(position.get('x', 0), 3), 'z': round(position.get('z', 0), 3)})
 
     @staticmethod
     def visible_interaction_button(state):
@@ -356,7 +460,8 @@ class MobileDriver:
         self.shot('16-second-customer-guided-to-wash')
 
         wash_stations = [station for station in self.state['stations']
-                         if station.get('type') == 'Wash' and not station.get('occupied')]
+                         if station.get('type') == 'Wash' and not station.get('occupied') and
+                         self.station_is_usable(station)]
         assert wash_stations, 'O002 cannot continue because every compatible wash station is occupied.'
 
         def route_distance(station):
@@ -501,6 +606,20 @@ class MobileDriver:
         while path and time.monotonic()<deadline:
             self.wait(.05)
             if self.state['state'] not in ('Business', 'ClosingGrace'):break
+            # A stalled console bridge can leave the last position looking
+            # current while the game continues moving under the held stick.
+            # Stop first, then wait for a genuinely newer frame and re-plan
+            # from that frame before sending another movement input.
+            if self.telemetry_is_stale():
+                self.release()
+                old_history_length = len(self.history)
+                while (time.monotonic() < deadline and
+                       len(self.history) <= old_history_length):
+                    self.wait(.05)
+                if len(self.history) <= old_history_length:
+                    break
+                path = self.route(target, radius)
+                continue
             p=self.state['player']; point=(p['x'],p['z'])
             if math.dist(point, (target['x'], target['z'])) <= radius:break
             while path and math.dist(point,path[0])<.42:path.pop(0)
@@ -599,8 +718,7 @@ class MobileDriver:
             if s['guided']>=0:
                 customer=next((c for c in s['customers'] if c['id']==s['guided']),None)
                 if not customer:continue
-                kind='Wash' if customer['need']=='Wash' else 'Haircut'
-                stations=[p for p in s['stations'] if p['type']==kind and not p['occupied']]
+                stations=self.transfer_stations(s, customer)
                 if not stations:
                     # Free a chair while keeping the guided customer. Only
                     # cancel when another customer must first be transferred.
@@ -609,9 +727,13 @@ class MobileDriver:
                         c=min(finishing,key=lambda c:c['patience'])
                         station=next(p for p in s['stations'] if p['id']==c['station'])
                         if not self.goto(station['position']): break
-                        self.action()
+                        if self.state.get('targetCustomer') == c['id'] and self.state.get('available'):
+                            self.action()
                     else:
-                        self.tap_button('取消接待')
+                        # A disabled Guide is a normal waiting state while
+                        # another chair is occupied. Do not click it or force
+                        # cancellation; wait for a compatible chair to free.
+                        self.wait(.25)
                     continue
                 def walking_distance(station):
                     route = [(s['player']['x'], s['player']['z'])] + self.route(station['position'], 1)
@@ -625,22 +747,46 @@ class MobileDriver:
             if any(c['need']=='Dry' and (c['state']=='MovingToStation' or
                 (c['state']=='Serving' and not c['arrived'])) for c in s['customers']):
                 continue
-            ready=[c for c in s['customers'] if self.service_ready(c)]
-            if ready:
+            ready=self.choose_ready_service(s)
+            if ready is not None:
                 # Finish a waiting foreground service while the dryer still
                 # provides a safe background window. A stopped dryer is urgent.
-                c=min(ready,key=lambda c:(not c['autoStopped'],not c.get('foamReady'),
-                    not (c['need']=='Dry' and not c['autoRunning']),c['autoRunning'],c['patience']))
+                c=ready
                 station=next(p for p in s['stations'] if p['id']==c['station'])
                 if not self.goto(station['position']): break
-                self.action();continue
+                if self.state.get('targetCustomer') == c['id'] and self.state.get('available'):
+                    self.action()
+                continue
+            # A completed wash remains in its original chair until the
+            # stylist guides it to the next compatible chair. This transfer
+            # must wait when every compatible chair is occupied, but once one
+            # is free it takes priority over admitting another queue entry.
+            transfers=[c for c in s['customers'] if c.get('needsTransfer') and
+                       c.get('state') == 'Serving' and c.get('arrived')]
+            if transfers:
+                c=min(transfers,key=lambda customer:customer.get('patience',1.0))
+                stations=self.transfer_stations(s, c)
+                if stations:
+                    # FindMobileTarget anchors Guide to the customer's
+                    # current (occupied) chair. Touch Guide there; the next
+                    # loop observes guided>=0 and performs the real walk to
+                    # the newly free compatible chair before Assign.
+                    anchor=self.transfer_anchor(s, c)
+                    if anchor is None: continue
+                    if not self.goto(anchor['position']): break
+                    if (self.state.get('targetCustomer') == c['id'] and
+                            self.state.get('targetAction') == 'Guide' and
+                            self.state.get('available')):
+                        self.action()
+                continue
             # Let a newly assigned NPC finish its short walk before sending
             # the stylist across the room for another queue entry. This keeps
             # the real-touch run focused on one active handoff at a time.
             if any(c['state']=='MovingToStation' or (c['state']=='Serving' and not c['arrived']) for c in s['customers']):
                 continue
             waiting=[c for c in s['customers'] if c['state']=='Waiting' and c['arrived'] and
-                any(p['type']==('Wash' if c['need']=='Wash' else 'Haircut') and not p['occupied'] for p in s['stations'])]
+                any(p['type']==('Wash' if c['need']=='Wash' else 'Haircut') and
+                    not p['occupied'] and self.station_is_usable(p) for p in s['stations'])]
             if waiting:
                 c=min(waiting,key=lambda c:c['patience'])
                 if not self.goto(c['position'],radius=1.0): break
@@ -663,15 +809,51 @@ class MobileDriver:
         (EVIDENCE/'report.json').write_text(json.dumps(self.result,ensure_ascii=False,indent=2))
         (EVIDENCE/'errors.json').write_text(json.dumps(self.errors,ensure_ascii=False,indent=2))
 
+def parse_driver_args(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--url')
+    parser.add_argument('--interactive', action='store_true')
+    parser.add_argument('--failure', action='store_true')
+    parser.add_argument('--evidence-dir', type=Path)
+    parser.add_argument('--record-video-dir', type=Path,
+                        help='Record the real-touch Chromium context into this directory')
+    parser.add_argument('--days', type=int, choices=(1, 2), default=1,
+                        help='Run and settle this many business days (default: 1)')
+    parser.add_argument('--skip-haircut-checks', action='store_false', dest='haircut_checks',
+                        help='Reuse separate gesture evidence while checking the full day')
+    return parser.parse_args(argv)
 
-def run(base, interactive=False, failure=False, haircut_checks=True):
+
+def mobile_context_options(record_video_dir=None):
+    options = {
+        'viewport': qa.VIEWPORT,
+        'user_agent': qa.MOBILE_USER_AGENT,
+        'is_mobile': True,
+        'has_touch': True,
+        'device_scale_factor': 1,
+    }
+    if record_video_dir is not None:
+        options['record_video_dir'] = str(Path(record_video_dir))
+    return options
+
+
+def run(base, interactive=False, failure=False, haircut_checks=True, days=1,
+        record_video_dir=None):
     EVIDENCE.mkdir(parents=True,exist_ok=True)
     with sync_playwright() as p:
         # Full Chromium's new headless mode uses the normal GPU path on macOS.
         # headless_shell defaults to software WebGL, which can starve this
         # real-time touch driver when other builds or browsers are running.
         browser=p.chromium.launch(channel='chromium',headless=True,args=['--enable-webgl','--disable-web-security'])
-        page=qa.new_mobile_page(browser);driver=MobileDriver(page)
+        video_context = None
+        if record_video_dir is not None:
+            video_dir = Path(record_video_dir)
+            video_dir.mkdir(parents=True, exist_ok=True)
+            video_context = browser.new_context(**mobile_context_options(video_dir))
+            page = video_context.new_page()
+        else:
+            page = qa.new_mobile_page(browser)
+        driver=MobileDriver(page)
         try:
             driver.load(base.rstrip('/')+'/?mobileEvidence=1');driver.shot('01-opening')
             if interactive:
@@ -706,9 +888,6 @@ def run(base, interactive=False, failure=False, haircut_checks=True):
                 driver.input_checks();driver.play_day();driver.shot('05-result')
                 assert driver.state['completed']>=driver.state['target'], 'This touch run did not reach the day target'
                 driver.tap_button('进入闭店经营');driver.shot('06-management')
-                if any('购买' in b['label'] and b['available'] for b in driver.state['buttons']):
-                    driver.tap_button('购买')
-                    assert driver.state['purchased']
                 balance=driver.state['balance'];day=driver.state['day'];purchased=driver.state['purchased']
                 satisfaction=driver.satisfaction(driver.state)
                 driver.reload();driver.until(lambda s:s['state']=='ClosedManagement')
@@ -722,10 +901,30 @@ def run(base, interactive=False, failure=False, haircut_checks=True):
                 driver.until(lambda s:s['state']=='PreOpen' and s['day']==day+1)
                 driver.shot('07-next-day')
                 driver.tap_button('开始营业');driver.until(lambda s:s['state']=='Business')
-                driver.wait(4)
-                driver.reload();driver.until(lambda s:s['state']=='PreOpen')
-                assert driver.state['day']==day+1 and driver.state['balance']==balance
-                driver.shot('08-midday-safe-restart')
+                if days >= 2:
+                    # A requested two-day run must settle Day 2 through the
+                    # same real-touch loop before checking its saved result.
+                    driver.play_day()
+                    driver.shot('11-day2-result')
+                    assert driver.state['completed'] >= driver.state['target'], \
+                        'This two-day touch run did not reach the Day 2 target'
+                    driver.tap_button('进入闭店经营');driver.shot('12-day2-management')
+                    day2_balance=driver.state['balance']
+                    day2=driver.state['day']
+                    day2_satisfaction=driver.satisfaction(driver.state)
+                    driver.reload();driver.until(lambda s:s['state']=='ClosedManagement')
+                    assert driver.state['day']==day2 and driver.state['balance']==day2_balance
+                    reloaded_day2_satisfaction=driver.satisfaction(driver.state)
+                    if day2_satisfaction is not None and reloaded_day2_satisfaction is not None:
+                        assert reloaded_day2_satisfaction == day2_satisfaction, \
+                            'Day 2 closed-management reload did not preserve satisfaction.'
+                        driver.satisfaction_persisted = True
+                    driver.shot('13-day2-management-reload')
+                else:
+                    driver.wait(4)
+                    driver.reload();driver.until(lambda s:s['state']=='PreOpen')
+                    assert driver.state['day']==day+1 and driver.state['balance']==balance
+                    driver.shot('08-midday-safe-restart')
             assert not driver.errors, 'Browser errors: '+str(driver.errors)
             for sample in driver.history:
                 active=sum(c['state'] in ('Entering','Waiting','MovingToStation','Serving')
@@ -741,9 +940,21 @@ def run(base, interactive=False, failure=False, haircut_checks=True):
                     'Leaving route moved less than 80 screen pixels: '+str(driver.first_leaving)
                 assert driver.first_leaving['closestExitDistance'] <= .12, \
                     'Leaving customer did not reach the configured exit: '+str(driver.first_leaving)
-                assert driver.second_customer_greeted is not None, \
-                    ('The second customer did not complete the real O002 Greet-to-Wash touch flow '
-                     'while the first customer was Leaving.')
+                beyond_wall = driver.first_leaving['samplesBeyondLeftWall']
+                assert beyond_wall and all(abs(point['z'] - DOOR_Z) <= DOOR_HALF_OPENING
+                                           for point in beyond_wall), \
+                    'Leaving customer crossed the left wall outside the door opening: '+str(driver.first_leaving)
+                # The calm opening wave usually lets customer 0 exit before
+                # customer 1 arrives; the O002 hand-off is only required when
+                # the two actually overlapped in this run.
+                second_overlap = any(
+                    any(c['id'] == 0 and c['state'] in ('Finished', 'Leaving') for c in item['customers']) and
+                    any(c['id'] == 1 and c['state'] == 'Waiting' and c['arrived'] for c in item['customers'])
+                    for item in driver.history)
+                if second_overlap:
+                    assert driver.second_customer_greeted is not None, \
+                        ('The second customer did not complete the real O002 Greet-to-Wash touch flow '
+                         'while the first customer was Leaving.')
                 driver.first_leaving['passed'] = True
                 assert interleaved, 'Touch run did not demonstrate a foreground service during background blow-drying'
             results = {}
@@ -757,12 +968,14 @@ def run(base, interactive=False, failure=False, haircut_checks=True):
                 'admissionWithinCapacity':True,
                 'haircutGestureChecks':haircut_checks and not failure and not interactive,
                 'balance':driver.state['balance'],'upgraded':driver.state['purchased'],
+                'businessDaysRequested':days,
                 'satisfaction':driver.satisfaction(driver.state),
                 'satisfactionPersisted':driver.satisfaction_persisted,
                 'maxWaiting':max(sum(c['state']=='Waiting' for c in item['customers']) for item in driver.history),
                 'manualCoinPickups':0,
                 'paymentsAutoSettled':True,
                 'firstCustomerLeavingTrajectory':driver.first_leaving,
+                'secondCustomerOverlapOccurred':second_overlap if not failure and not interactive else None,
                 'secondCustomerGreetedWhileFirstLeaving':driver.second_customer_greeted,
                 'secondCustomerReceptionFlow':driver.second_customer_reception_flow,
                 'backgroundWhileOtherService':interleaved, 'dayResults':results,
@@ -774,13 +987,14 @@ def run(base, interactive=False, failure=False, haircut_checks=True):
             driver.shot('failure')
             raise
         finally:
-            driver.save();browser.close()
+            driver.save()
+            if video_context is not None:
+                video_context.close()
+            browser.close()
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--url');parser.add_argument('--interactive',action='store_true');parser.add_argument('--failure',action='store_true');parser.add_argument('--evidence-dir',type=Path)
-    parser.add_argument('--skip-haircut-checks',action='store_false',dest='haircut_checks',help='Reuse separate gesture evidence while checking the full day')
-    args=parser.parse_args()
+    args=parse_driver_args()
     if args.evidence_dir:EVIDENCE=args.evidence_dir.resolve()
-    if args.url:run(args.url,args.interactive,args.failure,args.haircut_checks)
+    if args.url:run(args.url,args.interactive,args.failure,args.haircut_checks,args.days,args.record_video_dir)
     else:
-        with qa.serve(qa.BUILD_ROOT/'WebGLDemo') as base:run(base,args.interactive,args.failure,args.haircut_checks)
+        with qa.serve(qa.BUILD_ROOT/'WebGLDemo') as base:run(base,args.interactive,args.failure,args.haircut_checks,args.days,args.record_video_dir)

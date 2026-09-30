@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "days": [
+    {
+      "day": 1,
+      "completed": 7,
+      "balance": 760,
+      "checkoutAbandoned": 0,
+      "satisfaction": 70
+    },
+    {
+      "day": 2,
+      "completed": 5,
+      "balance": 382,
+      "checkoutAbandoned": 0,
+      "satisfaction": 32
+    }
+  ],
+  "pacing": [
+    {
+      "arrivalsWithin30Seconds": 6,
+      "atMostOneActiveCustomerPercent": 2.02,
+      "built": {
+        "BlowDryer": {
+          "seconds": 44.8,
+          "completedOrders": 2
+        },
+        "WashStation": {
+          "seconds": 165.9,
+          "completedOrders": 6
+        }
+      }
+    },
+    {
+      "arrivalsWithin30Seconds": 6,
+      "atMostOneActiveCustomerPercent": 1.85,
+      "built": {
+        "BlowDryer": {
+          "seconds": 0.0,
+          "completedOrders": 0
+        },
+        "WashStation": {
+          "seconds": 0.0,
+          "completedOrders": 0
+        },
+        "HaircutChair": {
+          "seconds": 123.3,
+          "completedOrders": 4
+        }
+      }
+    }
+  ],
+  "balanceAndStockPersistedAfterReload": true,
+  "errors": []
+}

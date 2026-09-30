@@ -216,6 +216,7 @@ public sealed partial class SalonDemo
         ClearCustomerViews();
         EndMobileWork();
         _mobileGuidedCustomer = null;
+        _mobileResumeGuidedCustomer = null;
         _game.ResetForNextDay();
         _mobileSaveSlotId = normalized;
         _mobileSaves = new PlayerPrefsSalonProgressRepository(_mobileSaveSlotId);
@@ -224,13 +225,15 @@ public sealed partial class SalonDemo
         FlowSettings.WaitingCapacity = SalonMobileDayConfig.WaitingCapacity;
         FlowSettings.MaxCustomers = SalonMobileDayConfig.MaxConcurrentCustomers;
         ServiceSettings = SalonMobileDayConfig.CreateServiceConfig();
-        PatienceSettings.DrainPerSecond = _mobileProgress.DayNumber <= 1 ? .85f : 1.0f;
+        PatienceSettings.DrainPerSecond = SalonMobileDayConfig.PatienceDrainPerSecond(_mobileProgress.DayNumber);
         _mobileSupplyPad = new SalonProximityPurchasePadModel("expansion-pad-wash-rack", MobileSupplyPadCost);
         _mobileHaircutExpansionPad = new SalonProximityPurchasePadModel(
             "expansion-pad-haircut-2", SalonProgressData.HaircutExpansionCost);
         RestoreMobileSupplyPadProgress(_mobileProgress);
         RestoreMobileHaircutExpansionProgress(_mobileProgress);
-        _game.ConfigureWorkstationAvailability(_mobileProgress.HaircutExpansionPurchased, false, false);
+        CreateMobileWashAnnexPad(_mobileProgress);
+        CreateMobileUnlockPads(_mobileProgress);
+        _game.ConfigureWorkstationAvailability(_mobileProgress.HaircutExpansionPurchased, IsMobileWashAnnexUnlocked, false);
         _game.RestorePersistentState(_mobileProgress.Balance, _mobileProgress.AutoBlowPurchased,
             _mobileProgress.FirstDayComplete);
         _dayController.RestoreReputation(_mobileProgress.ReputationStars);
@@ -238,6 +241,7 @@ public sealed partial class SalonDemo
         RestoreMobileGame();
         ApplyMobileWorkstationPresentation();
         if (_mobileExpansionBarrier != null) _mobileExpansionBarrier.SetActive(!_mobileHaircutExpansionPad.IsUnlocked);
+        ApplyMobileWashAnnexPresentation();
         if (_mobileSupplyPad.IsUnlocked) BuildExpandedWashRackVisual();
         else if (_mobileExpandedRackBuilt) RemoveExpandedWashRackVisual();
         UpdateMobilePurchasePadVisual();

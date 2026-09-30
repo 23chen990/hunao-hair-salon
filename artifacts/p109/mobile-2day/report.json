@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "viewport": {
+    "width": 844,
+    "height": 390
+  },
+  "input": "Chromium real touch events",
+  "lowPerformanceContinuation": false,
+  "admissionWithinCapacity": true,
+  "haircutGestureChecks": true,
+  "balance": 2992,
+  "upgraded": false,
+  "businessDaysRequested": 2,
+  "satisfaction": 88,
+  "satisfactionPersisted": true,
+  "maxWaiting": 4,
+  "manualCoinPickups": 0,
+  "paymentsAutoSettled": true,
+  "firstCustomerLeavingTrajectory": {
+    "startScreen": {
+      "x": 437.18853759765625,
+      "y": 193.0419158935547
+    },
+    "maxScreenDisplacementPx": 323.8242256123769,
+    "closestExitDistance": 2.1324805919359087e-07,
+    "exit": {
+      "x": -10.8,
+      "z": 5.9
+    },
+    "screenshot": "14-first-customer-leaving.png",
+    "passed": true
+  },
+  "secondCustomerOverlapOccurred": false,
+  "secondCustomerGreetedWhileFirstLeaving": null,
+  "secondCustomerReceptionFlow": null,
+  "backgroundWhileOtherService": true,
+  "dayResults": {
+    "1": {
+      "completed": 5,
+      "target": 3,
+      "balance": 1516,
+      "satisfaction": 90
+    },
+    "2": {
+      "completed": 5,
+      "target": 4,
+      "balance": 2992,
+      "satisfaction": 88
+    }
+  },
+  "framesObserved": 1423,
+  "actions": 95,
+  "errors": [],
+  "warnings": []
+}

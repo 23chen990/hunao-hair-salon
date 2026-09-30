@@ -1,0 +1,26 @@
+{
+  "buildDirectory": "/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/WebGLDemo",
+  "aggregateSha256": "1713d73eec5e492d691ff86d313de262d2a43437bbcf9a52741a0a18098a9ce7",
+  "files": [
+    {
+      "file": "/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/WebGLDemo/Build/WebGLDemo.data",
+      "sha256": "4d4421be37f4e72c56fb5d467fa12d5dfb0d517dce9ec2ffed618778c2f9a371",
+      "bytes": 36893807
+    },
+    {
+      "file": "/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/WebGLDemo/Build/WebGLDemo.framework.js",
+      "sha256": "28171c8d35e7530226c80e2c7573bab969efde660d34f7768fe3210546d70527",
+      "bytes": 689410
+    },
+    {
+      "file": "/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/WebGLDemo/Build/WebGLDemo.loader.js",
+      "sha256": "8066c849ca175a56765c67ba5bae5b687035659b307067a7e5b55aa6ebde8fcd",
+      "bytes": 58617
+    },
+    {
+      "file": "/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/WebGLDemo/Build/WebGLDemo.wasm",
+      "sha256": "9a9f483d9c62d9f823c107cc80c7b13321a565f554dcdfb9792986ff48571788",
+      "bytes": 40644335
+    }
+  ]
+}

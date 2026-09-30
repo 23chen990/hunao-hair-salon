@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "days": [
+    {
+      "day": 1,
+      "completed": 8,
+      "balance": 920,
+      "checkoutAbandoned": 0,
+      "satisfaction": 46
+    },
+    {
+      "day": 2,
+      "completed": 6,
+      "balance": 1626,
+      "checkoutAbandoned": 0,
+      "satisfaction": 0
+    }
+  ],
+  "errors": []
+}

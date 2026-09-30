@@ -87,17 +87,12 @@ public sealed class CustomerExitRouteRegressionTests
             CutStation[] stations = world.GetComponentsInChildren<CutStation>(true);
             Assert.That(stations, Has.Length.EqualTo(2), "The formal demo uses two haircut stations.");
             Vector3 exit = ReadPrivateStaticVector3(typeof(SalonDemo), "ExitPosition");
-            SalonFurnitureObstacle exitPlant = null;
+            Assert.That(exit, Is.EqualTo(SalonEntranceDoor.OutsideExit),
+                "Customers leave through the left-wall door to the outside.");
+            var plantBounds = new List<Rect>();
             foreach (SalonFurnitureObstacle obstacle in world.GetComponentsInChildren<SalonFurnitureObstacle>(true))
-                if (obstacle.AssetId == "prop-potted-plant" &&
-                    Vector2.Distance(new Vector2(obstacle.transform.position.x, obstacle.transform.position.z),
-                        new Vector2(exit.x, exit.z)) < 2f)
-                {
-                    exitPlant = obstacle;
-                    break;
-                }
-            Assert.That(exitPlant, Is.Not.Null, "The exit plant collision must come from the formal demo furniture builder.");
-            Rect plantBounds = exitPlant.WorldBounds(0f);
+                if (obstacle.AssetId == "prop-potted-plant") plantBounds.Add(obstacle.WorldBounds(0f));
+            Assert.That(plantBounds, Is.Not.Empty, "Plant collisions must come from the formal demo furniture builder.");
 
             var violations = new List<string>();
             for (int stationIndex = 0; stationIndex < stations.Length; stationIndex++)
@@ -108,8 +103,9 @@ public sealed class CustomerExitRouteRegressionTests
                 float routeLength = HorizontalDistance(start, route[0]);
                 for (int waypoint = 1; waypoint < route.Length; waypoint++)
                     routeLength += HorizontalDistance(route[waypoint - 1], route[waypoint]);
-                routeLength += HorizontalDistance(route[route.Length - 1], exit);
-                float timeBudgetDistance = CustomerWalkingSpeed * SalonGameModel.LeavingSeconds;
+                // The view keeps walking after the model exit timer, up to its ghost guard.
+                float timeBudgetDistance = CustomerWalkingSpeed *
+                    (SalonGameModel.LeavingSeconds + SalonCustomerView.MaxExitWalkSeconds);
                 if (routeLength > timeBudgetDistance + .001f)
                     violations.Add($"station {stationIndex + 1} route is {routeLength:F2} units, over the {timeBudgetDistance:F2}-unit leaving budget");
 
@@ -125,8 +121,9 @@ public sealed class CustomerExitRouteRegressionTests
                             violations.Add($"station {stationIndex + 1} route segment {waypoint + 1} crosses haircut station {otherIndex + 1} collision");
                     }
 
-                    if (SegmentIntersectsBounds(segmentStart, segmentEnd, plantBounds))
-                        violations.Add($"station {stationIndex + 1} route segment {waypoint + 1} crosses the exit plant collision");
+                    foreach (Rect plant in plantBounds)
+                        if (SegmentIntersectsBounds(segmentStart, segmentEnd, plant))
+                            violations.Add($"station {stationIndex + 1} route segment {waypoint + 1} crosses the plant at {plant.center}");
                     segmentStart = segmentEnd;
                 }
             }

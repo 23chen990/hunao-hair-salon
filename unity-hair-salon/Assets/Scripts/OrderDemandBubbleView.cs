@@ -24,6 +24,10 @@ public sealed class OrderDemandBubbleView : MonoBehaviour
     private Text _backgroundWaitText;
     private ProceduralProgressBar _backgroundWaitFill;
     private float _backgroundWaitProgress;
+    private Camera _sceneCamera;
+    private RectTransform _canvasRect;
+    private bool _mobileScreenLayout;
+    private readonly Vector3[] _screenCorners = new Vector3[4];
 
     public int StepCount => _steps.Count;
     public int CustomerId => _customer == null ? -1 : _customer.Id;
@@ -40,6 +44,52 @@ public sealed class OrderDemandBubbleView : MonoBehaviour
         _customer = customer;
         Build(sceneCamera);
         Refresh();
+    }
+
+    public void ConstrainToMobileScreen()
+    {
+        if (_sceneCamera == null || _canvasRect == null) return;
+        _mobileScreenLayout = true;
+        _canvasRect.localPosition = new Vector3(0f, 3.2f, 0f);
+        _canvasRect.localScale = Vector3.one * .0115f;
+        _canvasRect.rotation = _sceneCamera.transform.rotation;
+        _canvasRect.GetWorldCorners(_screenCorners);
+        float left = float.PositiveInfinity, right = float.NegativeInfinity;
+        float bottom = float.PositiveInfinity, top = float.NegativeInfinity;
+        for (int i = 0; i < _screenCorners.Length; i++)
+        {
+            Vector3 screen = _sceneCamera.WorldToScreenPoint(_screenCorners[i]);
+            left = Mathf.Min(left, screen.x);
+            right = Mathf.Max(right, screen.x);
+            bottom = Mathf.Min(bottom, screen.y);
+            top = Mathf.Max(top, screen.y);
+        }
+        int width = _sceneCamera.targetTexture == null ? _sceneCamera.pixelWidth : _sceneCamera.targetTexture.width;
+        int height = _sceneCamera.targetTexture == null ? _sceneCamera.pixelHeight : _sceneCamera.targetTexture.height;
+        float safeLeft = 8f, safeRight = width - 8f;
+        float safeBottom = height * .35f, safeTop = height * .66f;
+        float shiftX = left < safeLeft ? safeLeft - left : right > safeRight ? safeRight - right : 0f;
+        float shiftY = bottom < safeBottom ? safeBottom - bottom : top > safeTop ? safeTop - top : 0f;
+        Vector3 origin = _sceneCamera.WorldToScreenPoint(_canvasRect.position);
+        // Keep the authored world-sized artwork, but project it in front of
+        // the shop geometry. Sorting order alone cannot bypass world depth.
+        float depth = _sceneCamera.nearClipPlane + .05f;
+        if (!_sceneCamera.orthographic && origin.z > .001f)
+            _canvasRect.localScale *= depth / origin.z;
+        _canvasRect.position = _sceneCamera.ScreenToWorldPoint(
+            new Vector3(origin.x + shiftX, origin.y + shiftY, depth));
+    }
+
+    public void SetMobileSelected(bool selected)
+    {
+        if (_canvasRect != null) _canvasRect.GetComponent<Canvas>().sortingOrder = selected ? 25 : 22;
+    }
+
+    private void LateUpdate()
+    {
+        // Camera follow, customer reactions and selection scaling finish in
+        // Update. Reproject afterwards so those changes cannot clip the bubble.
+        if (_mobileScreenLayout) ConstrainToMobileScreen();
     }
 
     public void Refresh()
@@ -176,6 +226,7 @@ public sealed class OrderDemandBubbleView : MonoBehaviour
 
     private void Build(Camera sceneCamera)
     {
+        _sceneCamera = sceneCamera;
         int count = Mathf.Clamp(_customer.Needs.Count, 1, 3);
         var canvasObject = new GameObject("完整订单需求气泡", typeof(Canvas), typeof(CanvasScaler));
         canvasObject.transform.SetParent(transform, false);
@@ -188,7 +239,8 @@ public sealed class OrderDemandBubbleView : MonoBehaviour
 
         float width = count == 1 ? 132f : count == 2 ? 248f : 330f;
         Vector2 bubbleSize = new Vector2(width, count == 1 ? 148f : 142f);
-        canvasObject.GetComponent<RectTransform>().sizeDelta = new Vector2(width, 190f);
+        _canvasRect = canvasObject.GetComponent<RectTransform>();
+        _canvasRect.sizeDelta = new Vector2(width, 190f);
         _frame = DemandBubbleArtwork.Image("Demand Bubble Frame", canvasObject.transform,
             new Vector2(0f, 18f), bubbleSize, DemandBubbleArtwork.Frame(count, true), false);
 

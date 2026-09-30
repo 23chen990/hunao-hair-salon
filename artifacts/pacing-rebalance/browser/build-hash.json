@@ -1,0 +1,26 @@
+{
+  "buildDirectory": "unity-hair-salon/Builds/WebGLDemo",
+  "aggregateSha256": "b0470c48a846975f869d0b6577b111d1621d3230504b6977152b86ffc4a48b85",
+  "files": [
+    {
+      "file": "unity-hair-salon/Builds/WebGLDemo/Build/WebGLDemo.data",
+      "sha256": "9cf3dc1b19d3854737a0f9ba63130dc123e12e26e91eb7798550b77b20c3ea74",
+      "bytes": 36893607
+    },
+    {
+      "file": "unity-hair-salon/Builds/WebGLDemo/Build/WebGLDemo.framework.js",
+      "sha256": "28171c8d35e7530226c80e2c7573bab969efde660d34f7768fe3210546d70527",
+      "bytes": 689410
+    },
+    {
+      "file": "unity-hair-salon/Builds/WebGLDemo/Build/WebGLDemo.loader.js",
+      "sha256": "eb7c3458b9a762ec09d367af6d87c59fa37a787f3a8314ed81b0630f08897d1f",
+      "bytes": 58617
+    },
+    {
+      "file": "unity-hair-salon/Builds/WebGLDemo/Build/WebGLDemo.wasm",
+      "sha256": "7a03aa4adbe2cf9afc235dcee25cd4e100f194179a11fab1206531b88a197cd5",
+      "bytes": 40641455
+    }
+  ]
+}

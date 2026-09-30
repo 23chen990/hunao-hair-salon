@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="25" result="Failed(Child)" total="25" passed="22" failed="3" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.0694381">
+  <test-suite type="TestSuite" id="1000" name="胡闹理发店灰盒 Demo" fullname="胡闹理发店灰盒 Demo" runstate="Runnable" testcasecount="856" result="Failed" site="Child" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.069438" total="25" passed="22" failed="3" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1974" name="HairSalon.Tests.dll" fullname="/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Library/ScriptAssemblies/HairSalon.Tests.dll" runstate="Runnable" testcasecount="856" result="Failed" site="Child" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.055259" total="25" passed="22" failed="3" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="59110" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestFixture" id="1605" name="SalonPacingDirectorTests" fullname="SalonPacingDirectorTests" classname="SalonPacingDirectorTests" runstate="Runnable" testcasecount="19" result="Failed" site="Child" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.041765" total="19" passed="17" failed="2" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1623" name="AnEmptyShopWithoutUsefulWorkDoesNotForceEightIdleSeconds" fullname="SalonPacingDirectorTests.AnEmptyShopWithoutUsefulWorkDoesNotForceEightIdleSeconds" methodname="AnEmptyShopWithoutUsefulWorkDoesNotForceEightIdleSeconds" classname="SalonPacingDirectorTests" runstate="Runnable" seed="1263385013" result="Failed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.012466" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Expected: less than or equal to 2.0f
+  But was:  8.0f
+]]></message>
+            <stack-trace><![CDATA[at SalonPacingDirectorTests.AnEmptyShopWithoutUsefulWorkDoesNotForceEightIdleSeconds () [0x0001e] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/SalonPacingDirectorTests.cs:195
+]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1617" name="AnExistingAngryCustomerGetsAttentionBeforeMoreWork" fullname="SalonPacingDirectorTests.AnExistingAngryCustomerGetsAttentionBeforeMoreWork" methodname="AnExistingAngryCustomerGetsAttentionBeforeMoreWork" classname="SalonPacingDirectorTests" runstate="Runnable" seed="1194197793" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.009715" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1607" name="BuyingEquipmentDoesNotImmediatelyCreateExpertTraffic" fullname="SalonPacingDirectorTests.BuyingEquipmentDoesNotImmediatelyCreateExpertTraffic" methodname="BuyingEquipmentDoesNotImmediatelyCreateExpertTraffic" classname="SalonPacingDirectorTests" runstate="Runnable" seed="614279216" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.002288" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1608" name="CheckoutBacklogDefersNewArrivals" fullname="SalonPacingDirectorTests.CheckoutBacklogDefersNewArrivals" methodname="CheckoutBacklogDefersNewArrivals" classname="SalonPacingDirectorTests" runstate="Runnable" seed="362782875" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000327" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1618" name="ClearingABatchOfAbandonedCustomersAlsoAllowsRecovery" fullname="SalonPacingDirectorTests.ClearingABatchOfAbandonedCustomersAlsoAllowsRecovery" methodname="ClearingABatchOfAbandonedCustomersAlsoAllowsRecovery" classname="SalonPacingDirectorTests" runstate="Runnable" seed="311869872" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000445" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1613" name="ClosingRejectsLongOrdersButCanStillServeAShortHaircut" fullname="SalonPacingDirectorTests.ClosingRejectsLongOrdersButCanStillServeAShortHaircut" methodname="ClosingRejectsLongOrdersButCanStillServeAShortHaircut" classname="SalonPacingDirectorTests" runstate="Runnable" seed="1049381451" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000844" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1609" name="EmptyingABatchAllowsEightSecondsForUsefulManagementWork" fullname="SalonPacingDirectorTests.EmptyingABatchAllowsEightSecondsForUsefulManagementWork" methodname="EmptyingABatchAllowsEightSecondsForUsefulManagementWork" classname="SalonPacingDirectorTests" runstate="Runnable" seed="2117324616" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000171" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1611" name="EmptyWashSuppliesDoNotGenerateUnserviceableWashOrders" fullname="SalonPacingDirectorTests.EmptyWashSuppliesDoNotGenerateUnserviceableWashOrders" methodname="EmptyWashSuppliesDoNotGenerateUnserviceableWashOrders" classname="SalonPacingDirectorTests" runstate="Runnable" seed="1676592856" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.001440" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1621" name="ExtraCapacityGetsTwoPaidOrdersOfPracticeBeforeMoreTraffic" fullname="SalonPacingDirectorTests.ExtraCapacityGetsTwoPaidOrdersOfPracticeBeforeMoreTraffic" methodname="ExtraCapacityGetsTwoPaidOrdersOfPracticeBeforeMoreTraffic" classname="SalonPacingDirectorTests" runstate="Runnable" seed="1970405227" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000480" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1624" name="FinishingManagementWorkReleasesTheRemainingEmptyWindow" fullname="SalonPacingDirectorTests.FinishingManagementWorkReleasesTheRemainingEmptyWindow" methodname="FinishingManagementWorkReleasesTheRemainingEmptyWindow" classname="SalonPacingDirectorTests" runstate="Runnable" seed="1457851581" result="Failed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000231" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Expected: less than or equal to 2.0f
+  But was:  7.9000001f
+]]></message>
+            <stack-trace><![CDATA[at SalonPacingDirectorTests.FinishingManagementWorkReleasesTheRemainingEmptyWindow () [0x0002b] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/SalonPacingDirectorTests.cs:206
+]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1606" name="FirstTwoCustomersAreLearnedOneAtATimeEvenOnALateCalendarDay" fullname="SalonPacingDirectorTests.FirstTwoCustomersAreLearnedOneAtATimeEvenOnALateCalendarDay" methodname="FirstTwoCustomersAreLearnedOneAtATimeEvenOnALateCalendarDay" classname="SalonPacingDirectorTests" runstate="Runnable" seed="1961003925" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000146" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1619" name="FullChairsDoNotReceiveAnotherCutFirstOrder" fullname="SalonPacingDirectorTests.FullChairsDoNotReceiveAnotherCutFirstOrder" methodname="FullChairsDoNotReceiveAnotherCutFirstOrder" classname="SalonPacingDirectorTests" runstate="Runnable" seed="1270231598" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000167" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1620" name="InconsistentMasteryDoesNotLoadAsEarnedExperience" fullname="SalonPacingDirectorTests.InconsistentMasteryDoesNotLoadAsEarnedExperience" methodname="InconsistentMasteryDoesNotLoadAsEarnedExperience" classname="SalonPacingDirectorTests" runstate="Runnable" seed="635547251" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000293" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1612" name="LearningDryingDoesNotTurnEveryOrderIntoAMultiStepOrder" fullname="SalonPacingDirectorTests.LearningDryingDoesNotTurnEveryOrderIntoAMultiStepOrder" methodname="LearningDryingDoesNotTurnEveryOrderIntoAMultiStepOrder" classname="SalonPacingDirectorTests" runstate="Runnable" seed="1606258151" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000389" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1614" name="MasterySurvivesCloneAndJsonWithoutInventingItForOldSaves" fullname="SalonPacingDirectorTests.MasterySurvivesCloneAndJsonWithoutInventingItForOldSaves" methodname="MasterySurvivesCloneAndJsonWithoutInventingItForOldSaves" classname="SalonPacingDirectorTests" runstate="Runnable" seed="870305410" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000456" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1616" name="PaidEquipmentAndServiceExperienceBothMatterForCapacity" fullname="SalonPacingDirectorTests.PaidEquipmentAndServiceExperienceBothMatterForCapacity" methodname="PaidEquipmentAndServiceExperienceBothMatterForCapacity" classname="SalonPacingDirectorTests" runstate="Runnable" seed="719330929" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000094" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1622" name="ServiceFinishedButNotYetAtCashierStillCountsAsWork" fullname="SalonPacingDirectorTests.ServiceFinishedButNotYetAtCashierStillCountsAsWork" methodname="ServiceFinishedButNotYetAtCashierStillCountsAsWork" classname="SalonPacingDirectorTests" runstate="Runnable" seed="346687279" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000212" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1615" name="ThreeStepOrdersWaitUntilBothServicesHaveBeenPracticed" fullname="SalonPacingDirectorTests.ThreeStepOrdersWaitUntilBothServicesHaveBeenPracticed" methodname="ThreeStepOrdersWaitUntilBothServicesHaveBeenPracticed" classname="SalonPacingDirectorTests" runstate="Runnable" seed="986186096" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000332" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1610" name="WashBacklogSelectsHaircutInsteadOfAnotherWashFirstOrder" fullname="SalonPacingDirectorTests.WashBacklogSelectsHaircutInsteadOfAnotherWashFirstOrder" methodname="WashBacklogSelectsHaircutInsteadOfAnotherWashFirstOrder" classname="SalonPacingDirectorTests" runstate="Runnable" seed="2039213776" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000094" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1625" name="SalonPacingRegressionTests" fullname="SalonPacingRegressionTests" classname="SalonPacingRegressionTests" runstate="Runnable" testcasecount="6" result="Failed" site="Child" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.002990" total="6" passed="5" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1630" name="AnUnservedQueueStopsArrivalsInsteadOfMerelySlowingThem" fullname="SalonPacingRegressionTests.AnUnservedQueueStopsArrivalsInsteadOfMerelySlowingThem" methodname="AnUnservedQueueStopsArrivalsInsteadOfMerelySlowingThem" classname="SalonPacingRegressionTests" runstate="Runnable" seed="1570819909" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.001749" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1631" name="ClosingLeavesEnoughTimeForExistingOrdersAndCheckout" fullname="SalonPacingRegressionTests.ClosingLeavesEnoughTimeForExistingOrdersAndCheckout" methodname="ClosingLeavesEnoughTimeForExistingOrdersAndCheckout" classname="SalonPacingRegressionTests" runstate="Runnable" seed="1389217621" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000080" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1626" name="FirstDayNeverAllowsSixSimultaneousCustomers" fullname="SalonPacingRegressionTests.FirstDayNeverAllowsSixSimultaneousCustomers" methodname="FirstDayNeverAllowsSixSimultaneousCustomers" classname="SalonPacingRegressionTests" runstate="Runnable" seed="5196238" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000083" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1627" name="FirstDayOpeningAndPeakHaveReadableArrivalGaps" fullname="SalonPacingRegressionTests.FirstDayOpeningAndPeakHaveReadableArrivalGaps" methodname="FirstDayOpeningAndPeakHaveReadableArrivalGaps" classname="SalonPacingRegressionTests" runstate="Runnable" seed="582666566" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000092" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1628" name="FirstDayRecoveryDoesNotAddWorkWhileACustomerStillNeedsAttention" fullname="SalonPacingRegressionTests.FirstDayRecoveryDoesNotAddWorkWhileACustomerStillNeedsAttention" methodname="FirstDayRecoveryDoesNotAddWorkWhileACustomerStillNeedsAttention" classname="SalonPacingRegressionTests" runstate="Runnable" seed="751591117" result="Passed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000062" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1629" name="RecoveryWaveStillAdmitsOneCustomerWhenTheShopIsEmpty" fullname="SalonPacingRegressionTests.RecoveryWaveStillAdmitsOneCustomerWhenTheShopIsEmpty" methodname="RecoveryWaveStillAdmitsOneCustomerWhenTheShopIsEmpty" classname="SalonPacingRegressionTests" runstate="Runnable" seed="1907223554" result="Failed" start-time="2026-09-30 18:27:23Z" end-time="2026-09-30 18:27:23Z" duration="0.000174" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Expected: True
+  But was:  False
+]]></message>
+            <stack-trace><![CDATA[at SalonPacingRegressionTests.RecoveryWaveStillAdmitsOneCustomerWhenTheShopIsEmpty () [0x00029] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/SalonPacingRegressionTests.cs:35
+]]></stack-trace>
+          </failure>
+          <output><![CDATA[Saving results to: /Users/kker/Documents/ChatGPT/game2/artifacts/pacing-rebalance/productive-pacing-red.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

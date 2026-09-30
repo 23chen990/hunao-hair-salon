@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="5" result="Failed(Child)" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-30 16:07:18Z" end-time="2026-09-30 16:07:18Z" duration="0.0604544">
+  <test-suite type="TestSuite" id="1000" name="胡闹理发店灰盒 Demo" fullname="胡闹理发店灰盒 Demo" runstate="Runnable" testcasecount="824" result="Failed" site="Child" start-time="2026-09-30 16:07:18Z" end-time="2026-09-30 16:07:18Z" duration="0.060454" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1939" name="HairSalon.Tests.dll" fullname="/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Library/ScriptAssemblies/HairSalon.Tests.dll" runstate="Runnable" testcasecount="824" result="Failed" site="Child" start-time="2026-09-30 16:07:18Z" end-time="2026-09-30 16:07:18Z" duration="0.054022" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="18752" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestFixture" id="1078" name="CustomerEscortRegressionTests" fullname="CustomerEscortRegressionTests" classname="CustomerEscortRegressionTests" runstate="Runnable" testcasecount="5" result="Failed" site="Child" start-time="2026-09-30 16:07:18Z" end-time="2026-09-30 16:07:18Z" duration="0.044484" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1083" name="CustomerCanJoinLeaderAroundFurnitureInsteadOfGettingStuck" fullname="CustomerEscortRegressionTests.CustomerCanJoinLeaderAroundFurnitureInsteadOfGettingStuck" methodname="CustomerCanJoinLeaderAroundFurnitureInsteadOfGettingStuck" classname="CustomerEscortRegressionTests" runstate="Runnable" seed="1630400750" result="Failed" start-time="2026-09-30 16:07:18Z" end-time="2026-09-30 16:07:18Z" duration="0.032970" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  A customer greeted across a furniture corner must find the nearby free aisle.
+  Expected: less than 1.29999995f
+  But was:  1.41999984f
+]]></message>
+            <stack-trace><![CDATA[at CustomerEscortRegressionTests.CustomerCanJoinLeaderAroundFurnitureInsteadOfGettingStuck () [0x000cb] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CustomerEscortRegressionTests.cs:116
+]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1082" name="GettingUpFromFurnitureMovesTowardsLeaderWithoutTeleporting" fullname="CustomerEscortRegressionTests.GettingUpFromFurnitureMovesTowardsLeaderWithoutTeleporting" methodname="GettingUpFromFurnitureMovesTowardsLeaderWithoutTeleporting" classname="CustomerEscortRegressionTests" runstate="Runnable" seed="1455813386" result="Failed" start-time="2026-09-30 16:07:18Z" end-time="2026-09-30 16:07:18Z" duration="0.001004" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Standing up must not snap the customer to a randomly chosen furniture edge.
+  Expected: less than 0.109999999f
+  But was:  0.896666706f
+]]></message>
+            <stack-trace><![CDATA[at CustomerEscortRegressionTests.GettingUpFromFurnitureMovesTowardsLeaderWithoutTeleporting () [0x00083] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CustomerEscortRegressionTests.cs:97
+]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1081" name="ReselectingCustomerDropsThePreviousEscortRoute" fullname="CustomerEscortRegressionTests.ReselectingCustomerDropsThePreviousEscortRoute" methodname="ReselectingCustomerDropsThePreviousEscortRoute" classname="CustomerEscortRegressionTests" runstate="Runnable" seed="1893395043" result="Failed" start-time="2026-09-30 16:07:18Z" end-time="2026-09-30 16:07:18Z" duration="0.000518" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Reception must start towards the current stylist, never an old trail.
+  Expected: less than 0.0f
+  But was:  0.579999983f
+]]></message>
+            <stack-trace><![CDATA[at CustomerEscortRegressionTests.ReselectingCustomerDropsThePreviousEscortRoute () [0x000a4] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CustomerEscortRegressionTests.cs:85
+]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1080" name="SlowWalkingAndStoppingDoNotMakeCustomerSprintInShortBursts" fullname="CustomerEscortRegressionTests.SlowWalkingAndStoppingDoNotMakeCustomerSprintInShortBursts" methodname="SlowWalkingAndStoppingDoNotMakeCustomerSprintInShortBursts" classname="CustomerEscortRegressionTests" runstate="Runnable" seed="1616944933" result="Failed" start-time="2026-09-30 16:07:18Z" end-time="2026-09-30 16:07:18Z" duration="0.000500" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  A slow leader needs a slow follower, not repeated full-speed catch-up steps.
+  Expected: less than 0.0250000004f
+  But was:  0.0966665745f
+]]></message>
+            <stack-trace><![CDATA[at CustomerEscortRegressionTests.SlowWalkingAndStoppingDoNotMakeCustomerSprintInShortBursts () [0x00069] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CustomerEscortRegressionTests.cs:63
+]]></stack-trace>
+          </failure>
+        </test-case>
+        <test-case id="1079" name="WalkingCustomerKeepsPersonalSpaceBehindLeader" fullname="CustomerEscortRegressionTests.WalkingCustomerKeepsPersonalSpaceBehindLeader" methodname="WalkingCustomerKeepsPersonalSpaceBehindLeader" classname="CustomerEscortRegressionTests" runstate="Runnable" seed="270927549" result="Failed" start-time="2026-09-30 16:07:18Z" end-time="2026-09-30 16:07:18Z" duration="0.001022" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  A walking customer should trail the stylist with visible personal space.
+  Expected: in range (0.9,2.2)
+  But was:  0.895000458f
+]]></message>
+            <stack-trace><![CDATA[at CustomerEscortRegressionTests.WalkingCustomerKeepsPersonalSpaceBehindLeader () [0x00087] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CustomerEscortRegressionTests.cs:49
+]]></stack-trace>
+          </failure>
+          <output><![CDATA[Saving results to: /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Builds/BugFixFocused.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

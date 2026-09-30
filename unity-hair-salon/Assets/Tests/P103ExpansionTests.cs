@@ -53,12 +53,12 @@ public sealed class P103ExpansionTests
     {
         var pad = new SalonProximityPurchasePadModel("expansion-pad-haircut-2", SalonProgressData.HaircutExpansionCost);
         Assert.AreEqual("expansion-pad-haircut-2", pad.PadId);
-        Assert.AreEqual(180, pad.Cost);
+        Assert.AreEqual(2000, pad.Cost);
         Assert.AreEqual(60, pad.CalculatePayment(1f, 999, 60));
         Assert.IsTrue(pad.ApplyPayment(60));
         Assert.AreEqual(60, pad.Paid);
         Assert.IsFalse(pad.IsUnlocked);
-        Assert.IsTrue(pad.ApplyPayment(120));
+        Assert.IsTrue(pad.ApplyPayment(1940));
         Assert.IsTrue(pad.IsUnlocked);
         Assert.IsFalse(pad.ApplyPayment(1));
     }
@@ -70,6 +70,6 @@ public sealed class P103ExpansionTests
             "{\"SchemaVersion\":1,\"DayNumber\":1,\"Balance\":40,\"ShopSatisfaction\":90,\"ReputationStars\":3}");
         Assert.IsFalse(legacy.HaircutExpansionPurchased);
         Assert.AreEqual(0, legacy.HaircutExpansionPaid);
-        Assert.IsTrue(legacy.TryValidate(out _));
+        Assert.IsFalse(legacy.TryValidate(out _), "Version-one JSON is migrated by the repository before validation.");
     }
 }

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Failed(Child)" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-30 11:07:49Z" end-time="2026-09-30 11:07:49Z" duration="0.0468351">
+  <test-suite type="TestSuite" id="1000" name="胡闹理发店灰盒 Demo" fullname="胡闹理发店灰盒 Demo" runstate="Runnable" testcasecount="815" result="Failed" site="Child" start-time="2026-09-30 11:07:49Z" end-time="2026-09-30 11:07:49Z" duration="0.046835" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1929" name="HairSalon.Tests.dll" fullname="/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Library/ScriptAssemblies/HairSalon.Tests.dll" runstate="Runnable" testcasecount="815" result="Failed" site="Child" start-time="2026-09-30 11:07:49Z" end-time="2026-09-30 11:07:49Z" duration="0.040309" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="36588" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestFixture" id="1060" name="CoreReworkAcceptanceTests" fullname="CoreReworkAcceptanceTests" classname="CoreReworkAcceptanceTests" runstate="Runnable" testcasecount="11" result="Failed" site="Child" start-time="2026-09-30 11:07:49Z" end-time="2026-09-30 11:07:49Z" duration="0.028592" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1070" name="WalkingOverAnUnrevealedChairPadCannotSpendMoney" fullname="CoreReworkAcceptanceTests.WalkingOverAnUnrevealedChairPadCannotSpendMoney" methodname="WalkingOverAnUnrevealedChairPadCannotSpendMoney" classname="CoreReworkAcceptanceTests" runstate="Runnable" seed="1932549366" result="Failed" start-time="2026-09-30 11:07:49Z" end-time="2026-09-30 11:07:49Z" duration="0.020706" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Expected: 100
+  But was:  0
+]]></message>
+            <stack-trace><![CDATA[at CoreReworkAcceptanceTests.WalkingOverAnUnrevealedChairPadCannotSpendMoney () [0x00179] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/CoreReworkAcceptanceTests.cs:169
+]]></stack-trace>
+          </failure>
+          <output><![CDATA[Saving results to: /Users/kker/Documents/ChatGPT/game2/artifacts/core-rework/hidden-pad-red.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

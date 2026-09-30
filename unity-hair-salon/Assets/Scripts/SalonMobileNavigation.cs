@@ -31,6 +31,29 @@ public static class SalonMobileNavigation
         return position;
     }
 
+    /// <summary>
+    /// Returns the nearest free floor point when new furniture appears on top
+    /// of a player; Move never leaves a blocked start on its own.
+    /// </summary>
+    public static Vector3 ResolveOverlap(Vector3 position, Rect floor, IReadOnlyList<Rect> obstacles)
+    {
+        if (!Blocked(position, obstacles)) return position;
+        const float ringStep = .1f;
+        const int directions = 16;
+        for (int ring = 1; ring <= 40; ring++)
+        {
+            for (int i = 0; i < directions; i++)
+            {
+                float angle = i * Mathf.PI * 2f / directions;
+                Vector3 candidate = position + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * (ring * ringStep);
+                candidate.x = Mathf.Clamp(candidate.x, floor.xMin, floor.xMax);
+                candidate.z = Mathf.Clamp(candidate.z, floor.yMin, floor.yMax);
+                if (!Blocked(candidate, obstacles)) return candidate;
+            }
+        }
+        return position;
+    }
+
     private static bool Blocked(Vector3 point, IReadOnlyList<Rect> obstacles)
     {
         for (int i = 0; i < obstacles.Count; i++)
@@ -44,11 +67,13 @@ public sealed class SalonFurnitureObstacle : MonoBehaviour
 {
     public string AssetId { get; private set; }
     private AssetArea _collision;
+    private AssetArea _footprint;
 
     public void Initialize(AssetDefinition asset)
     {
         AssetId = asset.Id;
         _collision = asset.Collision;
+        _footprint = asset.Footprint;
     }
 
     public Rect WorldBounds(float radius)
@@ -56,5 +81,15 @@ public sealed class SalonFurnitureObstacle : MonoBehaviour
         Vector3 center = transform.TransformPoint(new Vector3(_collision.Center.x, 0f, _collision.Center.y));
         Vector2 half = _collision.Size * .5f + Vector2.one * radius;
         return Rect.MinMaxRect(center.x - half.x, center.z - half.y, center.x + half.x, center.z + half.y);
+    }
+
+    public float DistanceToFootprint(Vector3 worldPoint)
+    {
+        AssetArea footprint = _footprint ?? _collision;
+        Vector3 center = transform.TransformPoint(new Vector3(footprint.Center.x, 0f, footprint.Center.y));
+        Vector2 half = footprint.Size * .5f;
+        float dx = Mathf.Max(0f, Mathf.Abs(worldPoint.x - center.x) - half.x);
+        float dz = Mathf.Max(0f, Mathf.Abs(worldPoint.z - center.z) - half.y);
+        return Mathf.Sqrt(dx * dx + dz * dz);
     }
 }

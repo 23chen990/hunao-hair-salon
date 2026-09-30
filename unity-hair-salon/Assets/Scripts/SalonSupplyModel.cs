@@ -27,6 +27,15 @@ namespace HairSalon
             SourceWashKits = sourceStock;
         }
 
+        public void RestoreStock(int source, int carried, int rack)
+        {
+            if (source < 0 || carried < 0 || rack < 0) throw new ArgumentOutOfRangeException(nameof(source));
+            SourceWashKits = source;
+            CarriedWashKits = Math.Min(CarryCapacity, carried);
+            WashRackWashKits = Math.Min(WashRackCapacity, rack);
+            Changed?.Invoke();
+        }
+
         public bool TryPickUpWashKit()
         {
             if (SourceWashKits <= 0 || CarriedWashKits >= CarryCapacity) return false;

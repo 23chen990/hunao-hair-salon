@@ -127,6 +127,7 @@ namespace HairSalon
         public float AutoBlowStartDuration = .75f;
         public float AutoBlowSafetyStopTime = 9f;
         public float ReadyDelayGrace = 2f;
+        public bool BackgroundFoamIsNotServiceDelay;
         public float LateSatisfactionPenalty = 8f;
         public float SevereLateSatisfactionPenalty = 24f;
     }

@@ -1,0 +1,443 @@
+{
+  "passed": false,
+  "error": "",
+  "errors": [],
+  "state": {
+    "checkoutWaiting": 0,
+    "checkoutAbandoned": 0,
+    "cashier": {
+      "x": 3.549999713897705,
+      "y": 0.05000000074505806,
+      "z": -3.6000001430511475
+    },
+    "supplyIntroduced": true,
+    "day": 2,
+    "completed": 3,
+    "target": 4,
+    "balance": 1244,
+    "guided": -1,
+    "working": -1,
+    "targetCustomer": -1,
+    "satisfaction": 6,
+    "activeCustomers": 0,
+    "waitingCustomers": 0,
+    "occupiedStations": 0,
+    "readyToRinse": 0,
+    "autoBlowRunning": 0,
+    "autoBlowReady": 0,
+    "ungreetedWaiting": 0,
+    "attentionDemand": 0,
+    "sourceWashKits": 12,
+    "carriedWashKits": 0,
+    "washRackWashKits": 2,
+    "padPaid": 0,
+    "haircutPadPaid": 0,
+    "annexPadPaid": 0,
+    "waitingCapacity": 4,
+    "maxCustomers": 6,
+    "paused": false,
+    "purchased": false,
+    "padUnlocked": false,
+    "haircutPadUnlocked": false,
+    "annexPadUnlocked": false,
+    "annexPadVisible": false,
+    "available": false,
+    "workingSuspended": false,
+    "coop": false,
+    "waitingSeats": false,
+    "extraSeats": false,
+    "state": "Result",
+    "action": "靠近顾客",
+    "targetTool": "",
+    "targetAction": "None",
+    "wave": "收尾",
+    "progress": 1.0,
+    "workingElapsed": 0.0,
+    "cameraSize": 8.349996566772461,
+    "reputation": 2.5999999046325684,
+    "reputationBefore": 2.799999952316284,
+    "player": {
+      "x": -8.639805793762207,
+      "y": 0.05000000074505806,
+      "z": 3.0747196674346924
+    },
+    "cameraRight": {
+      "x": 0.8944271802902222,
+      "y": 0.0,
+      "z": -0.4472135901451111
+    },
+    "cameraForward": {
+      "x": 0.3627343773841858,
+      "y": -0.5849092602729797,
+      "z": 0.7254687547683716
+    },
+    "cameraPosition": {
+      "x": -12.000003814697266,
+      "y": 19.99999237060547,
+      "z": -22.99999237060547
+    },
+    "annexPad": {
+      "x": 9.100000381469727,
+      "y": 0.20000000298023224,
+      "z": 3.9000000953674316
+    },
+    "annexPadScreen": {
+      "x": 581.7921142578125,
+      "y": 277.49652099609375,
+      "z": 38.750003814697266
+    },
+    "playerScreen": {
+      "x": 219.86517333984375,
+      "y": 156.20449829101562,
+      "z": 31.804187774658203
+    },
+    "playerHeadScreen": {
+      "x": 219.86517333984375,
+      "y": 194.08816528320312,
+      "z": 30.634368896484375
+    },
+    "playerTwoScreen": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "playerTwoHeadScreen": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0
+    },
+    "joystick": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "interaction": {
+      "x": 0.0,
+      "y": 0.0
+    },
+    "pads": [
+      {
+        "id": "BlowDryer",
+        "padId": "expansion-pad-blow-dryer",
+        "openDay": 1,
+        "cost": 600,
+        "paid": 600,
+        "unlocked": true,
+        "visible": false,
+        "position": {
+          "x": -3.799999952316284,
+          "y": 0.20000000298023224,
+          "z": 0.3499999940395355
+        },
+        "screen": {
+          "x": 349.41497802734375,
+          "y": 155.32167053222656,
+          "z": 31.495315551757812
+        }
+      },
+      {
+        "id": "WashStation",
+        "padId": "expansion-pad-wash-station",
+        "openDay": 1,
+        "cost": 1200,
+        "paid": 1200,
+        "unlocked": true,
+        "visible": false,
+        "position": {
+          "x": -8.75,
+          "y": 0.0,
+          "z": 4.049999713897705
+        },
+        "screen": {
+          "x": 207.37774658203125,
+          "y": 166.49972534179688,
+          "z": 32.50099563598633
+        }
+      },
+      {
+        "id": "HaircutChair",
+        "padId": "expansion-pad-haircut-2",
+        "openDay": 1,
+        "cost": 2000,
+        "paid": 0,
+        "unlocked": false,
+        "visible": true,
+        "position": {
+          "x": 3.9000000953674316,
+          "y": 0.20000000298023224,
+          "z": -0.3499999940395355
+        },
+        "screen": {
+          "x": 517.56201171875,
+          "y": 193.8067626953125,
+          "z": 33.780540466308594
+        }
+      },
+      {
+        "id": "WaitingSeats",
+        "padId": "expansion-pad-waiting-seats",
+        "openDay": 1,
+        "cost": 2400,
+        "paid": 0,
+        "unlocked": false,
+        "visible": false,
+        "position": {
+          "x": -3.3499999046325684,
+          "y": 0.20000000298023224,
+          "z": -4.199999809265137
+        },
+        "screen": {
+          "x": 406.3343200683594,
+          "y": 102.48106384277344,
+          "z": 28.357662200927734
+        }
+      },
+      {
+        "id": "BlowStand",
+        "padId": "expansion-pad-blow-stand",
+        "openDay": 1,
+        "cost": 3000,
+        "paid": 0,
+        "unlocked": false,
+        "visible": false,
+        "position": {
+          "x": -3.799999952316284,
+          "y": 0.20000000298023224,
+          "z": 0.3499999940395355
+        },
+        "screen": {
+          "x": 349.41497802734375,
+          "y": 155.32167053222656,
+          "z": 31.495315551757812
+        }
+      },
+      {
+        "id": "WashAnnex",
+        "padId": "expansion-pad-wash-annex",
+        "openDay": 1,
+        "cost": 3600,
+        "paid": 0,
+        "unlocked": false,
+        "visible": false,
+        "position": {
+          "x": 9.100000381469727,
+          "y": 0.20000000298023224,
+          "z": 3.9000000953674316
+        },
+        "screen": {
+          "x": 581.7921142578125,
+          "y": 277.49652099609375,
+          "z": 38.750003814697266
+        }
+      },
+      {
+        "id": "ExtraSeats",
+        "padId": "expansion-pad-extra-seats",
+        "openDay": 1,
+        "cost": 4200,
+        "paid": 0,
+        "unlocked": false,
+        "visible": false,
+        "position": {
+          "x": -3.3499999046325684,
+          "y": 0.20000000298023224,
+          "z": -4.199999809265137
+        },
+        "screen": {
+          "x": 406.3343200683594,
+          "y": 102.48106384277344,
+          "z": 28.357662200927734
+        }
+      }
+    ],
+    "stations": [
+      {
+        "id": 0,
+        "position": {
+          "x": -8.75,
+          "y": 0.0,
+          "z": 4.049999713897705
+        },
+        "type": "Wash",
+        "occupied": false,
+        "usable": true
+      },
+      {
+        "id": 4,
+        "position": {
+          "x": 11.649999618530273,
+          "y": 0.0,
+          "z": 4.049999713897705
+        },
+        "type": "Wash",
+        "occupied": false,
+        "usable": false
+      },
+      {
+        "id": 1,
+        "position": {
+          "x": -2.0999999046325684,
+          "y": 0.20000000298023224,
+          "z": -1.1999999284744263
+        },
+        "type": "Haircut",
+        "occupied": false,
+        "usable": true
+      },
+      {
+        "id": 2,
+        "position": {
+          "x": 4.799999713897705,
+          "y": 0.20000000298023224,
+          "z": 0.20000000298023224
+        },
+        "type": "Haircut",
+        "occupied": false,
+        "usable": false
+      },
+      {
+        "id": 3,
+        "position": {
+          "x": 5.449999809265137,
+          "y": 0.20000000298023224,
+          "z": 3.700000047683716
+        },
+        "type": "Perm",
+        "occupied": false,
+        "usable": false
+      }
+    ],
+    "buttons": [
+      {
+        "label": "进入闭店经营",
+        "available": true,
+        "position": {
+          "x": 422.0,
+          "y": 61.52934265136719
+        }
+      },
+      {
+        "label": "Settings",
+        "available": true,
+        "position": {
+          "x": 819.2979736328125,
+          "y": 362.110595703125
+        }
+      }
+    ],
+    "customers": [],
+    "floor": {
+      "serializedVersion": "2",
+      "x": -10.200000762939453,
+      "y": -5.0,
+      "width": 14.800000190734863,
+      "height": 12.149999618530273
+    },
+    "obstacles": [
+      {
+        "serializedVersion": "2",
+        "x": 2.3499999046325684,
+        "y": 6.275000095367432,
+        "width": 3.3000001907348633,
+        "height": 0.9499998092651367
+      },
+      {
+        "serializedVersion": "2",
+        "x": -9.924999237060547,
+        "y": 5.174999713897705,
+        "width": 1.0499992370605469,
+        "height": 1.0500001907348633
+      },
+      {
+        "serializedVersion": "2",
+        "x": -10.024999618530273,
+        "y": -2.9250001907348633,
+        "width": 1.0499992370605469,
+        "height": 1.0500000715255737
+      },
+      {
+        "serializedVersion": "2",
+        "x": -1.649999976158142,
+        "y": 6.275000095367432,
+        "width": 3.299999952316284,
+        "height": 0.9499998092651367
+      },
+      {
+        "serializedVersion": "2",
+        "x": -5.650000095367432,
+        "y": 6.275000095367432,
+        "width": 3.3000001907348633,
+        "height": 0.9499998092651367
+      },
+      {
+        "serializedVersion": "2",
+        "x": -2.4749999046325684,
+        "y": 4.990000247955322,
+        "width": 2.4499998092651367,
+        "height": 1.119999885559082
+      },
+      {
+        "serializedVersion": "2",
+        "x": 8.875,
+        "y": -1.4249999523162842,
+        "width": 1.0499992370605469,
+        "height": 1.0499999523162842
+      },
+      {
+        "serializedVersion": "2",
+        "x": 6.349999904632568,
+        "y": 6.275000095367432,
+        "width": 3.299999713897705,
+        "height": 0.9499998092651367
+      },
+      {
+        "serializedVersion": "2",
+        "x": 4.399999618530273,
+        "y": -5.150000095367432,
+        "width": 5.600000381469727,
+        "height": 2.5
+      },
+      {
+        "serializedVersion": "2",
+        "x": 3.9749999046325684,
+        "y": -5.525000095367432,
+        "width": 1.0500001907348633,
+        "height": 1.0500001907348633
+      },
+      {
+        "serializedVersion": "2",
+        "x": 2.2750000953674316,
+        "y": 1.024999976158142,
+        "width": 1.75,
+        "height": 1.2500001192092896
+      },
+      {
+        "serializedVersion": "2",
+        "x": -8.449999809265137,
+        "y": 3.124999761581421,
+        "width": 2.5,
+        "height": 3.3499996662139893
+      },
+      {
+        "serializedVersion": "2",
+        "x": -9.649999618530273,
+        "y": 6.275000095367432,
+        "width": 3.299999713897705,
+        "height": 0.9499998092651367
+      },
+      {
+        "serializedVersion": "2",
+        "x": -3.1499998569488525,
+        "y": -0.31000006198883057,
+        "width": 2.0999999046325684,
+        "height": 1.380000114440918
+      },
+      {
+        "serializedVersion": "2",
+        "x": 4.75,
+        "y": -2.799999952316284,
+        "width": 0.5,
+        "height": 8.899999618530273
+      }
+    ]
+  }
+}

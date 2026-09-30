@@ -1,0 +1,97 @@
+{
+  "unityEditMode": {
+    "passed": 816,
+    "failed": 0
+  },
+  "nodeAssetPipeline": {
+    "passed": 17,
+    "failed": 0
+  },
+  "mobileDriverUnitTests": {
+    "passed": 13,
+    "failed": 0
+  },
+  "font": {
+    "requiredCjk": 418,
+    "packagedGlyphs": 714
+  },
+  "manifestAndBothBuildsPassed": true,
+  "edges": {
+    "overcut": {
+      "passed": true,
+      "errors": []
+    },
+    "checkout-abandon": {
+      "passed": true,
+      "errors": []
+    },
+    "wash-and-restock": {
+      "passed": true,
+      "errors": []
+    },
+    "blow-timeout": {
+      "passed": true,
+      "errors": []
+    }
+  },
+  "demoBrowser": true,
+  "assetLabBrowser": true,
+  "physicalPhoneTested": false,
+  "twoDayRun": {
+    "passed": true,
+    "days": [
+      {
+        "day": 1,
+        "completed": 7,
+        "balance": 760,
+        "checkoutAbandoned": 0,
+        "satisfaction": 70
+      },
+      {
+        "day": 2,
+        "completed": 5,
+        "balance": 382,
+        "checkoutAbandoned": 0,
+        "satisfaction": 32
+      }
+    ],
+    "pacing": [
+      {
+        "arrivalsWithin30Seconds": 6,
+        "atMostOneActiveCustomerPercent": 2.02,
+        "built": {
+          "BlowDryer": {
+            "seconds": 44.8,
+            "completedOrders": 2
+          },
+          "WashStation": {
+            "seconds": 165.9,
+            "completedOrders": 6
+          }
+        }
+      },
+      {
+        "arrivalsWithin30Seconds": 6,
+        "atMostOneActiveCustomerPercent": 1.85,
+        "built": {
+          "BlowDryer": {
+            "seconds": 0.0,
+            "completedOrders": 0
+          },
+          "WashStation": {
+            "seconds": 0.0,
+            "completedOrders": 0
+          },
+          "HaircutChair": {
+            "seconds": 123.3,
+            "completedOrders": 4
+          }
+        }
+      }
+    ],
+    "balanceAndStockPersistedAfterReload": true,
+    "errors": []
+  },
+  "interruptedRunEvidence": "interrupted-mobile-20260930",
+  "completedAt": "2026-09-30T21:41:54.654229+08:00"
+}

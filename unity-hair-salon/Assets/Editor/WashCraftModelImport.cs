@@ -16,6 +16,8 @@ public sealed class WashCraftModelImport : AssetPostprocessor
         importer.importCameras = false;
         importer.importLights = false;
         importer.materialImportMode = ModelImporterMaterialImportMode.ImportStandard;
+        // The wash annex opens the right wall by cutting this mesh at runtime.
+        if (assetPath.EndsWith("/room-finish.fbx")) importer.isReadable = true;
     }
     private Material OnAssignMaterialModel(Material source, Renderer renderer)
     {

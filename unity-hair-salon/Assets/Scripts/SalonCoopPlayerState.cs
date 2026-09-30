@@ -14,12 +14,14 @@ public sealed class SalonCoopPlayerState
     public HairdresserCharacter Character;
     public SalonMobileControls Controls;
     public CustomerModel GuidedCustomer;
+    public CustomerModel ResumeGuidedCustomer;
     public SalonCustomerView WorkingView;
     public ServiceType WorkingService;
     public SalonTool WorkingTool;
     public float WorkElapsed;
     public float WorkDuration;
     public bool HaircutSuspended;
+    public bool ManualBlowSuspended;
     public string ActionLabel = "靠近顾客";
     public bool ActionAvailable;
 
@@ -33,10 +35,12 @@ public sealed class SalonCoopPlayerState
     public void ResetInteraction()
     {
         GuidedCustomer = null;
+        ResumeGuidedCustomer = null;
         WorkingView = null;
         WorkElapsed = 0f;
         WorkDuration = 0f;
         HaircutSuspended = false;
+        ManualBlowSuspended = false;
         ActionLabel = "靠近顾客";
         ActionAvailable = false;
     }

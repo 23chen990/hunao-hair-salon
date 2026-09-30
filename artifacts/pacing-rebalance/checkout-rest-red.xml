@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Failed(Child)" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-30 18:14:41Z" end-time="2026-09-30 18:14:41Z" duration="0.083301">
+  <test-suite type="TestSuite" id="1000" name="胡闹理发店灰盒 Demo" fullname="胡闹理发店灰盒 Demo" runstate="Runnable" testcasecount="853" result="Failed" site="Child" start-time="2026-09-30 18:14:41Z" end-time="2026-09-30 18:14:41Z" duration="0.083301" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1971" name="HairSalon.Tests.dll" fullname="/Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Library/ScriptAssemblies/HairSalon.Tests.dll" runstate="Runnable" testcasecount="853" result="Failed" site="Child" start-time="2026-09-30 18:14:41Z" end-time="2026-09-30 18:14:41Z" duration="0.064553" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="56688" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestFixture" id="1605" name="SalonPacingDirectorTests" fullname="SalonPacingDirectorTests" classname="SalonPacingDirectorTests" runstate="Runnable" testcasecount="17" result="Failed" site="Child" start-time="2026-09-30 18:14:41Z" end-time="2026-09-30 18:14:41Z" duration="0.046053" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1622" name="ServiceFinishedButNotYetAtCashierStillCountsAsWork" fullname="SalonPacingDirectorTests.ServiceFinishedButNotYetAtCashierStillCountsAsWork" methodname="ServiceFinishedButNotYetAtCashierStillCountsAsWork" classname="SalonPacingDirectorTests" runstate="Runnable" seed="877670300" result="Failed" start-time="2026-09-30 18:14:41Z" end-time="2026-09-30 18:14:41Z" duration="0.033690" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  The checkout trip cannot consume the recovery window.
+  Expected: 0.0f
+  But was:  8.0f
+]]></message>
+            <stack-trace><![CDATA[at SalonPacingDirectorTests.ServiceFinishedButNotYetAtCashierStillCountsAsWork () [0x00044] in /Users/kker/Documents/ChatGPT/game2/unity-hair-salon/Assets/Tests/SalonPacingDirectorTests.cs:181
+]]></stack-trace>
+          </failure>
+          <output><![CDATA[Saving results to: /Users/kker/Documents/ChatGPT/game2/artifacts/pacing-rebalance/checkout-rest-red.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

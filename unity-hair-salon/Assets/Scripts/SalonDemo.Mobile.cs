@@ -16,12 +16,14 @@ public sealed partial class SalonDemo
     private SalonProgressData _mobileProgress;
     private SalonProgressData _mobileOpening;
     private CustomerModel _mobileGuidedCustomer;
+    private CustomerModel _mobileResumeGuidedCustomer;
     private SalonCustomerView _mobileWorkingView;
     private ServiceType _mobileWorkingService;
     private SalonTool _mobileWorkingTool;
     private float _mobileWorkElapsed;
     private float _mobileWorkDuration;
     private bool _mobileHaircutSuspended;
+    private bool _mobileManualBlowSuspended;
     private readonly List<Rect> _mobileObstacles = new List<Rect>();
     private Rect _mobileFloor;
     private Text _mobileGoalLabel;
@@ -73,7 +75,7 @@ public sealed partial class SalonDemo
     private const int MobileSupplyRackCapacity = 6;
     private const int MobileSupplyPadCost = SalonProgressData.SupplyRackExpansionCost;
     private const float MobileSupplyPadSpendRate = 60f;
-    private const float MobileHaircutPadSpendRate = 60f;
+    private const float MobileHaircutPadSpendRate = SalonProgressData.HaircutExpansionCost / 6f;
     private static readonly Vector3 MobileSupplySourcePosition = new Vector3(3.15f, .2f, 1.65f);
     private static readonly Vector3 MobileWashRackPosition = new Vector3(-1.25f, .2f, 5.55f);
     // In front of the expansion rack, with enough separation from the first
@@ -84,7 +86,7 @@ public sealed partial class SalonDemo
     private static readonly Rect MobileZoneABounds = new Rect(-10.35f, -5.15f, 15.1f, 12.45f);
     private static readonly Rect MobileSalonBounds = new Rect(-10.35f, -5.15f, 20.7f, 12.45f);
 
-    private enum MobileAction { None, Greet, Assign, Guide, Wash, RinseWash, Cut, StartDry, FinishDry }
+    private enum MobileAction { None, Greet, Assign, Guide, Recall, Wash, RinseWash, Cut, StartDry, FinishDry }
     private struct MobileTarget
     {
         public MobileAction Action;
@@ -114,6 +116,7 @@ public sealed partial class SalonDemo
         _coopMode = IsLocalCoopRequested(Application.absoluteURL, System.Environment.GetCommandLineArgs());
         // Acceptance harnesses exercise their original APIs. The playable entry always uses mobile controls.
         _mobileMode = Application.isPlaying && IsNormalGameplayMode &&
+            GetComponent<HairSalon.AssetPipeline.CandidateAssetValidation>() == null &&
             !HairSalon.AssetPipeline.BrowserCoreFlowSmoke.IsRequested(Application.absoluteURL) &&
             !Application.absoluteURL.Contains("washCraft=detail") &&
             !Application.absoluteURL.Contains("washCraft=service");
@@ -133,13 +136,18 @@ public sealed partial class SalonDemo
         _mobileSaveSlotId = SalonSaveSlots.NormalizeSlot(PlayerPrefs.GetInt(SalonSaveSlots.SelectedSlotKey, 1));
         _mobileSaves = new PlayerPrefsSalonProgressRepository(_mobileSaveSlotId);
         _mobileProgress = _mobileSaves.Load() ?? SalonProgressData.CreateDefault();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        _mobileProgress = CreateMobileEvidenceSeed(Application.absoluteURL) ?? _mobileProgress;
+#endif
         DaySettings = SalonMobileDayConfig.CreateForDay(_mobileProgress.DayNumber);
         FlowSettings.WaitingCapacity = SalonMobileDayConfig.WaitingCapacity;
         ServiceSettings = SalonMobileDayConfig.CreateServiceConfig();
+        SalonMobileDayConfig.ApplyRewardProfile(RewardSettings);
+        SalonMobileDayConfig.ApplySatisfactionProfile(SatisfactionSettings);
         // Day 1 is the onboarding run: the first customer still creates
         // pressure, but the queue must survive a normal escort to a station.
         // Later days restore the sharper waiting pressure.
-        PatienceSettings.DrainPerSecond = _mobileProgress.DayNumber <= 1 ? .85f : 1.0f;
+        PatienceSettings.DrainPerSecond = SalonMobileDayConfig.PatienceDrainPerSecond(_mobileProgress.DayNumber);
         _mobileSupplies = new SalonSupplyModel(
             MobileSupplySourceStock, MobileSupplyCarryCapacity, MobileSupplyRackCapacity);
         _mobileSupplies.Changed += HandleMobileSupplyChanged;
@@ -149,6 +157,8 @@ public sealed partial class SalonDemo
             "expansion-pad-haircut-2", SalonProgressData.HaircutExpansionCost);
         RestoreMobileSupplyPadProgress(_mobileProgress);
         RestoreMobileHaircutExpansionProgress(_mobileProgress);
+        CreateMobileWashAnnexPad(_mobileProgress);
+        CreateMobileUnlockPads(_mobileProgress);
     }
 
     /// <summary>
@@ -162,6 +172,11 @@ public sealed partial class SalonDemo
         Transform stage = new GameObject("Stage1 Supply Loop").transform;
         stage.SetParent(root, false);
         _mobileSupplyStageRoot = stage;
+        _mobileSourceRoot = new GameObject("Supply Crate Group").transform;
+        _mobileSourceRoot.SetParent(stage, false);
+        _mobileRackRoot = new GameObject("Supply Rack Group").transform;
+        _mobileRackRoot.SetParent(stage, false);
+        stage = _mobileSourceRoot;
 
         FurnitureShadow(stage, "furniture-supply-crate", MobileSupplySourcePosition);
         Block("Wash Supply Crate", stage, MobileSupplySourcePosition + new Vector3(0f, .42f, 0f),
@@ -178,6 +193,7 @@ public sealed partial class SalonDemo
             _mobileSourceItems.Add(item);
         }
 
+        stage = _mobileRackRoot;
         FurnitureShadow(stage, "furniture-wash-supply-rack", MobileWashRackPosition);
         Block("Wash Supply Rack Back", stage, MobileWashRackPosition + new Vector3(0f, 1.0f, .2f),
             new Vector3(2.25f, 1.85f, .3f), Wood);
@@ -201,8 +217,11 @@ public sealed partial class SalonDemo
         _mobileWashRackPoint = new GameObject("Wash Supply Dropoff Anchor").transform;
         _mobileWashRackPoint.SetParent(stage, false);
         _mobileWashRackPoint.position = MobileWashRackPosition + new Vector3(0f, 0f, -.95f);
+        stage = _mobileSupplyStageRoot;
         BuildMobileSupplyPurchasePad(stage);
         BuildMobileHaircutExpansionPad(stage);
+        BuildMobileWashAnnexPad(stage);
+        BuildMobileUnlockProps(stage);
         if (_mobileSupplyPad != null && _mobileSupplyPad.IsUnlocked)
             BuildExpandedWashRackVisual();
         UpdateMobileSupplyVisuals();
@@ -247,12 +266,11 @@ public sealed partial class SalonDemo
         _mobileSupplyPadLabel.anchor = TextAnchor.MiddleCenter;
         _mobileSupplyPadLabel.characterSize = .1f;
         _mobileSupplyPadLabel.fontSize = 36;
+        _mobileSupplyPadLabel.font = SalonUiFactory.GetPackagedUiFont();
+        labelObject.GetComponent<MeshRenderer>().sharedMaterial = _mobileSupplyPadLabel.font.material;
         _mobileSupplyPadLabel.color = Cream;
         UpdateMobilePurchasePadVisual();
-        bool showPad = _mobileHaircutExpansionPad == null || _mobileHaircutExpansionPad.IsUnlocked ||
-                       _mobileProgress == null || _mobileProgress.SupplyRackExpansionPaid > 0 ||
-                       _mobileProgress.SupplyRackExpansionPurchased;
-        _mobileSupplyPadRoot.SetActive(showPad);
+        _mobileSupplyPadRoot.SetActive(IsMobileSupplyPadVisible());
     }
 
     private void BuildMobileHaircutExpansionPad(Transform stage)
@@ -281,6 +299,8 @@ public sealed partial class SalonDemo
         _mobileHaircutExpansionPadLabel.anchor = TextAnchor.MiddleCenter;
         _mobileHaircutExpansionPadLabel.characterSize = .1f;
         _mobileHaircutExpansionPadLabel.fontSize = 36;
+        _mobileHaircutExpansionPadLabel.font = SalonUiFactory.GetPackagedUiFont();
+        labelObject.GetComponent<MeshRenderer>().sharedMaterial = _mobileHaircutExpansionPadLabel.font.material;
         _mobileHaircutExpansionPadLabel.color = Cream;
         UpdateMobileHaircutExpansionPadVisual();
     }
@@ -347,10 +367,12 @@ public sealed partial class SalonDemo
 
     private void UpdateMobilePurchasePadVisual()
     {
+        if (_mobileSupplyPadRoot != null)
+            _mobileSupplyPadRoot.SetActive(IsMobileSupplyPadVisible());
         if (_mobileSupplyPadLabel == null || _mobileSupplyPad == null) return;
         _mobileSupplyPadLabel.text = _mobileSupplyPad.IsUnlocked
-            ? "OPEN"
-            : "BUILD " + _mobileSupplyPad.Paid + "/" + _mobileSupplyPad.Cost;
+            ? "补货架已开放"
+            : "补货架\n" + _mobileSupplyPad.Paid + "/" + _mobileSupplyPad.Cost + " 金币";
         _mobileSupplyPadLabel.color = _mobileSupplyPad.IsUnlocked ? Teal : Cream;
         if (_camera != null)
         {
@@ -359,6 +381,8 @@ public sealed partial class SalonDemo
                 _mobileSupplyPadLabel.transform.rotation = Quaternion.LookRotation(toCamera, Vector3.up);
         }
     }
+
+    private bool IsMobileSupplyPadVisible() => false;
 
     private void BuildStage1CarryVisual(Transform player)
     {
@@ -392,6 +416,7 @@ public sealed partial class SalonDemo
 
     private void HandleMobileSupplyChanged()
     {
+        CheckMobileRestockIntroduction();
         UpdateMobileSupplyVisuals();
         RefreshMobileDayPresentation();
     }
@@ -432,15 +457,14 @@ public sealed partial class SalonDemo
                 bool visible = i < expandedRackItems;
                 _mobileExpandedRackItems[i].SetActive(visible);
             }
-        UpdateMobilePurchasePadVisual();
-        UpdateMobileHaircutExpansionPadVisual();
+        RefreshMobileUnlockPadVisuals();
     }
 
     private void UpdateMobileHaircutExpansionPadVisual()
     {
         if (_mobileHaircutExpansionPadLabel == null || _mobileHaircutExpansionPad == null) return;
         _mobileHaircutExpansionPadLabel.text = _mobileHaircutExpansionPad.IsUnlocked
-            ? "OPEN" : "BUILD " + _mobileHaircutExpansionPad.Paid + "/" + _mobileHaircutExpansionPad.Cost;
+            ? "理发工位已开放" : "理发工位\n" + _mobileHaircutExpansionPad.Paid + "/" + _mobileHaircutExpansionPad.Cost + " 金币";
         _mobileHaircutExpansionPadLabel.color = _mobileHaircutExpansionPad.IsUnlocked ? Teal : Cream;
         if (_camera != null)
         {
@@ -449,12 +473,14 @@ public sealed partial class SalonDemo
                 _mobileHaircutExpansionPadLabel.transform.rotation = Quaternion.LookRotation(toCamera, Vector3.up);
         }
         if (_mobileHaircutExpansionPadRoot != null)
-            _mobileHaircutExpansionPadRoot.SetActive(!_mobileHaircutExpansionPad.IsUnlocked);
+            _mobileHaircutExpansionPadRoot.SetActive(!_mobileHaircutExpansionPad.IsUnlocked &&
+                                                     IsMobileUnlockPadVisible(SalonUnlockId.HaircutChair));
     }
 
     private void UpdateMobileSupplyLoop(float dt)
     {
         if (!_mobileMode || _mobileSupplies == null || _player == null ||
+            _mobileProgress == null || !_mobileProgress.SupplyRackIntroduced ||
             !CanInteractWithSalon() || _mobileSupplySourcePoint == null || _mobileWashRackPoint == null)
             return;
 
@@ -495,6 +521,13 @@ public sealed partial class SalonDemo
             _player == null || !CanInteractWithSalon())
             return;
 
+        if (!IsMobileSupplyPadVisible())
+        {
+            _mobilePadWasNear = false;
+            _mobilePadSpendElapsed = 0f;
+            return;
+        }
+
         bool nearPad = FlatDistance(_player.position, _mobileSupplyPadPoint.position) <= 1.25f;
         if (!nearPad)
         {
@@ -512,7 +545,7 @@ public sealed partial class SalonDemo
             _mobilePadWasNear = true;
             _mobilePadInsufficientToastShown = false;
             if (!_mobileSupplyPad.IsUnlocked)
-                ShowToast("STAND ON PAD TO BUILD");
+                ShowToast("停留投入金币 · 扩建补货架");
         }
 
         if (!_mobileSupplyPad.IsUnlocked)
@@ -538,7 +571,8 @@ public sealed partial class SalonDemo
                         {
                             if (_mobileSupplyPadRoot != null) _mobileSupplyPadRoot.SetActive(true);
                             BuildExpandedWashRackVisual();
-                            ShowToast("SUPPLY RACK OPEN");
+                            RefreshMobileUnlockPadVisuals();
+                            ShowToast("补货架已开放 · 两处均可放下用品");
                             SaveMobileCheckpoint(false);
                         }
                     }
@@ -575,7 +609,8 @@ public sealed partial class SalonDemo
     {
         if (!_mobileMode || _mobileHaircutExpansionPad == null || _mobileHaircutExpansionPadPoint == null ||
             _player == null || !CanInteractWithSalon()) return;
-        bool nearPad = FlatDistance(_player.position, _mobileHaircutExpansionPadPoint.position) <= 1.25f;
+        bool nearPad = IsMobileUnlockPadVisible(SalonUnlockId.HaircutChair) &&
+                       FlatDistance(_player.position, _mobileHaircutExpansionPadPoint.position) <= 1.25f;
         if (!nearPad)
         {
             bool shouldSave = _mobileHaircutPadWasNear && _mobileHaircutPadCheckpointDirty;
@@ -590,7 +625,7 @@ public sealed partial class SalonDemo
         {
             _mobileHaircutPadWasNear = true;
             _mobileHaircutPadInsufficientToastShown = false;
-            if (!_mobileHaircutExpansionPad.IsUnlocked) ShowToast("STAND ON PAD TO BUILD HAIRCUT");
+            if (!_mobileHaircutExpansionPad.IsUnlocked) ShowToast("停留投入金币 · 增加一个理发工位");
         }
         if (!_mobileHaircutExpansionPad.IsUnlocked)
         {
@@ -600,6 +635,7 @@ public sealed partial class SalonDemo
             if (amount > 0)
             {
                 int balanceBeforeSpend = _game.Balance;
+                int customerLimitBefore = SalonPacingDirector.ActiveLimit(_mobileProgress);
                 if (_game.Payments.TrySpend(amount))
                 {
                     if (_mobileHaircutExpansionPad.ApplyPayment(amount))
@@ -612,11 +648,14 @@ public sealed partial class SalonDemo
                         if (_coinBalanceLabel != null) _coinBalanceLabel.text = _game.Balance.ToString("N0");
                         if (_mobileHaircutExpansionPad.IsUnlocked)
                         {
+                            ProtectMobileCapacityIncrease(customerLimitBefore);
                             _game.SetWorkstationAvailability(2, true);
                             ApplyMobileWorkstationPresentation();
+                            ApplyMobileUnlockPresentation();
                             if (_mobileExpansionBarrier != null) _mobileExpansionBarrier.SetActive(false);
                             BuildMobileCollisionMap();
-                            ShowToast("HAIRCUT CHAIR OPEN");
+                            RefreshMobileUnlockPadVisuals();
+                            ShowToast("新理发工位已开放 · 可同时安排两位顾客");
                             SaveMobileCheckpoint(false);
                         }
                     }
@@ -682,7 +721,7 @@ public sealed partial class SalonDemo
         if (_coopMode) BuildCoopControls(safeParent);
         _mobileQueue = SalonMobileQueueView.Create(safeParent);
         // Modals are built afterwards, above all touch targets.
-        _mobileGoalLabel = UiLabel("", safeParent, 26, Cream, TextAnchor.MiddleCenter,
+        _mobileGoalLabel = UiLabel("", safeParent, 30, Cream, TextAnchor.MiddleCenter,
             new Vector2(-150f, -168f), new Vector2(420f, 58f), DarkWood, new Vector2(.5f, 1f));
         _mobileGoalRoot = _mobileGoalLabel.transform.parent.gameObject;
         ((RectTransform)_businessClockLabel.transform.parent).anchoredPosition = new Vector2(210f, -168f);
@@ -700,11 +739,12 @@ public sealed partial class SalonDemo
             new Vector2(0f, 190f), new Vector2(230f, 70f), DarkWood, () =>
             {
                 _mobileGuidedCustomer = null;
+                _mobileResumeGuidedCustomer = null;
                 _game.ClearFocus();
             });
         _mobileCancelGuideButton.gameObject.SetActive(false);
-        _mobileTaskSummaryLabel = UiLabel("", safeParent, 18, Cream, TextAnchor.MiddleLeft,
-            new Vector2(-150f, -205f), new Vector2(420f, 36f), new Color(.11f, .12f, .14f, .82f), new Vector2(.5f, 1f));
+        _mobileTaskSummaryLabel = UiLabel("", safeParent, 28, Cream, TextAnchor.MiddleCenter,
+            new Vector2(0f, -244f), new Vector2(760f, 86f), new Color(.11f, .12f, .14f, .82f), new Vector2(.5f, 1f));
         SalonUiFactory.MakeClickThrough(_mobileTaskSummaryLabel.transform.parent.gameObject);
         BuildMobileCollisionMap();
     }
@@ -752,11 +792,22 @@ public sealed partial class SalonDemo
             else bounds.Encapsulate(renderer.bounds);
         }
         bool expanded = _mobileHaircutExpansionPad != null && _mobileHaircutExpansionPad.IsUnlocked;
-        Rect playable = expanded ? MobileSalonBounds : MobileZoneABounds;
+        Rect playable = IsMobileWashAnnexUnlocked ? SalonWashAnnexLayout.WalkableBounds :
+            expanded ? MobileSalonBounds : MobileZoneABounds;
         _mobileFloor = new Rect(playable.xMin + bodyRadius, playable.yMin + bodyRadius,
             playable.width - bodyRadius * 2f, playable.height - bodyRadius * 2f);
         if (!expanded)
             _mobileObstacles.Add(new Rect(4.75f, -2.8f, .5f, 8.9f));
+        if (IsMobileWashAnnexUnlocked)
+            SalonWashAnnexLayout.AddOpenObstacles(_mobileObstacles, bodyRadius);
+        if (_player != null)
+        {
+            _player.position = SalonMobileNavigation.ResolveOverlap(_player.position, _mobileFloor, _mobileObstacles);
+            _playerTarget = _player.position;
+        }
+        if (_coopPlayerTwo?.Transform != null)
+            _coopPlayerTwo.Transform.position = SalonMobileNavigation.ResolveOverlap(
+                _coopPlayerTwo.Transform.position, _mobileFloor, _mobileObstacles);
     }
 
     private SalonProgressData CaptureMobileProgress(bool settled)
@@ -769,6 +820,10 @@ public sealed partial class SalonDemo
         data.SupplyRackExpansionPaid = _mobileSupplyPad == null ? 0 : _mobileSupplyPad.Paid;
         data.HaircutExpansionPurchased = _mobileHaircutExpansionPad != null && _mobileHaircutExpansionPad.IsUnlocked;
         data.HaircutExpansionPaid = _mobileHaircutExpansionPad == null ? 0 : _mobileHaircutExpansionPad.Paid;
+        data.WashAnnexExpansionPurchased = IsMobileWashAnnexUnlocked;
+        data.WashAnnexExpansionPaid = _mobileWashAnnexPad == null ? 0 : _mobileWashAnnexPad.Paid;
+        WriteMobileUnlockProgress(data);
+        CaptureMobileCoreStock(data);
         data.FirstDayComplete = _game.FirstDayCompleteForShop;
         data.ReputationStars = _dayController.Reputation.CurrentStars;
         data.ShopSatisfaction = _satisfaction.CurrentSatisfaction;
@@ -783,7 +838,12 @@ public sealed partial class SalonDemo
         bool saved = _mobileSaves.Save(_mobileProgress);
         if (!saved)
             ShowToast("本次进度无法保存，请保留当前页面");
-        if (saved) _mobilePadCheckpointDirty = false;
+        if (saved)
+        {
+            _mobilePadCheckpointDirty = false;
+            _mobileWashAnnexPadCheckpointDirty = false;
+            foreach (MobileUnlockPad pad in _mobileUnlockPads.Values) pad.CheckpointDirty = false;
+        }
         return saved;
     }
 
@@ -797,11 +857,15 @@ public sealed partial class SalonDemo
             _mobileResultFinalizedForDay = false;
             _mobileResultSavePending = false;
             SalonMobileDayConfig.ApplyForDay(DaySettings, _dayController.DayNumber);
-            _mobileSupplies?.ResetDay(MobileSupplySourceStock);
+            PatienceSettings.DrainPerSecond = SalonMobileDayConfig.PatienceDrainPerSecond(_dayController.DayNumber);
+            ApplyMobileUnlockPresentation();
+            RestoreMobileCoreStock();
+            ResetMobileCheckout();
             _mobileSupplyTickElapsed = 0f;
             _nextCustomerId = 0;
             _satisfaction.BeginDay(_satisfaction.CurrentSatisfaction);
             _mobileGuidedCustomer = null;
+            _mobileResumeGuidedCustomer = null;
             EndMobileWork();
             if (_player != null) _player.position = new Vector3(0f, .05f, -3.2f);
             if (!_mobileRestoring)
@@ -820,6 +884,7 @@ public sealed partial class SalonDemo
             _mobileResultFinalizedForDay = true;
             EndMobileWork();
             _mobileGuidedCustomer = null;
+            _mobileResumeGuidedCustomer = null;
             bool passed = _dayController.Stats.CompletedOrders >= DaySettings.TargetOrders;
             _resultTitleLabel.text = "DAY " + _dayController.DayNumber + (passed ? "  目标达成" : "  本日已结算");
             _resultContinueButton.gameObject.SetActive(true);
@@ -842,10 +907,15 @@ public sealed partial class SalonDemo
             if (_mobileSaveRetryButton != null)
                 _mobileSaveRetryButton.gameObject.SetActive(_mobileResultSavePending);
             _resultSummaryLabel.text = "完成订单   " + _dayController.Stats.CompletedOrders + " / " + DaySettings.TargetOrders +
-                "\n\n" + (passed ? "忙碌的一天完成了，去升级设备吧！" : "本日营业已结束，收入和投入进度已保留。") +
+                "\n\n" + (passed ? "今日目标达成，收入和施工进度已保留。" : "今日目标未达成，收入和施工进度已保留。") +
                 "\n\n订单收入   " + _dayController.Stats.OrderIncome +
                 "\n小费收入   " + _dayController.Stats.TipIncome +
-                "\n离店顾客   " + _game.AngryLeaves +
+                "\n流失顾客   " + _game.AngryLeaves +
+                "\n收银流失   " + _dayController.Stats.CheckoutAbandoned +
+                "\n未完成服务   " + _dayController.Stats.IncompleteAtClose +
+                "\n打烊未接待   " + _dayController.Stats.UnservedAtClose +
+                "\n\n" + SalonMobileDayConfig.DescribeReputationChange(
+                    _dayController.Stats.ReputationBefore, _dayController.Stats.ReputationAfter) +
                 "\n\n" + (saved ? "进度已保存" : "保存失败，请保留当前页面");
         }
         RefreshMobileDayPresentation();
@@ -868,7 +938,14 @@ public sealed partial class SalonDemo
         if (_dayController.State == DayState.PreOpen && _preOpenInfoLabel != null)
         {
             _preOpenInfoLabel.fontSize = 24;
-            _preOpenInfoLabel.text = "3 分钟 · 完成 " + DaySettings.TargetOrders + " 单\n左摇杆移动 · 右按钮就近操作\n先取洗发用品，再去洗发区";
+            var infoRect = (RectTransform)_preOpenInfoLabel.transform;
+            infoRect.anchoredPosition = new Vector2(0f, -40f);
+            infoRect.sizeDelta = new Vector2(620f, 150f);
+            string construction = DescribeMobileRouteForOpening(_dayController.DayNumber);
+            _preOpenInfoLabel.text = "3 分钟 · 完成 " + DaySettings.TargetOrders + " 单\n" +
+                SalonMobileDayConfig.DescribeReputationForOpening(_dayController.Reputation.CurrentStars) +
+                "\n左摇杆移动 · 右按钮就近操作\n" +
+                (construction.Length > 0 ? construction : "先取洗发用品，再去洗发区");
         }
         bool playable = CanInteractWithSalon();
         if (_closingLabel != null) _closingLabel.transform.parent.gameObject.SetActive(false);
@@ -876,20 +953,15 @@ public sealed partial class SalonDemo
         RefreshCoopDayPresentation(playable);
         _mobileQueue?.SetVisible(playable);
         _mobileQueue?.Refresh(_game.Customers);
+        if (_mobileTaskSummaryLabel != null)
+            _mobileTaskSummaryLabel.transform.parent.gameObject.SetActive(playable);
         if (_mobileGoalLabel != null)
         {
             _mobileGoalRoot.SetActive(playable);
             string phase = _dayController.State == DayState.ClosingGrace ? "收尾" :
-                _dayController.BusinessProgress >= .7f ? "高峰" :
-                _dayController.BusinessProgress >= .4f ? "忙碌" : "接待";
-            string supply = _mobileSupplies == null ? string.Empty :
-                "  ·  用品 " + _mobileSupplies.CarriedWashKits + "/" + _mobileSupplies.CarryCapacity +
-                "  架 " + _mobileSupplies.WashRackWashKits + "/" + _mobileSupplies.WashRackCapacity;
-            string pad = _mobileSupplyPad == null ? string.Empty :
-                (_mobileSupplyPad.IsUnlocked
-                    ? "  ·  BUILD OPEN"
-                    : "  ·  BUILD " + _mobileSupplyPad.Paid + "/" + _mobileSupplyPad.Cost);
-            _mobileGoalLabel.text = "目标 " + _dayController.Stats.CompletedOrders + "/" + DaySettings.TargetOrders + " 单  ·  " + phase + supply + pad;
+                _mobilePacing.RestRemaining > 0f ? "喘息" :
+                _dayController.CurrentTrafficWaveLabel;
+            _mobileGoalLabel.text = "目标 " + _dayController.Stats.CompletedOrders + "/" + DaySettings.TargetOrders + " 单  ·  " + phase;
         }
         if (_mobileCancelGuideButton != null)
             _mobileCancelGuideButton.gameObject.SetActive(playable && _mobileGuidedCustomer != null);
@@ -913,10 +985,13 @@ public sealed partial class SalonDemo
         _mobileHaircutExpansionPad = new SalonProximityPurchasePadModel(
             "expansion-pad-haircut-2", SalonProgressData.HaircutExpansionCost);
         RestoreMobileHaircutExpansionProgress(checkpoint);
-        _game.ConfigureWorkstationAvailability(_mobileHaircutExpansionPad.IsUnlocked, false, false);
+        CreateMobileWashAnnexPad(checkpoint);
+        CreateMobileUnlockPads(checkpoint);
+        _game.ConfigureWorkstationAvailability(_mobileHaircutExpansionPad.IsUnlocked, IsMobileWashAnnexUnlocked, false);
         ApplyMobileWorkstationPresentation();
         if (_mobileExpansionBarrier != null)
             _mobileExpansionBarrier.SetActive(!_mobileHaircutExpansionPad.IsUnlocked);
+        ApplyMobileWashAnnexPresentation();
         if (_mobileSupplyPad.IsUnlocked)
             BuildExpandedWashRackVisual();
         else if (_mobileExpandedRackBuilt)
@@ -937,7 +1012,9 @@ public sealed partial class SalonDemo
     private void UpdateMobilePlay(float dt)
     {
         if (_mobileControls == null) return;
+        UpdateMobileCoreFlow(dt);
         ClearStaleMobileGuidedCustomer();
+        UpdateMobileTaskSummary();
         if (_mobileWorkingView != null)
         {
             TickMobileWork(dt);
@@ -959,31 +1036,102 @@ public sealed partial class SalonDemo
         UpdateMobileSupplyLoop(dt);
         UpdateMobilePurchasePad(dt);
         UpdateMobileHaircutExpansionPad(dt);
+        UpdateMobileWashAnnexPad(dt);
+        UpdateMobileUnlockPads(dt);
         MobileTarget target = FindMobileTarget();
         _mobileActionLabel = target.Label;
         _mobileActionAvailable = target.Available;
         _mobileControls.SetInteraction(target.Label, target.Available);
-        _mobileControls.SetHint(target.Hint);
+        _mobileControls.SetHint(!target.Available && _mobileTutorialHint != null ? _mobileTutorialHint : target.Hint);
         foreach (var pair in _selectionPlates)
             pair.Value.SetActive(target.Available && target.Station == pair.Key && target.Action != MobileAction.Greet);
         if (_mobileControls.ConsumeInteractionPressed() && target.Available) ExecuteMobileTarget(target);
-        UpdateMobileTaskSummary();
         if (!_coopMode) UpdateMobileCameraFollow();
     }
 
     private void UpdateMobileCameraFollow()
     {
         if (!_mobileMode || _simple2DMode || _camera == null || _player == null) return;
-        bool expanded = _mobileHaircutExpansionPad != null && _mobileHaircutExpansionPad.IsUnlocked;
-        Rect bounds = expanded ? MobileSalonBounds : MobileZoneABounds;
-        const float cameraSize = 6.0f;
-        float aspect = Mathf.Max(.5f, (float)Screen.width / Mathf.Max(1f, Screen.height));
-        float halfWidth = cameraSize * aspect;
-        float centerX = Mathf.Clamp(_player.position.x, bounds.xMin + halfWidth, bounds.xMax - halfWidth);
-        float centerZ = Mathf.Clamp(_player.position.z, bounds.yMin + cameraSize, bounds.yMax - cameraSize);
-        float zOffset = _overviewCameraPosition.z - 1.4f;
-        _cameraPositionTarget = new Vector3(centerX, _overviewCameraPosition.y, centerZ + zOffset);
+        SetMobileCameraFrame(MobileCameraBounds(), _player.position + Vector3.up, 6f);
+    }
+
+    private void SetMobileCameraFrame(Rect bounds, Vector3 focus, float cameraSize)
+    {
+        // Clamp the view in the authored camera's plane. World X/Z clamping
+        // loses the crafted camera's yaw offset and can put the player offscreen.
+        Vector3 right = _overviewCameraRotation * Vector3.right;
+        Vector3 up = _overviewCameraRotation * Vector3.up;
+        Vector2 minimum = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+        Vector2 maximum = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+        for (int corner = 0; corner < 8; corner++)
+        {
+            Vector3 point = new Vector3((corner & 1) == 0 ? bounds.xMin : bounds.xMax,
+                (corner & 4) == 0 ? 0f : 2.5f,
+                (corner & 2) == 0 ? bounds.yMin : bounds.yMax);
+            Vector2 projected = new Vector2(Vector3.Dot(right, point), Vector3.Dot(up, point));
+            minimum = Vector2.Min(minimum, projected);
+            maximum = Vector2.Max(maximum, projected);
+        }
+        // Leave space for feet/head silhouettes at the floor edges.
+        minimum -= new Vector2(1.2f, 1.6f);
+        maximum += new Vector2(1.2f, 1.6f);
+        float halfWidth = cameraSize * Mathf.Max(.5f, _camera.aspect);
+        float x = maximum.x - minimum.x <= halfWidth * 2f
+            ? (minimum.x + maximum.x) * .5f
+            : Mathf.Clamp(Vector3.Dot(right, focus), minimum.x + halfWidth, maximum.x - halfWidth);
+        float y = maximum.y - minimum.y <= cameraSize * 2f
+            ? (minimum.y + maximum.y) * .5f
+            : Mathf.Clamp(Vector3.Dot(up, focus), minimum.y + cameraSize, maximum.y - cameraSize);
+        // Room edges must not pin a nearby stylist behind the HUD. Keep the
+        // authored room clamp wherever possible, then reserve the readable
+        // band between the top tasks and bottom controls for the whole body.
+        if (_player != null)
+        {
+            MobileStylistProjection(_player, right, up, out Vector2 bodyMin, out Vector2 bodyMax);
+            if (_coopMode && _coopPlayerTwo != null && _coopPlayerTwo.Transform != null)
+            {
+                MobileStylistProjection(_coopPlayerTwo.Transform, right, up,
+                    out Vector2 secondMin, out Vector2 secondMax);
+                bodyMin = Vector2.Min(bodyMin, secondMin);
+                bodyMax = Vector2.Max(bodyMax, secondMax);
+            }
+            float bodyLeft = bodyMax.x - .60f * halfWidth;
+            float bodyRight = bodyMin.x + .56f * halfWidth;
+            float bodyBottom = bodyMax.y - .40f * cameraSize;
+            float bodyTop = bodyMin.y + .46f * cameraSize;
+            if (bodyLeft <= bodyRight) x = Mathf.Clamp(x, bodyLeft, bodyRight);
+            // Widely separated co-op players retain the full-room framing;
+            // do not zoom them to unreadable sizes merely to fit a HUD band.
+            if (bodyBottom <= bodyTop) y = Mathf.Clamp(y, bodyBottom, bodyTop);
+        }
+        _cameraPositionTarget = _overviewCameraPosition +
+            right * (x - Vector3.Dot(right, _overviewCameraPosition)) +
+            up * (y - Vector3.Dot(up, _overviewCameraPosition));
         _cameraSizeTarget = cameraSize;
+    }
+
+    private static void MobileStylistProjection(Transform stylist, Vector3 right, Vector3 up,
+        out Vector2 minimum, out Vector2 maximum)
+    {
+        Vector3 feet = stylist.position;
+        minimum = new Vector2(Vector3.Dot(right, feet), Vector3.Dot(up, feet));
+        maximum = new Vector2(minimum.x, Vector3.Dot(up, feet + Vector3.up * 2f));
+        Hairdresser2DPresenter presenter = stylist.GetComponentInChildren<Hairdresser2DPresenter>();
+        SpriteRenderer visual = presenter == null ? null : presenter.GetComponent<SpriteRenderer>();
+        if (visual == null || visual.sprite == null) return;
+        Bounds bounds = visual.localBounds;
+        // The sprite faces the camera, so a world-up estimate cuts off its
+        // hairstyle. Project its actual corners, excluding carried props and
+        // ground shadows. Avoid allocations in the follow loop.
+        for (int i = 0; i < 4; i++)
+        {
+            Vector3 corner = visual.transform.TransformPoint(new Vector3(
+                (i & 1) == 0 ? bounds.min.x : bounds.max.x,
+                (i & 2) == 0 ? bounds.min.y : bounds.max.y, bounds.center.z));
+            Vector2 point = new Vector2(Vector3.Dot(right, corner), Vector3.Dot(up, corner));
+            minimum = Vector2.Min(minimum, point);
+            maximum = Vector2.Max(maximum, point);
+        }
     }
 
     private void UpdateMobileTaskSummary()
@@ -993,18 +1141,28 @@ public sealed partial class SalonDemo
         foreach (CustomerModel customer in _game.Customers)
         {
             if (customer == null || customer.State == CustomerState.Leaving || customer.State == CustomerState.Exited) continue;
-            if ((customer.State == CustomerState.Waiting || customer.State == CustomerState.Entering) && !customer.HasServiceEngaged) greet++;
-            if (customer.CurrentNeed == ServiceType.Wash && customer.WashStage == WashStage.Rinsed) rinse++;
-            if (customer.CurrentNeed == ServiceType.Dry && (customer.BlowStage == BlowStage.AwaitingStart || customer.BlowStage == BlowStage.SafetyStopped)) blow++;
+            bool guided = customer == _mobileGuidedCustomer ||
+                (_coopPlayerTwo != null && customer == _coopPlayerTwo.GuidedCustomer);
+            if (customer.State == CustomerState.Waiting && !customer.HasServiceEngaged && !guided) greet++;
+            if (_game.IsWashFoamReadyToRinse(customer)) rinse++;
+            if (customer.CurrentNeed == ServiceType.Dry &&
+                (customer.AutoBlowSafetyStopped || (customer.AutoBlowRunning &&
+                 customer.BackgroundTask.Elapsed >= customer.BackgroundTask.IdealStart))) blow++;
         }
         var parts = new List<string>();
-        if (greet > 0) parts.Add("待接 " + greet);
-        if (rinse > 0) parts.Add("冲洗 " + rinse);
-        if (blow > 0) parts.Add("吹发 " + blow);
-        if (_mobileSupplies != null && _mobileSupplies.WashRackWashKits <= 1) parts.Add("用品 LOW");
-        _mobileTaskSummaryLabel.text = parts.Count == 0 ? string.Empty : string.Join("  ·  ", parts.ToArray());
-        _mobileTaskSummaryLabel.color = parts.Count >= 3 ? new Color(1f, .48f, .36f) :
-            parts.Count == 2 ? Gold : Cream;
+        if ((_mobileCheckout?.Queue.Count ?? 0) > 0) parts.Add("待结账 " + _mobileCheckout.Queue.Count);
+        if (rinse > 0) parts.Add("待冲洗 " + rinse);
+        if (blow > 0) parts.Add("吹发收尾 " + blow);
+        if (greet > 0) parts.Add("待接待 " + greet);
+        string tasks = parts.Count == 0 ? "靠近顾客或工位操作" : string.Join("  ·  ", parts.ToArray());
+        string stock = _mobileSupplies == null || !IsMobileUnlockBuilt(SalonUnlockId.WashStation) ? string.Empty :
+            "\n手持 " + _mobileSupplies.CarriedWashKits + "/" + _mobileSupplies.CarryCapacity +
+            "  ·  货架 " + _mobileSupplies.WashRackWashKits + "/" + _mobileSupplies.WashRackCapacity +
+            (_mobileSupplies.CanStartWash ? string.Empty :
+                _mobileSupplies.CarriedWashKits > 0 ? "  ·  需补货：送回洗发区" :
+                _mobileSupplies.SourceWashKits > 0 ? "  ·  需补货：右侧取货" : "  ·  用品已用完");
+        _mobileTaskSummaryLabel.text = tasks + stock;
+        _mobileTaskSummaryLabel.color = rinse + blow > 0 ? Gold : Cream;
     }
 
     private MobileTarget FindMobileTarget()
@@ -1041,7 +1199,7 @@ public sealed partial class SalonDemo
                 // correction path); the mobile target must not erase that
                 // already-approved mistake space.
                 if (_game.IsStationOccupied(pair.Key)) continue;
-                float distance = FlatDistance(_player.position, pair.Value.position);
+                float distance = MobileStationInteractionDistance(pair.Key, _player.position);
                 if (distance < fallbackAnyDistance)
                 {
                     fallbackAnyDistance = distance;
@@ -1065,10 +1223,31 @@ public sealed partial class SalonDemo
                 fallbackCompatibleStation >= 0 ? fallbackCompatibleStation : fallbackAnyStation;
             float best = hasNearbyStation ? nearbyDistance :
                 fallbackCompatibleStation >= 0 ? fallbackCompatibleDistance : fallbackAnyDistance;
-            if (guided.Station < 0)
+            if (!hasNearbyStation && fallbackCompatibleStation < 0)
             {
-                guided.Label = "等待空闲" + service + "工位";
-                guided.Hint = "已接待 " + (_mobileGuidedCustomer.Id + 1) + " 号 · 兼容工位正在使用中";
+                // Every compatible chair is taken. When one occupant only needs
+                // the player's finishing touch, that is the real next step.
+                CustomerModel blocker = FindMobileFinishableOccupant(_mobileGuidedCustomer.CurrentNeed,
+                    out int blockerStation, out string finishVerb);
+                if (blocker != null)
+                {
+                    guided.Station = blockerStation;
+                    best = MobileStationInteractionDistance(blockerStation, _player.position);
+                    bool transfer = finishVerb == "转移";
+                    bool recall = finishVerb == "请离";
+                    guided.Label = transfer
+                        ? "先转移 " + (blocker.Id + 1) + " 号"
+                        : recall
+                        ? "先请离 " + (blocker.Id + 1) + " 号"
+                        : "先为 " + (blocker.Id + 1) + " 号" + finishVerb;
+                    guided.Hint = service + "工位被 " + (blocker.Id + 1) + " 号占用 · " +
+                        (transfer ? "转移" : recall ? "请离" : "完成") + "后再安排 " + (_mobileGuidedCustomer.Id + 1) + " 号";
+                }
+                else
+                {
+                    guided.Label = "等待空闲" + service + "工位";
+                    guided.Hint = "已接待 " + (_mobileGuidedCustomer.Id + 1) + " 号 · 兼容工位正在使用中";
+                }
             }
             else if (hasNearbyStation)
             {
@@ -1097,14 +1276,19 @@ public sealed partial class SalonDemo
             if (view == null || view.Customer == null) continue;
             CustomerModel customer = view.Customer;
             if (customer.State != CustomerState.Waiting && customer.State != CustomerState.Serving) continue;
+            if (_coopMode && customer.InteractionOwnerPlayerId > 0 && customer.InteractionOwnerPlayerId != 1) continue;
             bool waiting = customer.State == CustomerState.Waiting;
             // Keep the guided customer, but allow existing services to finish
             // so the player can free an occupied chair without cancelling reception.
-            if (_mobileGuidedCustomer != null && (waiting || !SalonGameModel.IsCompatibleStation(
-                customer.CurrentNeed, _game.Workstations[customer.Station].Type))) continue;
-            Vector3 anchor = !waiting && _playerServiceAnchors.TryGetValue(customer.Station, out var work)
-                ? work.position : view.transform.position;
-            float distance = FlatDistance(_player.position, anchor);
+            // A seated customer awaiting transfer may be moved only when their
+            // chair is the one the guided customer is waiting for.
+            if (_mobileGuidedCustomer != null && (waiting || (!SalonGameModel.IsCompatibleStation(
+                    customer.CurrentNeed, _game.Workstations[customer.Station].Type) &&
+                !SalonGameModel.IsCompatibleStation(
+                    _mobileGuidedCustomer.CurrentNeed, _game.Workstations[customer.Station].Type)))) continue;
+            float distance = !waiting && _playerServiceAnchors.ContainsKey(customer.Station)
+                ? MobileStationInteractionDistance(customer.Station, _player.position)
+                : FlatDistance(_player.position, view.transform.position);
             if (distance > 1.8f || (!waiting && distance > 1.45f)) continue;
 
             MobileTarget candidate = new MobileTarget
@@ -1132,11 +1316,7 @@ public sealed partial class SalonDemo
                 }
                 else if (!SalonGameModel.IsCompatibleStation(customer.CurrentNeed, _game.Workstations[customer.Station].Type))
                 {
-                    candidate.Action = MobileAction.Guide;
-                    bool transferReady = HasFreeCompatibleStation(customer.CurrentNeed);
-                    candidate.Available = transferReady;
-                    candidate.Label = transferReady ? "转移顾客" : "等待空闲工位";
-                    candidate.Hint += transferReady ? " · 带到下一工位" : " · 兼容工位正在使用中";
+                    SetWrongStationRecoveryAction(ref candidate, customer, " · 兼容工位正在使用中");
                 }
                 else if (customer.CurrentNeed == ServiceType.Wash)
                 {
@@ -1169,7 +1349,7 @@ public sealed partial class SalonDemo
                 {
                     candidate.Action = MobileAction.Cut;
                     candidate.Label = "剪发";
-                    candidate.Hint += " · 按住到绿色区间再松手";
+                    candidate.Hint += " · 按住到满格变绿再松手";
                 }
                 else if (customer.CurrentNeed == ServiceType.Dry)
                 {
@@ -1177,8 +1357,10 @@ public sealed partial class SalonDemo
                     bool ready = running && customer.BackgroundTask.Elapsed >= customer.BackgroundTask.IdealStart;
                     candidate.Action = running ? MobileAction.FinishDry : MobileAction.StartDry;
                     candidate.Available = !running || ready;
-                    candidate.Label = !running ? "启动吹发" : ready ? "吹发收尾" : "吹发运行中";
-                    candidate.Hint += running ? ready ? " · 回来收尾即可完成" : " · 可以先照顾其他顾客" : " · 启动后可离开";
+                    candidate.Label = !running ? (_game.AutoBlowAvailable ? "启动吹发" : "按住吹发") :
+                        ready ? "吹发收尾" : "吹发运行中";
+                    candidate.Hint += running ? ready ? " · 回来收尾即可完成" : " · 可以先照顾其他顾客" :
+                        _game.AutoBlowAvailable ? " · 启动后可离开" : " · 按住吹风，满格变绿后松手";
                 }
             }
 
@@ -1197,12 +1379,101 @@ public sealed partial class SalonDemo
     private static float FlatDistance(Vector3 a, Vector3 b)
         => Vector2.Distance(new Vector2(a.x, a.z), new Vector2(b.x, b.z));
 
+    private float MobileStationInteractionDistance(int stationId, Vector3 playerPosition)
+    {
+        if (!_playerServiceAnchors.TryGetValue(stationId, out Transform anchor))
+            return float.PositiveInfinity;
+        float distance = FlatDistance(playerPosition, anchor.position);
+        if (_game == null || stationId < 0 || stationId >= _game.Workstations.Count ||
+            _game.Workstations[stationId].Type != WorkstationType.Wash ||
+            !_stationRoots.TryGetValue(stationId, out GameObject stationRoot) || stationRoot == null)
+            return distance;
+        SalonFurnitureObstacle footprint = stationRoot.GetComponentInChildren<SalonFurnitureObstacle>();
+        if (footprint == null || footprint.AssetId != "furniture-wash-station") return distance;
+        // The collision keeps the player outside the bed; the manifest footprint
+        // lets every reachable side share the same small approach margin.
+        return Mathf.Min(distance, footprint.DistanceToFootprint(playerPosition) + .85f);
+    }
+
+    /// <summary>
+    /// Finds a compatible chair whose seated customer is waiting only for a
+    /// player finish that stays executable while another customer is guided.
+    /// </summary>
+    private CustomerModel FindMobileFinishableOccupant(ServiceType need, out int station, out string verb)
+    {
+        station = -1;
+        verb = string.Empty;
+        CustomerModel best = null;
+        float bestDistance = float.PositiveInfinity;
+        foreach (var pair in _playerServiceAnchors)
+        {
+            if (pair.Key < 0 || pair.Key >= _game.Workstations.Count ||
+                !_game.Workstations[pair.Key].IsUsable || !_game.IsStationOccupied(pair.Key)) continue;
+            WorkstationType type = _game.Workstations[pair.Key].Type;
+            if (!SalonGameModel.IsCompatibleStation(need, type)) continue;
+            CustomerModel occupant = null;
+            foreach (CustomerModel customer in _game.Customers)
+                if (customer != null && customer.State == CustomerState.Serving && customer.Station == pair.Key)
+                {
+                    occupant = customer;
+                    break;
+                }
+            if (occupant == null) continue;
+            string finish;
+            if (!SalonGameModel.IsCompatibleStation(occupant.CurrentNeed, type))
+                finish = HasFreeCompatibleStation(occupant.CurrentNeed) ? "转移" :
+                    _game.CanRecallFromStation(occupant) ? "请离" : null;
+            else
+                finish = occupant.CurrentNeed == ServiceType.Wash && _game.IsWashFoamReadyToRinse(occupant) ? "冲洗" :
+                    occupant.CurrentNeed == ServiceType.Dry && (occupant.AutoBlowSafetyStopped ||
+                        (occupant.AutoBlowRunning && occupant.BackgroundTask.Elapsed >= occupant.BackgroundTask.IdealStart))
+                        ? "吹发收尾" : null;
+            if (finish == null) continue;
+            float distance = MobileStationInteractionDistance(pair.Key, _player.position);
+            if (distance >= bestDistance) continue;
+            bestDistance = distance;
+            best = occupant;
+            station = pair.Key;
+            verb = finish;
+        }
+        return best;
+    }
+
     private void ClearStaleMobileGuidedCustomer()
     {
         if (_mobileGuidedCustomer == null) return;
         if (_mobileGuidedCustomer.State == CustomerState.Leaving ||
             _mobileGuidedCustomer.State == CustomerState.Exited)
-            _mobileGuidedCustomer = null;
+        {
+            _mobileGuidedCustomer = _mobileResumeGuidedCustomer;
+            _mobileResumeGuidedCustomer = null;
+            if (_mobileGuidedCustomer != null && _mobileGuidedCustomer.State != CustomerState.Waiting)
+                _mobileGuidedCustomer = null;
+        }
+    }
+
+    private void SetWrongStationRecoveryAction(ref MobileTarget candidate, CustomerModel customer, string blockedHint)
+    {
+        if (HasFreeCompatibleStation(customer.CurrentNeed))
+        {
+            candidate.Action = MobileAction.Guide;
+            candidate.Available = true;
+            candidate.Label = "转移顾客";
+            candidate.Hint += " · 带到下一工位";
+            return;
+        }
+        if (_game != null && _game.CanRecallFromStation(customer))
+        {
+            candidate.Action = MobileAction.Recall;
+            candidate.Available = true;
+            candidate.Label = "请离工位";
+            candidate.Hint += " · 先离开工位，腾出位置";
+            return;
+        }
+        candidate.Action = MobileAction.Guide;
+        candidate.Available = false;
+        candidate.Label = "等待空闲工位";
+        candidate.Hint += blockedHint;
     }
 
     private bool HasFreeCompatibleStation(ServiceType service)
@@ -1231,7 +1502,11 @@ public sealed partial class SalonDemo
         _game.SelectCustomer(customer);
         if (target.Action == MobileAction.Greet)
         {
-            if (!_game.EngageCustomerForHandoff(customer))
+            // A received customer whose reception was cancelled keeps its
+            // engagement; resume guiding it instead of stranding it in the queue.
+            bool resumeReception = customer.State == CustomerState.Waiting && customer.HasServiceEngaged &&
+                (_coopPlayerTwo == null || _coopPlayerTwo.GuidedCustomer != customer);
+            if (!resumeReception && !_game.EngageCustomerForHandoff(customer))
             {
                 ShowToast("顾客正在离店或已被接待");
                 return;
@@ -1239,14 +1514,25 @@ public sealed partial class SalonDemo
             _mobileGuidedCustomer = customer;
             ShowToast("接待成功 · 去空闲" + MobileServiceName(customer.CurrentNeed) + "工位");
         }
-        else if (target.Action == MobileAction.Guide)
+        else if (target.Action == MobileAction.Guide || target.Action == MobileAction.Recall)
         {
             // A completed wash can be Serving while it waits for its next
             // compatible station. It already has service engagement, so the
             // Waiting-only hand-off guard used by Greet must not reject this
-            // transfer.
+            // transfer. Recall stands a seated customer up when the correct
+            // chair is occupied, so the two can be swapped.
+            if ((target.Action == MobileAction.Recall || _game.CanRecallFromStation(customer)) && !_game.RecallFromStation(customer))
+            {
+                ShowToast("当前操作结束前不能请离工位");
+                return;
+            }
+            if (_mobileGuidedCustomer != null && _mobileGuidedCustomer != customer &&
+                _mobileGuidedCustomer.State == CustomerState.Waiting)
+                _mobileResumeGuidedCustomer = _mobileGuidedCustomer;
             _mobileGuidedCustomer = customer;
-            ShowToast("转移顾客 · 去空闲" + MobileServiceName(customer.CurrentNeed) + "工位");
+            ShowToast(target.Action == MobileAction.Recall
+                ? "顾客已离开工位 · 去空闲" + MobileServiceName(customer.CurrentNeed) + "工位"
+                : "转移顾客 · 去空闲" + MobileServiceName(customer.CurrentNeed) + "工位");
         }
         else if (target.Action == MobileAction.Assign)
         {
@@ -1261,13 +1547,32 @@ public sealed partial class SalonDemo
                     _game.Workstations[target.Station].Type);
             if (_game.Assign(customer, target.Station))
             {
-                _mobileGuidedCustomer = null;
+                SeatMobileCustomer(customer, target.Station);
+                CustomerModel resume = _mobileResumeGuidedCustomer;
+                _mobileResumeGuidedCustomer = null;
+                _mobileGuidedCustomer = resume != null && resume != customer &&
+                    resume.State == CustomerState.Waiting ? resume : null;
                 ShowToast(wrongStation ? "顾客被安排到了错误工位" : "顾客正在入座");
             }
         }
         else if (target.Action == MobileAction.StartDry)
         {
-            if (_game.StartAutoBlow(customer)) ShowToast("吹发已启动 · 可以照顾下一位");
+            if (_game.AutoBlowAvailable)
+            {
+                if (_game.StartAutoBlow(customer)) ShowToast("吹发已启动 · 可以照顾下一位");
+            }
+            else
+            {
+                SalonCustomerView view = FindCustomerView(customer);
+                if (view == null || !view.IsAtMovementDestination) return;
+                if (!(_coopMode ? _game.StartManualBlow(1, customer) : _game.StartManualBlow(customer))) return;
+                _mobileWorkingView = view;
+                _mobileWorkingService = ServiceType.Dry;
+                _mobileWorkElapsed = customer.ManualBlowElapsed;
+                _mobileManualBlowSuspended = false;
+                _playerCharacter?.FaceTowards(view.transform.position - _player.position);
+                _playerCharacter?.BeginService(HairdresserAnimationState.DryHair);
+            }
         }
         else if (target.Action == MobileAction.FinishDry)
         {
@@ -1331,12 +1636,18 @@ public sealed partial class SalonDemo
             return;
         }
 
-        _mobileWorkElapsed += dt;
+        if (_mobileWorkingService == ServiceType.Dry)
+        {
+            TickMobileManualBlow(view, dt);
+            return;
+        }
+
+        if (_mobileControls.InteractionHeld) _mobileWorkElapsed += dt;
         float progress = Mathf.Clamp01(_mobileWorkElapsed / Mathf.Max(.1f, _mobileWorkDuration));
-        _mobileActionLabel = MobileServiceName(_mobileWorkingService) + "中";
-        _mobileActionAvailable = false;
-        _mobileControls.SetInteraction(_mobileActionLabel, false);
-        _mobileControls.SetHint("正在" + MobileServiceName(_mobileWorkingService) + " · " + Mathf.RoundToInt(progress * 100f) + "%");
+        _mobileActionLabel = _mobileControls.InteractionHeld ? "按住起泡" : "继续起泡";
+        _mobileActionAvailable = true;
+        _mobileControls.SetInteraction(_mobileActionLabel, true);
+        _mobileControls.SetHint("按住打泡沫 · 松手暂停 · 满格后等8秒回来冲洗");
         _mobileProgressFill.transform.parent.gameObject.SetActive(true);
         _mobileProgressFill.fillAmount = progress;
         _mobileProgressFill.color = Teal;
@@ -1344,6 +1655,54 @@ public sealed partial class SalonDemo
         if (_mobileWorkElapsed < _mobileWorkDuration) return;
         view.OrderDemand?.Refresh();
         ShowToast("泡沫已打好 · 可以先去照顾别人，回来冲洗");
+        EndMobileWork();
+    }
+
+    private void TickMobileManualBlow(SalonCustomerView view, float dt)
+    {
+        CustomerModel customer = view.Customer;
+        bool held = _mobileControls != null && _mobileControls.InteractionHeld;
+        if (_mobileManualBlowSuspended && !held)
+        {
+            _mobileActionLabel = "继续吹发";
+            _mobileActionAvailable = true;
+            _mobileControls.SetInteraction(_mobileActionLabel, true);
+            _mobileControls.SetHint("按住继续手持吹发 · 满格变绿后松手");
+            return;
+        }
+        _mobileManualBlowSuspended = false;
+        if (held)
+        {
+            if (_coopMode) _game.TickManualBlow(1, customer, Mathf.Max(0f, dt));
+            else _game.TickManualBlow(customer, Mathf.Max(0f, dt));
+        }
+        _mobileWorkElapsed = customer.ManualBlowElapsed;
+        float goodStart = Mathf.Max(.01f, _game.ServiceConfig.ManualBlowGoodStart);
+        float goodEnd = Mathf.Max(goodStart, _game.ServiceConfig.ManualBlowGoodEnd);
+        float minorEnd = Mathf.Max(goodEnd, _game.ServiceConfig.ManualBlowMinorEnd);
+        float progress = ServiceProgressDisplay.HaircutFill(_mobileWorkElapsed, goodStart);
+        ServiceProgressDisplay.Phase phase = _mobileWorkElapsed > minorEnd
+            ? ServiceProgressDisplay.Phase.Failing
+            : _mobileWorkElapsed > goodEnd ? ServiceProgressDisplay.Phase.Late
+            : ServiceProgressDisplay.HaircutPhase(_mobileWorkElapsed, goodStart, goodEnd);
+        Color color = ServiceProgressDisplay.ColorFor(phase, Time.unscaledTime);
+        _mobileActionLabel = _mobileWorkElapsed >= goodStart ? "松手完成" : "按住吹发";
+        _mobileActionAvailable = true;
+        _mobileControls.SetInteraction(_mobileActionLabel, true);
+        _mobileControls.SetHint(phase == ServiceProgressDisplay.Phase.Failing ? "吹发过久 · 快松手" :
+            phase == ServiceProgressDisplay.Phase.Late ? "快松手 · 吹发已经超时" :
+            _mobileWorkElapsed >= goodStart ? "现在松手 · 吹发完成" : "手持吹风机 · 按住到满格变绿");
+        _mobileProgressFill.transform.parent.gameObject.SetActive(true);
+        _mobileProgressFill.fillAmount = progress;
+        _mobileProgressFill.color = color;
+        view.ActionProgress?.SetProgressForService(ServiceType.Dry, "", progress, color);
+        if (held && _mobileWorkElapsed <= minorEnd) return;
+
+        BlowResult result = _coopMode ? _game.EndManualBlowHold(1, customer) : _game.EndManualBlowHold(customer);
+        view.OrderDemand?.Refresh();
+        ShowToast(result == BlowResult.Undone ? "吹发还不够 · 继续按住吹风" :
+            result == BlowResult.Good ? "吹发完成！" :
+            result == BlowResult.Minor ? "吹发太久 · 已完成" : "吹发过久 · 顾客不满意");
         EndMobileWork();
     }
 
@@ -1363,13 +1722,16 @@ public sealed partial class SalonDemo
 
         float perfectMin = Mathf.Max(.01f, HaircutSettings.GetPerfectMin(_mobileWorkingTool));
         float perfectMax = HaircutSettings.GetPerfectMax(_mobileWorkingTool);
-        float progress = Mathf.Clamp01(_mobileWorkElapsed / perfectMax);
-        bool ready = _mobileWorkElapsed >= perfectMin;
-        Color progressColor = ready ? SalonPalette.Success : SalonPalette.Warning;
+        float progress = ServiceProgressDisplay.HaircutFill(_mobileWorkElapsed, perfectMin);
+        ServiceProgressDisplay.Phase phase =
+            ServiceProgressDisplay.HaircutPhase(_mobileWorkElapsed, perfectMin, perfectMax);
+        bool ready = phase != ServiceProgressDisplay.Phase.Working;
+        Color progressColor = ServiceProgressDisplay.ColorFor(phase, Time.unscaledTime);
         _mobileActionLabel = ready ? "松手完成" : "按住剪发";
         _mobileActionAvailable = true;
         _mobileControls.SetInteraction(_mobileActionLabel, true);
-        _mobileControls.SetHint(ready ? "现在松手 · 剪发完成" : "正在剪发 · 绿色时松手");
+        _mobileControls.SetHint(phase == ServiceProgressDisplay.Phase.Late ? "快松手 · 再剪就过头了" :
+            ready ? "现在松手 · 剪发完成" : "正在剪发 · 满格变绿时松手");
         _mobileProgressFill.transform.parent.gameObject.SetActive(true);
         _mobileProgressFill.fillAmount = progress;
         _mobileProgressFill.color = progressColor;
@@ -1405,12 +1767,20 @@ public sealed partial class SalonDemo
         EndMobileWork();
     }
 
+    private bool IsMobileWorkView(SalonCustomerView view)
+    {
+        if (view == null) return false;
+        if (_mobileMode && view == _mobileWorkingView) return true;
+        return _coopMode && _coopPlayerTwo != null && _coopPlayerTwo.WorkingView == view;
+    }
+
     private void EndMobileWork()
     {
         if (_mobileWorkingView != null) _mobileWorkingView.ActionProgress?.ClearProgress();
         _mobileWorkingView = null;
         _mobileWorkElapsed = 0f;
         _mobileHaircutSuspended = false;
+        _mobileManualBlowSuspended = false;
         _playerCharacter?.EndService();
         if (_mobileProgressFill != null) _mobileProgressFill.transform.parent.gameObject.SetActive(false);
     }
@@ -1419,6 +1789,8 @@ public sealed partial class SalonDemo
     {
         if (_mobileWorkingView != null && _mobileWorkingService == ServiceType.Cut)
             _mobileHaircutSuspended = true;
+        if (_mobileWorkingView != null && _mobileWorkingService == ServiceType.Dry)
+            _mobileManualBlowSuspended = true;
         _mobileControls?.ResetInput();
         SuspendCoopInput();
     }
@@ -1462,10 +1834,35 @@ public sealed partial class SalonDemo
         {
             day = _dayController.DayNumber, state = _dayController.State.ToString(),
             paused = _dayController.IsPaused, progress = _dayController.BusinessProgress,
+            wave = _dayController.CurrentTrafficWaveLabel, reputation = _dayController.Reputation.CurrentStars,
+            reputationBefore = _dayController.Stats.ReputationApplied ? _dayController.Stats.ReputationBefore :
+                _dayController.Reputation.CurrentStars,
             completed = _dayController.Stats.CompletedOrders, target = DaySettings.TargetOrders,
+            cashier = _cashierPlayerPoint == null ? Vector3.zero : _cashierPlayerPoint.position,
+            checkoutWaiting = _mobileCheckout?.Queue.Count ?? 0,
+            checkoutAbandoned = _mobileCheckout?.UnpaidCount ?? 0,
+            paidCustomers = _mobileProgress.PaidCustomerCount,
+            paidDryOrders = _mobileProgress.PaidDryOrderCount,
+            paidWashOrders = _mobileProgress.PaidWashOrderCount,
+            capacityPracticeUntilPaid = _mobileProgress.CapacityPracticeUntilPaid,
+            activeWorkCustomers = SalonPacingDirector.ActiveCount(_game),
+            softCustomerLimit = SalonPacingDirector.ActiveLimit(_mobileProgress),
+            restRemaining = _mobilePacing.RestRemaining,
+            hasUsefulManagementWork = MobileHasUsefulManagementWork(),
+            batchArrivals = _mobilePacing.BatchArrivals,
+            pacingReason = _mobilePacing.AdmissionReason,
+            supplyIntroduced = _mobileProgress.SupplyRackIntroduced,
             balance = _game.Balance, purchased = _game.HasAutoBlowStand,
             satisfaction = _satisfaction.CurrentSatisfaction,
             player = _player.position, action = _mobileActionLabel, available = _mobileActionAvailable,
+            playerScreen = _camera.WorldToScreenPoint(_player.position),
+            playerHeadScreen = _camera.WorldToScreenPoint(_player.position + Vector3.up * 2f),
+            coop = _coopMode,
+            playerTwoScreen = _coopPlayerTwo?.Transform == null ? Vector3.zero :
+                _camera.WorldToScreenPoint(_coopPlayerTwo.Transform.position),
+            playerTwoHeadScreen = _coopPlayerTwo?.Transform == null ? Vector3.zero :
+                _camera.WorldToScreenPoint(_coopPlayerTwo.Transform.position + Vector3.up * 2f),
+            cameraPosition = _camera.transform.position, cameraSize = _camera.orthographicSize,
             guided = _mobileGuidedCustomer == null ? -1 : _mobileGuidedCustomer.Id,
             working = _mobileWorkingView == null ? -1 : _mobileWorkingView.Customer.Id,
             targetCustomer = evidenceTarget.Customer == null ? -1 : evidenceTarget.Customer.Id,
@@ -1479,22 +1876,33 @@ public sealed partial class SalonDemo
             washRackWashKits = _mobileSupplies == null ? -1 : _mobileSupplies.WashRackWashKits,
             padPaid = _mobileSupplyPad == null ? -1 : _mobileSupplyPad.Paid,
             padUnlocked = _mobileSupplyPad != null && _mobileSupplyPad.IsUnlocked,
+            haircutPadPaid = _mobileHaircutExpansionPad == null ? -1 : _mobileHaircutExpansionPad.Paid,
+            haircutPadUnlocked = _mobileHaircutExpansionPad != null && _mobileHaircutExpansionPad.IsUnlocked,
+            annexPadPaid = _mobileWashAnnexPad == null ? -1 : _mobileWashAnnexPad.Paid,
+            annexPadUnlocked = IsMobileWashAnnexUnlocked,
+            annexPadVisible = IsMobileWashAnnexPadVisible(),
+            annexPad = SalonWashAnnexLayout.PadPosition,
+            annexPadScreen = _camera.WorldToScreenPoint(SalonWashAnnexLayout.PadPosition),
             cameraRight = _camera.transform.right, cameraForward = _camera.transform.forward,
-            floor = _mobileFloor, obstacles = _mobileObstacles.ToArray(),
             activeCustomers = activeCustomers, waitingCustomers = waitingCustomers,
             occupiedStations = occupiedStations, readyToRinse = readyToRinse,
             autoBlowRunning = autoBlowRunning, autoBlowReady = autoBlowReady,
             ungreetedWaiting = ungreeted,
-            attentionDemand = ungreeted + readyToRinse + autoBlowReady + Mathf.Max(0, waitingCustomers - ungreeted)
+            attentionDemand = ungreeted + readyToRinse + autoBlowReady + Mathf.Max(0, waitingCustomers - ungreeted),
+            pads = CaptureMobilePadEvidence(),
+            waitingSeats = IsMobileUnlockBuilt(SalonUnlockId.WaitingSeats),
+            extraSeats = IsMobileUnlockBuilt(SalonUnlockId.ExtraSeats),
+            waitingCapacity = FlowSettings.WaitingCapacity, maxCustomers = FlowSettings.MaxCustomers
         };
+        var customerEvidence = new MobileCustomersEvidence();
         foreach (var view in _customerViews)
         {
             if (view == null) continue;
             var c = view.Customer;
-            evidence.customers.Add(new MobileCustomerEvidence
+            customerEvidence.customers.Add(new MobileCustomerEvidence
             {
                 id = c.Id, state = c.State.ToString(), station = c.Station,
-                need = c.CurrentNeed.ToString(), step = c.Step, patience = c.Patience,
+                need = c.CurrentNeed.ToString(), step = c.Step, serviceCount = c.Needs.Count, patience = c.Patience,
                 position = view.transform.position, arrived = view.IsAtMovementDestination,
                 autoRunning = c.AutoBlowRunning, autoStopped = c.AutoBlowSafetyStopped,
                 autoElapsed = c.BackgroundTask.Elapsed, autoReady = c.BackgroundTask.IdealStart,
@@ -1505,6 +1913,8 @@ public sealed partial class SalonDemo
                 needsTransfer = c.State == CustomerState.Serving && !SalonGameModel.IsCompatibleStation(
                     c.CurrentNeed, _game.Workstations[c.Station].Type),
                 haircutTool = c.HaircutService == null ? string.Empty : c.HaircutService.CurrentRequiredTool.ToString(),
+                comedy = view.Comedy == null ? string.Empty : view.Comedy.ReactionKind.ToString(),
+                comedyText = view.Comedy == null ? string.Empty : view.Comedy.BubbleText,
                 complete = c.IsComplete, screen = _camera.WorldToScreenPoint(view.transform.position)
             });
         }
@@ -1513,6 +1923,7 @@ public sealed partial class SalonDemo
             {
                 id = pair.Key, position = pair.Value.position,
                 type = _game.Workstations[pair.Key].Type.ToString(),
+                usable = _game.Workstations[pair.Key].IsUsable,
                 occupied = _game.IsStationOccupied(pair.Key)
             });
         foreach (var button in FindObjectsByType<Button>())
@@ -1526,6 +1937,15 @@ public sealed partial class SalonDemo
         GameObject action = GameObject.Find("MobileInteractionButton");
         if (joystick != null) evidence.joystick = UiScreenCenter(joystick.transform as RectTransform);
         if (action != null) evidence.interaction = UiScreenCenter(action.transform as RectTransform);
+        // WebGL truncates a console line at about 8 KB; the static navigation
+        // layout and the customer list travel separately so eight customers
+        // and the construction pads still fit. Customers precede the state
+        // they belong to.
+        Debug.Log("[MOBILE_LAYOUT] " + JsonUtility.ToJson(new MobileLayoutEvidence
+        {
+            floor = _mobileFloor, obstacles = _mobileObstacles.ToArray()
+        }));
+        Debug.Log("[MOBILE_CUSTOMERS] " + JsonUtility.ToJson(customerEvidence));
         Debug.Log("[MOBILE_STATE] " + JsonUtility.ToJson(evidence));
 #endif
     }
@@ -1535,23 +1955,42 @@ public sealed partial class SalonDemo
 
     [Serializable] private sealed class MobileEvidence
     {
+        public int paidCustomers, paidDryOrders, paidWashOrders, activeWorkCustomers, softCustomerLimit, batchArrivals;
+        public int capacityPracticeUntilPaid;
+        public float restRemaining;
+        public bool hasUsefulManagementWork;
+        public string pacingReason;
+        public int checkoutWaiting, checkoutAbandoned;
+        public Vector3 cashier;
+        public bool supplyIntroduced;
         public int day, completed, target, balance, guided, working, targetCustomer, satisfaction;
         public int activeCustomers, waitingCustomers, occupiedStations, readyToRinse, autoBlowRunning, autoBlowReady, ungreetedWaiting, attentionDemand;
-        public int sourceWashKits, carriedWashKits, washRackWashKits, padPaid;
-        public bool paused, purchased, padUnlocked, available, workingSuspended;
-        public string state, action, targetTool, targetAction;
-        public float progress, workingElapsed;
-        public Vector3 player, cameraRight, cameraForward;
-        public Rect floor;
-        public Rect[] obstacles;
+        public int sourceWashKits, carriedWashKits, washRackWashKits, padPaid, haircutPadPaid, annexPadPaid;
+        public int waitingCapacity, maxCustomers;
+        public bool paused, purchased, padUnlocked, haircutPadUnlocked, annexPadUnlocked, annexPadVisible,
+            available, workingSuspended, coop, waitingSeats, extraSeats;
+        public string state, action, targetTool, targetAction, wave;
+        public float progress, workingElapsed, cameraSize, reputation, reputationBefore;
+        public Vector3 player, cameraRight, cameraForward, cameraPosition, annexPad, annexPadScreen;
+        public Vector3 playerScreen, playerHeadScreen, playerTwoScreen, playerTwoHeadScreen;
         public Vector2 joystick, interaction;
-        public List<MobileCustomerEvidence> customers = new List<MobileCustomerEvidence>();
+        public MobilePadEvidence[] pads;
         public List<MobileStationEvidence> stations = new List<MobileStationEvidence>();
         public List<MobileButtonEvidence> buttons = new List<MobileButtonEvidence>();
     }
+    [Serializable] private sealed class MobileCustomersEvidence
+    {
+        public List<MobileCustomerEvidence> customers = new List<MobileCustomerEvidence>();
+    }
+    [Serializable] private sealed class MobileLayoutEvidence
+    {
+        public Rect floor;
+        public Rect[] obstacles;
+    }
     [Serializable] private sealed class MobileCustomerEvidence
     {
-        public int id, station, step, wrongStationCount;
+        public string comedy, comedyText;
+        public int id, station, step, serviceCount, wrongStationCount;
         public string state, need, activeAction, serviceResult, haircutTool, hairStage, reactionKind;
         public Vector3 position, screen;
         public bool arrived, autoRunning, autoStopped, complete, foamRunning, foamReady, needsTransfer;
@@ -1562,7 +2001,7 @@ public sealed partial class SalonDemo
         public int id;
         public Vector3 position;
         public string type;
-        public bool occupied;
+        public bool occupied, usable;
     }
     [Serializable] private sealed class MobileButtonEvidence
     {

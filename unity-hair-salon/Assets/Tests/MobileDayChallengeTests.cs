@@ -17,6 +17,7 @@ public sealed class MobileDayChallengeTests
         game.Tick(game.ServiceConfig.WashServiceDuration + .01f);
         Assert.IsTrue(game.Assign(background, 1));
         game.Tick(SalonGameModel.MovingToStationSeconds + .01f);
+        game.InstallAutoBlowStand();
         Assert.IsTrue(game.StartAutoBlow(background));
 
         game.Tick(4f); // Walk back to the waiting area.
@@ -32,7 +33,8 @@ public sealed class MobileDayChallengeTests
         game.Tick(duration);
         Assert.AreEqual(HaircutResult.Perfect, game.CompleteHaircutAction(foreground, duration, false));
         game.EndActiveOperation(foreground);
-        game.Tick(4f); // Return for the background customer's finish.
+        game.Tick(1f); // A quick return fits the new eight-second timer; later returns incur a penalty.
+        // Return for the background customer's finish.
 
         Assert.IsFalse(background.AutoBlowSafetyStopped,
             "A normal trip to another customer should fit inside the mobile background window.");
@@ -42,7 +44,7 @@ public sealed class MobileDayChallengeTests
     }
 
     [Test]
-    public void MobileProfileUsesThreeMinuteBusinessAndExplicitTrafficLimits()
+    public void MobileProfileUsesThreeMinuteBusinessAndASoftDayOneCap()
     {
         DayConfig day = SalonMobileDayConfig.CreateForDay(1);
 
@@ -50,9 +52,12 @@ public sealed class MobileDayChallengeTests
         Assert.AreEqual(180f, day.BusinessDuration, .001f,
             "The mobile business phase is three minutes, matching the approved round length.");
         Assert.AreEqual(15f, day.ClosingGraceDuration, .001f);
-        Assert.AreEqual(6, day.MaxConcurrentCustomers);
+        Assert.AreEqual(2, day.MaxConcurrentCustomers,
+            "首日的日历客流上限只保留两位活跃顾客，后续由已付款服务成长放开。");
         Assert.AreEqual(4, day.WaitingCapacity);
-        Assert.IsTrue(day.AllowSpawnWhileWaitingOverload);
+        Assert.IsFalse(day.AllowSpawnWhileWaitingOverload);
+        Assert.AreEqual(2, day.OverloadWaitingThreshold);
+        Assert.AreEqual(1.35f, day.OverloadSlowdownMultiplier, .001f);
         Assert.Greater(day.TargetOrders, 0);
     }
 
@@ -220,21 +225,35 @@ public sealed class MobileDayChallengeTests
     }
 
     [Test]
-    public void MobileOverloadSlowsAtThreeWaitingButStopsAtCapacity()
+    public void MobilePacingDefersWhenTheExistingQueueIsAlreadyBusy()
     {
         DayConfig config = SalonMobileDayConfig.CreateForDay(1);
         var director = new CustomerTrafficDirector(config);
 
         TrafficDecision threeWaiting = director.Evaluate(.45f,
-            new TrafficSnapshot(4, 3, 2, 0, 3));
+            new TrafficSnapshot(1, 3, 2, 0, 3));
         TrafficDecision fourWaiting = director.Evaluate(.45f,
-            new TrafficSnapshot(5, 4, 2, 0, 3));
+            new TrafficSnapshot(1, 4, 2, 0, 3));
 
         Assert.IsTrue(threeWaiting.IsOverloaded);
-        Assert.IsTrue(threeWaiting.ShouldSpawn);
+        Assert.IsFalse(threeWaiting.ShouldSpawn,
+            "两位等待已进入喘息/消化段，不再继续把队列推高。");
         Assert.IsFalse(fourWaiting.ShouldSpawn);
         Assert.Greater(threeWaiting.SpawnInterval,
-            director.Evaluate(.45f, new TrafficSnapshot(4, 1, 2, 0, 3)).SpawnInterval);
+            director.Evaluate(.45f, new TrafficSnapshot(1, 1, 2, 0, 3)).SpawnInterval);
+
+        var game = new SalonGameModel();
+        game.ConfigureWorkstationAvailability(false, false, false);
+        var progress = SalonProgressData.CreateDefault();
+        progress.PaidCustomerCount = 2;
+        var pacing = new SalonPacingDirector();
+        CustomerModel first = game.Spawn(8801, new[] { ServiceType.Cut });
+        CustomerModel second = game.Spawn(8802, new[] { ServiceType.Cut });
+        first.State = CustomerState.Waiting;
+        second.State = CustomerState.Waiting;
+        Assert.IsFalse(pacing.CanAdmit(game, progress));
+        Assert.AreEqual("workload", pacing.AdmissionReason,
+            "真实移动端入口要由 SalonPacingDirector 拦住已有的两位活跃顾客。");
     }
 
     [Test]

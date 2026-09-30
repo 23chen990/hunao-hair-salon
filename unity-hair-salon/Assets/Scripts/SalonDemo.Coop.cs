@@ -88,6 +88,8 @@ public sealed partial class SalonDemo
         if (!_coopMode || _coopPlayerTwo == null) return;
         if (_coopPlayerTwo.IsWorking && _coopPlayerTwo.WorkingService == ServiceType.Cut)
             _coopPlayerTwo.HaircutSuspended = true;
+        if (_coopPlayerTwo.IsWorking && _coopPlayerTwo.WorkingService == ServiceType.Dry)
+            _coopPlayerTwo.ManualBlowSuspended = true;
         _coopPlayerTwo.Controls?.ResetInput();
     }
 
@@ -154,15 +156,16 @@ public sealed partial class SalonDemo
                 Action = MobileAction.Assign,
                 Customer = guidedCustomer,
                 Station = -1,
-                Label = "前往工位",
-                Hint = "P2 已接待 " + (guidedCustomer.Id + 1) + " 号 · 前往空闲工位"
+                Label = "前往" + MobileServiceName(guidedCustomer.CurrentNeed) + "工位",
+                Hint = "P2 已接待 " + (guidedCustomer.Id + 1) + " 号 · 前往空闲" +
+                    MobileServiceName(guidedCustomer.CurrentNeed) + "工位"
             };
             float nearest = float.PositiveInfinity;
             foreach (var pair in _playerServiceAnchors)
             {
                 if (pair.Key < 0 || pair.Key >= _game.Workstations.Count ||
                     !_game.Workstations[pair.Key].IsUsable || _game.IsStationOccupied(pair.Key)) continue;
-                float distance = FlatDistance(player.Transform.position, pair.Value.position);
+                float distance = MobileStationInteractionDistance(pair.Key, player.Transform.position);
                 if (distance < nearest)
                 {
                     nearest = distance;
@@ -177,8 +180,15 @@ public sealed partial class SalonDemo
                     ? "安排" + MobileServiceName(guidedCustomer.CurrentNeed)
                     : "安排" + MobileWorkstationName(stationType);
             }
-            return guided;
+            if (guided.Available) return guided;
+            // No empty chair in reach. Keep looking at whoever is sitting nearby,
+            // so a crossed assignment can be stood up without cancelling the escort.
+            fallback = guided;
         }
+
+        bool escorting = player.GuidedCustomer != null &&
+            player.GuidedCustomer.State != CustomerState.Leaving &&
+            player.GuidedCustomer.State != CustomerState.Exited;
 
         float nearestDistance = float.PositiveInfinity;
         foreach (SalonCustomerView view in _customerViews)
@@ -189,11 +199,14 @@ public sealed partial class SalonDemo
             if (customer.InteractionOwnerPlayerId > 0 && customer.InteractionOwnerPlayerId != player.PlayerId)
                 continue;
             bool waiting = customer.State == CustomerState.Waiting;
+            if (escorting && (waiting || customer == player.GuidedCustomer)) continue;
             Vector3 anchor = view.transform.position;
             if (!waiting && customer.Station >= 0 &&
                 _playerServiceAnchors.TryGetValue(customer.Station, out Transform serviceAnchor))
                 anchor = serviceAnchor.position;
-            float distance = FlatDistance(player.Transform.position, anchor);
+            float distance = !waiting && _playerServiceAnchors.ContainsKey(customer.Station)
+                ? MobileStationInteractionDistance(customer.Station, player.Transform.position)
+                : FlatDistance(player.Transform.position, anchor);
             if (distance > (waiting ? 1.9f : 1.55f) || distance >= nearestDistance) continue;
             MobileTarget candidate = new MobileTarget
             {
@@ -211,6 +224,11 @@ public sealed partial class SalonDemo
             {
                 candidate.Label = "顾客入座中";
                 candidate.Hint = "P2 等顾客到达座位后操作";
+            }
+            else if (!SalonGameModel.IsCompatibleStation(customer.CurrentNeed,
+                _game.Workstations[customer.Station].Type))
+            {
+                SetWrongStationRecoveryAction(ref candidate, customer, " · 先完成其他顾客的服务");
             }
             else if (customer.CurrentNeed == ServiceType.Wash)
             {
@@ -236,7 +254,7 @@ public sealed partial class SalonDemo
             {
                 candidate.Action = MobileAction.Cut;
                 candidate.Label = "剪发";
-                candidate.Hint += " · 按住 Ctrl 到绿色区间松手";
+                candidate.Hint += " · 按住操作键，绿色时松手";
             }
             else if (customer.CurrentNeed == ServiceType.Dry)
             {
@@ -244,8 +262,10 @@ public sealed partial class SalonDemo
                 bool ready = running && customer.BackgroundTask.Elapsed >= customer.BackgroundTask.IdealStart;
                 candidate.Action = running ? MobileAction.FinishDry : MobileAction.StartDry;
                 candidate.Available = !running || ready;
-                candidate.Label = !running ? "启动吹发" : ready ? "吹发收尾" : "吹发运行中";
+                candidate.Label = !running ? (_game.AutoBlowAvailable ? "启动吹发" : "按住吹发") :
+                    ready ? "吹发收尾" : "吹发运行中";
             }
+            if (escorting && !candidate.Available) continue;
             nearestDistance = distance;
             fallback = candidate;
         }
@@ -267,6 +287,21 @@ public sealed partial class SalonDemo
             player.GuidedCustomer = customer;
             ShowToast("P2 接待成功 · 去空闲" + MobileServiceName(customer.CurrentNeed) + "工位");
         }
+        else if (target.Action == MobileAction.Guide || target.Action == MobileAction.Recall)
+        {
+            if ((target.Action == MobileAction.Recall || _game.CanRecallFromStation(customer)) && !_game.RecallFromStation(customer))
+            {
+                ShowToast("当前操作结束前不能请离工位");
+                return;
+            }
+            if (player.GuidedCustomer != null && player.GuidedCustomer != customer &&
+                player.GuidedCustomer.State == CustomerState.Waiting)
+                player.ResumeGuidedCustomer = player.GuidedCustomer;
+            player.GuidedCustomer = customer;
+            ShowToast(target.Action == MobileAction.Recall
+                ? "P2 顾客已离开工位 · 去空闲" + MobileServiceName(customer.CurrentNeed) + "工位"
+                : "P2 转移顾客 · 去空闲" + MobileServiceName(customer.CurrentNeed) + "工位");
+        }
         else if (target.Action == MobileAction.Assign)
         {
             if (customer.CurrentNeed == ServiceType.Cut && customer.HaircutService == null)
@@ -274,7 +309,11 @@ public sealed partial class SalonDemo
                     SalonMobileDayConfig.GetHaircutToolsForSpawn(DaySettings.MobileDayNumber, customer.Id));
             if (_game.Assign(customer, target.Station))
             {
-                player.GuidedCustomer = null;
+                SeatMobileCustomer(customer, target.Station);
+                CustomerModel resume = player.ResumeGuidedCustomer;
+                player.ResumeGuidedCustomer = null;
+                player.GuidedCustomer = resume != null && resume != customer &&
+                    resume.State == CustomerState.Waiting ? resume : null;
                 ShowToast("P2 已安排顾客入座");
             }
         }
@@ -285,7 +324,22 @@ public sealed partial class SalonDemo
         }
         else if (target.Action == MobileAction.StartDry)
         {
-            if (_game.StartAutoBlow(customer)) ShowToast("P2 吹发已启动");
+            if (_game.AutoBlowAvailable)
+            {
+                if (_game.StartAutoBlow(customer)) ShowToast("P2 吹发已启动");
+            }
+            else
+            {
+                SalonCustomerView view = FindCustomerView(customer);
+                if (view == null || !view.IsAtMovementDestination ||
+                    !_game.StartManualBlow(player.PlayerId, customer)) return;
+                player.WorkingView = view;
+                player.WorkingService = ServiceType.Dry;
+                player.WorkElapsed = customer.ManualBlowElapsed;
+                player.ManualBlowSuspended = false;
+                player.Character?.FaceTowards(view.transform.position - player.Transform.position);
+                player.Character?.BeginService(HairdresserAnimationState.DryHair);
+            }
         }
         else if (target.Action == MobileAction.FinishDry)
         {
@@ -339,6 +393,11 @@ public sealed partial class SalonDemo
             EndCoopWork();
             return;
         }
+        if (player.WorkingService == ServiceType.Dry)
+        {
+            TickCoopManualBlow(player, dt);
+            return;
+        }
         if (player.WorkingService == ServiceType.Cut)
         {
             bool held = player.Controls != null && player.Controls.InteractionHeld;
@@ -361,12 +420,15 @@ public sealed partial class SalonDemo
             }
             float perfectMin = Mathf.Max(.01f, HaircutSettings.GetPerfectMin(player.WorkingTool));
             float perfectMax = HaircutSettings.GetPerfectMax(player.WorkingTool);
-            float progress = Mathf.Clamp01(player.WorkElapsed / perfectMax);
-            bool ready = player.WorkElapsed >= perfectMin;
+            float progress = ServiceProgressDisplay.HaircutFill(player.WorkElapsed, perfectMin);
+            ServiceProgressDisplay.Phase phase =
+                ServiceProgressDisplay.HaircutPhase(player.WorkElapsed, perfectMin, perfectMax);
+            bool ready = phase != ServiceProgressDisplay.Phase.Working;
             player.Controls.SetInteraction(ready ? "松手完成" : "按住剪发", true);
-            player.Controls.SetHint(ready ? "P2 现在松手 · 剪发完成" : "P2 正在剪发 · 绿色时松手");
+            player.Controls.SetHint(phase == ServiceProgressDisplay.Phase.Late ? "P2 快松手 · 再剪就过头了" :
+                ready ? "P2 现在松手 · 剪发完成" : "P2 正在剪发 · 满格变绿时松手");
             view.ActionProgress?.SetProgressForService(ServiceType.Cut, "", progress,
-                ready ? SalonPalette.Success : SalonPalette.Warning);
+                ServiceProgressDisplay.ColorFor(phase, Time.unscaledTime));
             view.HaircutFeedback?.TickHold(player.WorkElapsed, progress);
             if (held && player.WorkElapsed <= perfectMax) return;
             HaircutResult result = _game.CompleteHaircutAction(player.PlayerId, view.Customer,
@@ -380,9 +442,9 @@ public sealed partial class SalonDemo
             return;
         }
 
-        player.WorkElapsed += Mathf.Max(0f, dt);
+        if (player.Controls.InteractionHeld) player.WorkElapsed += Mathf.Max(0f, dt);
         float washProgress = Mathf.Clamp01(player.WorkElapsed / Mathf.Max(.1f, player.WorkDuration));
-        player.Controls.SetInteraction("洗发中", false);
+        player.Controls.SetInteraction("按住起泡", true);
         player.Controls.SetHint("P2 正在洗发 · " + Mathf.RoundToInt(washProgress * 100f) + "%");
         view.ActionProgress?.SetProgressForService(ServiceType.Wash, "", washProgress, Teal);
         if (player.WorkElapsed >= player.WorkDuration)
@@ -391,6 +453,42 @@ public sealed partial class SalonDemo
             ShowToast("P2 泡沫已打好");
             EndCoopWork();
         }
+    }
+
+    private void TickCoopManualBlow(SalonCoopPlayerState player, float dt)
+    {
+        SalonCustomerView view = player.WorkingView;
+        CustomerModel customer = view.Customer;
+        bool held = player.Controls != null && player.Controls.InteractionHeld;
+        if (player.ManualBlowSuspended && !held)
+        {
+            player.Controls.SetInteraction("继续吹发", true);
+            player.Controls.SetHint("P2 按住继续手持吹发 · 满格变绿后松手");
+            return;
+        }
+        player.ManualBlowSuspended = false;
+        if (held) _game.TickManualBlow(player.PlayerId, customer, Mathf.Max(0f, dt));
+        player.WorkElapsed = customer.ManualBlowElapsed;
+        float goodStart = Mathf.Max(.01f, _game.ServiceConfig.ManualBlowGoodStart);
+        float goodEnd = Mathf.Max(goodStart, _game.ServiceConfig.ManualBlowGoodEnd);
+        float minorEnd = Mathf.Max(goodEnd, _game.ServiceConfig.ManualBlowMinorEnd);
+        ServiceProgressDisplay.Phase phase = player.WorkElapsed > minorEnd
+            ? ServiceProgressDisplay.Phase.Failing
+            : player.WorkElapsed > goodEnd ? ServiceProgressDisplay.Phase.Late
+            : ServiceProgressDisplay.HaircutPhase(player.WorkElapsed, goodStart, goodEnd);
+        player.Controls.SetInteraction(player.WorkElapsed >= goodStart ? "松手完成" : "按住吹发", true);
+        player.Controls.SetHint(phase == ServiceProgressDisplay.Phase.Failing ? "P2 吹发过久 · 快松手" :
+            phase == ServiceProgressDisplay.Phase.Late ? "P2 快松手 · 吹发已经超时" :
+            player.WorkElapsed >= goodStart ? "P2 现在松手 · 吹发完成" : "P2 手持吹风机 · 按住到满格变绿");
+        view.ActionProgress?.SetProgressForService(ServiceType.Dry, "",
+            ServiceProgressDisplay.HaircutFill(player.WorkElapsed, goodStart),
+            ServiceProgressDisplay.ColorFor(phase, Time.unscaledTime));
+        if (held && player.WorkElapsed <= minorEnd) return;
+        BlowResult result = _game.EndManualBlowHold(player.PlayerId, customer);
+        view.OrderDemand?.Refresh();
+        ShowToast(result == BlowResult.Undone ? "P2 吹发还不够 · 继续按住吹风" :
+            result == BlowResult.Good ? "P2 吹发完成" : "P2 吹发太久 · 顾客不满意");
+        EndCoopWork();
     }
 
     private void EndCoopWork()
@@ -411,29 +509,17 @@ public sealed partial class SalonDemo
     {
         if (!_coopMode || _simple2DMode || _camera == null || _player == null ||
             _coopPlayerTwo == null || _coopPlayerTwo.Transform == null) return;
-        bool expanded = _mobileHaircutExpansionPad != null && _mobileHaircutExpansionPad.IsUnlocked;
-        Rect bounds = expanded ? MobileSalonBounds : MobileZoneABounds;
+        Rect bounds = MobileCameraBounds();
         Vector3 p1 = _player.position;
         Vector3 p2 = _coopPlayerTwo.Transform.position;
-        float distanceX = Mathf.Abs(p1.x - p2.x);
-        float distanceZ = Mathf.Abs(p1.z - p2.z);
-        float aspect = Mathf.Max(.5f, (float)Screen.width / Mathf.Max(1f, Screen.height));
-        float requiredSize = Mathf.Max(6f, distanceZ * .5f + 2.2f,
+        Vector3 right = _overviewCameraRotation * Vector3.right;
+        Vector3 up = _overviewCameraRotation * Vector3.up;
+        float distanceX = Mathf.Abs(Vector3.Dot(right, p1 - p2));
+        float distanceY = Mathf.Abs(Vector3.Dot(up, p1 - p2));
+        float aspect = Mathf.Max(.5f, _camera.aspect);
+        float requiredSize = Mathf.Max(6f, distanceY * .5f + 2.2f,
             (distanceX * .5f + 2.2f) / aspect);
-        // The approved overview is the farthest framing available. If the
-        // players spread farther apart the camera still remains inside the
-        // original salon bounds rather than exposing space outside the room.
-        float cameraSize = Mathf.Min(requiredSize, 8.35f);
-        float halfWidth = cameraSize * aspect;
-        float midX = (p1.x + p2.x) * .5f;
-        float midZ = (p1.z + p2.z) * .5f;
-        float centerX = bounds.width <= halfWidth * 2f ? bounds.center.x :
-            Mathf.Clamp(midX, bounds.xMin + halfWidth, bounds.xMax - halfWidth);
-        float centerZ = bounds.height <= cameraSize * 2f ? bounds.center.y :
-            Mathf.Clamp(midZ, bounds.yMin + cameraSize, bounds.yMax - cameraSize);
-        float zOffset = _overviewCameraPosition.z - 1.4f;
-        _cameraPositionTarget = new Vector3(centerX, _overviewCameraPosition.y, centerZ + zOffset);
-        _cameraSizeTarget = cameraSize;
+        SetMobileCameraFrame(bounds, (p1 + p2) * .5f + Vector3.up, Mathf.Min(requiredSize, 8.4f));
     }
 
     private void EmitCoopEvidence()

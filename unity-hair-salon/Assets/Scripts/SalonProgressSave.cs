@@ -12,15 +12,29 @@ namespace HairSalon
     [Serializable]
     public sealed class SalonProgressData
     {
-        public const int CurrentSchemaVersion = 1;
+        public const int CurrentSchemaVersion = 2;
         public const int MaxDayNumber = 100000;
         public const int DefaultShopSatisfaction = 90;
         public const int SupplyRackExpansionCost = 180;
-        public const int HaircutExpansionCost = 180;
+        public const int HaircutExpansionCost = 2000;
+        public const int WaitingSeatsCost = 2400;
+        public const int WashAnnexExpansionCost = 3600;
+        public const int LegacyWashAnnexExpansionCost = 600;
+        public const int BlowStandCost = 3000;
+        public const int ExtraSeatsCost = 4200;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public int DayNumber = 1;
         public int Balance;
+        public bool BlowDryerPurchased;
+        public int BlowDryerPaid;
+        public bool WashStationPurchased;
+        public int WashStationPaid;
+        public bool SupplyRackIntroduced;
+        public bool SupplyStockInitialized;
+        public int SourceStock = 12;
+        public int RackStock;
+        public int CarriedStock;
         public bool AutoBlowPurchased;
         // Optional field added without a schema bump: older JSON simply reads
         // the missing value as false, while the pad purchase survives reloads.
@@ -28,17 +42,30 @@ namespace HairSalon
         public int SupplyRackExpansionPaid;
         public bool HaircutExpansionPurchased;
         public int HaircutExpansionPaid;
+        public bool WashAnnexExpansionPurchased;
+        public int WashAnnexExpansionPaid;
+        public bool WaitingSeatsPurchased;
+        public int WaitingSeatsPaid;
+        public int BlowStandPaid;
+        public bool ExtraSeatsPurchased;
+        public int ExtraSeatsPaid;
         public bool FirstDayComplete;
         public bool DaySettled;
         public int ShopSatisfaction = DefaultShopSatisfaction;
         public float ReputationStars = 3f;
         public bool TutorialCompleted;
+        // Optional durable mastery; old saves start with a gentle refresher.
+        public int PaidCustomerCount;
+        public int PaidDryOrderCount;
+        public int PaidWashOrderCount;
+        public int CapacityPracticeUntilPaid;
+        public int CapacityPracticeLimit;
         public List<int> CompletedDays = new List<int>();
         public List<int> BestCompletedOrders = new List<int>();
 
         public static SalonProgressData CreateDefault()
         {
-            return new SalonProgressData();
+            return new SalonProgressData { Balance = 100 };
         }
 
         /// <summary>
@@ -66,6 +93,27 @@ namespace HairSalon
                 error = "Balance cannot be negative.";
                 return false;
             }
+            if (PaidCustomerCount < 0 || PaidDryOrderCount < 0 || PaidWashOrderCount < 0 ||
+                PaidDryOrderCount > PaidCustomerCount || PaidWashOrderCount > PaidCustomerCount)
+            {
+                error = "Service mastery counts are invalid.";
+                return false;
+            }
+            if (CapacityPracticeUntilPaid < 0 || CapacityPracticeLimit < 0 || CapacityPracticeLimit > 4 ||
+                (CapacityPracticeUntilPaid > PaidCustomerCount && CapacityPracticeLimit == 0))
+            {
+                error = "Capacity practice checkpoint is invalid.";
+                return false;
+            }
+
+            if (!ValidPad(BlowDryerPurchased, BlowDryerPaid, 600) ||
+                !ValidPad(WashStationPurchased, WashStationPaid, 1200) ||
+                SourceStock < 0 || SourceStock > 12 || RackStock < 0 || RackStock > 6 ||
+                CarriedStock < 0 || CarriedStock > 3)
+            {
+                error = "Service unlocks or supply stock are invalid.";
+                return false;
+            }
 
             if (SupplyRackExpansionPaid < 0 ||
                 SupplyRackExpansionPaid > SupplyRackExpansionCost)
@@ -90,6 +138,34 @@ namespace HairSalon
             if (HaircutExpansionPurchased && HaircutExpansionPaid != HaircutExpansionCost)
             {
                 error = "A purchased haircut station must have the full construction payment.";
+                return false;
+            }
+
+            if (WashAnnexExpansionPaid < 0 || WashAnnexExpansionPaid > WashAnnexExpansionCost)
+            {
+                error = "WashAnnexExpansionPaid is outside the supported range.";
+                return false;
+            }
+
+            if (WashAnnexExpansionPurchased && WashAnnexExpansionPaid != WashAnnexExpansionCost)
+            {
+                error = "A purchased wash annex must have the full construction payment.";
+                return false;
+            }
+
+            // AutoBlowPurchased stays authoritative for the stand: saves from
+            // the removed shop carry the flag without a pad payment.
+            if (!ValidPad(WaitingSeatsPurchased, WaitingSeatsPaid, WaitingSeatsCost) ||
+                !ValidPad(false, BlowStandPaid, BlowStandCost) ||
+                !ValidPad(ExtraSeatsPurchased, ExtraSeatsPaid, ExtraSeatsCost))
+            {
+                error = "Construction payments must be within cost and complete when purchased.";
+                return false;
+            }
+
+            if (ExtraSeatsPurchased && !WaitingSeatsPurchased)
+            {
+                error = "Extra seats require the waiting seats.";
                 return false;
             }
 
@@ -146,6 +222,9 @@ namespace HairSalon
             return true;
         }
 
+        private static bool ValidPad(bool purchased, int paid, int cost)
+            => paid >= 0 && paid <= cost && (!purchased || paid == cost);
+
         /// <summary>
         /// Makes a plain-data copy and supplies empty history lists for JSON
         /// documents that predate those optional fields.
@@ -157,16 +236,32 @@ namespace HairSalon
                 SchemaVersion = SchemaVersion,
                 DayNumber = DayNumber,
                 Balance = Balance,
+                BlowDryerPurchased = BlowDryerPurchased, BlowDryerPaid = BlowDryerPaid,
+                WashStationPurchased = WashStationPurchased, WashStationPaid = WashStationPaid,
+                SupplyRackIntroduced = SupplyRackIntroduced, SupplyStockInitialized = SupplyStockInitialized,
+                SourceStock = SourceStock, RackStock = RackStock, CarriedStock = CarriedStock,
                 AutoBlowPurchased = AutoBlowPurchased,
                 SupplyRackExpansionPurchased = SupplyRackExpansionPurchased,
                 SupplyRackExpansionPaid = SupplyRackExpansionPaid,
                 HaircutExpansionPurchased = HaircutExpansionPurchased,
                 HaircutExpansionPaid = HaircutExpansionPaid,
+                WashAnnexExpansionPurchased = WashAnnexExpansionPurchased,
+                WashAnnexExpansionPaid = WashAnnexExpansionPaid,
+                WaitingSeatsPurchased = WaitingSeatsPurchased,
+                WaitingSeatsPaid = WaitingSeatsPaid,
+                BlowStandPaid = BlowStandPaid,
+                ExtraSeatsPurchased = ExtraSeatsPurchased,
+                ExtraSeatsPaid = ExtraSeatsPaid,
                 FirstDayComplete = FirstDayComplete,
                 DaySettled = DaySettled,
                 ShopSatisfaction = ShopSatisfaction,
                 ReputationStars = ReputationStars,
                 TutorialCompleted = TutorialCompleted,
+                PaidCustomerCount = PaidCustomerCount,
+                PaidDryOrderCount = PaidDryOrderCount,
+                PaidWashOrderCount = PaidWashOrderCount,
+                CapacityPracticeUntilPaid = CapacityPracticeUntilPaid,
+                CapacityPracticeLimit = CapacityPracticeLimit,
                 CompletedDays = CompletedDays == null
                     ? new List<int>() : new List<int>(CompletedDays),
                 BestCompletedOrders = BestCompletedOrders == null
@@ -354,6 +449,39 @@ namespace HairSalon
                     data.SupplyRackExpansionPaid = data.SupplyRackExpansionPurchased
                         ? SalonProgressData.SupplyRackExpansionCost : 0;
 
+                // Saves from before the day-gated unlock route: the waiting
+                // sofa was always present after day 1, the annex was built at
+                // its old price and the blow stand came from the shop panel.
+                // Keep everything the player already owned.
+                if (raw.IndexOf("\"WaitingSeatsPurchased\"", StringComparison.Ordinal) < 0)
+                {
+                    data.WaitingSeatsPurchased = data.FirstDayComplete || data.DayNumber >= 2;
+                    data.WaitingSeatsPaid = data.WaitingSeatsPurchased ? SalonProgressData.WaitingSeatsCost : 0;
+                    if (data.WashAnnexExpansionPurchased)
+                        data.WashAnnexExpansionPaid = SalonProgressData.WashAnnexExpansionCost;
+                    data.BlowStandPaid = data.AutoBlowPurchased ? SalonProgressData.BlowStandCost : 0;
+                    data.ExtraSeatsPurchased = false;
+                    data.ExtraSeatsPaid = 0;
+                }
+
+                if (data.SchemaVersion == 1)
+                {
+                    // Existing stores already offered wash/dry. Preserve all owned equipment
+                    // and every partial coin contribution when upgrading the save format.
+                    data.BlowDryerPurchased = data.WashStationPurchased = true;
+                    data.BlowDryerPaid = 600;
+                    data.WashStationPaid = 1200;
+                    data.SupplyRackIntroduced = true;
+                    data.SourceStock = 12;
+                    data.RackStock = 6;
+                    data.SupplyStockInitialized = true;
+                    if (data.HaircutExpansionPurchased) data.HaircutExpansionPaid = SalonProgressData.HaircutExpansionCost;
+                    if (data.WaitingSeatsPurchased) data.WaitingSeatsPaid = SalonProgressData.WaitingSeatsCost;
+                    if (data.WashAnnexExpansionPurchased) data.WashAnnexExpansionPaid = SalonProgressData.WashAnnexExpansionCost;
+                    if (data.AutoBlowPurchased) data.BlowStandPaid = SalonProgressData.BlowStandCost;
+                    if (data.ExtraSeatsPurchased) data.ExtraSeatsPaid = SalonProgressData.ExtraSeatsCost;
+                    data.SchemaVersion = SalonProgressData.CurrentSchemaVersion;
+                }
                 SalonProgressData normalized = data.Clone();
                 if (!normalized.TryValidate(out _))
                     return new SlotRead(raw, null, false);

@@ -58,6 +58,14 @@ sysinfo.txt
 artifacts/**/*.zip
 artifacts/**/*.tar.gz
 
+# 浏览器逐帧遥测和原始录屏保留在本机；报告、截图与验证 XML 入库。
+artifacts/**/states.json
+artifacts/**/*-states.json
+artifacts/**/actions.json
+artifacts/**/*-actions.json
+artifacts/**/console.json
+artifacts/**/*.webm
+
 # Node
 node_modules/
 npm-debug.log*

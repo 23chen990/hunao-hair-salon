@@ -1,0 +1,25 @@
+✔ normalizes incoming file names to stable kebab case (0.67525ms)
+✔ rejects unsupported formats with a clear error (3.553625ms)
+✔ does not overwrite an approved asset with the same stable id (2.272583ms)
+✔ imports a valid png, creates a preview and updates the manifest (311.986417ms)
+✔ inspection records production fingerprint and effective alpha-edge evidence (79.21075ms)
+✔ requires an explicit production definition instead of inventing furniture directions (2.832416ms)
+✔ browser QA exposes a candidate scene mode with alignment, active-service and completion evidence (1.400125ms)
+✔ full project gate rebuilds the candidate and validates fresh Unity XML (0.736417ms)
+✔ visual QA captures source, inspect, context and 100-percent pixel evidence (0.362042ms)
+✔ ingest skill can revalidate an existing candidate without copying or replacing its PNG (0.782292ms)
+✔ visual QA preserves mode-specific machine and report evidence across successive runs (0.675167ms)
+✔ visual QA can render a generic fixed-camera context scale comparison (0.302458ms)
+✔ visual QA supports an independent reference scene and approved side-by-side evidence (0.530666ms)
+✔ reference visual QA captures overlay calibration evidence and relative screen metrics (0.36875ms)
+✔ formal demo visual QA owns the wash-area A-B-C-D evidence instead of the reference scene (0.801375ms)
+✔ formal demo visual QA captures the opening card and active service toolbar at the ship viewport (1.118708ms)
+✔ rolls back copied files and manifest when preview generation fails (81.440333ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 543.628041
